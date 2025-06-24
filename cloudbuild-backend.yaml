@@ -1,0 +1,19 @@
+steps:
+  # Build the backend Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-f'
+      - 'apps/backend/Dockerfile'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/backend-prod'
+      - '.'
+
+  # Push the image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/backend-prod'
+
+images:
+  - 'gcr.io/$PROJECT_ID/backend-prod'

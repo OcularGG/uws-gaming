@@ -1,0 +1,266 @@
+﻿name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, preview ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: gcr.io
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+
+jobs:
+  # Lint and Test Jobs
+  lint-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        workspace: [frontend, backend, discord-bot]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Lint ${{ matrix.workspace }}
+      run: npm run lint -w @krakengaming/${{ matrix.workspace }}
+
+    - name: Test ${{ matrix.workspace }}
+      run: npm run test -w @krakengaming/${{ matrix.workspace }}
+
+  # Database Migration Check
+  database-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Generate Prisma Client
+      run: npm run generate -w @krakengaming/database
+
+    - name: Check Prisma migrations
+      run: npx prisma migrate diff --from-empty --to-schema-datamodel packages/database/prisma/schema.prisma
+
+  # Build and Deploy Frontend
+  build-deploy-frontend:
+    needs: [lint-and-test, database-check]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/preview'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build frontend
+      run: npm run build -w @krakengaming/frontend
+      env:
+        NEXT_PUBLIC_API_URL: ${{ github.ref == 'refs/heads/main' && 'https://api.krakengaming.org' || 'https://api.preview.krakengaming.org' }}
+        NEXT_PUBLIC_ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Configure Docker for GCR
+      run: gcloud auth configure-docker
+
+    - name: Build and push frontend Docker image
+      run: |
+        IMAGE_TAG=${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+        docker build -f apps/frontend/Dockerfile -t $REGISTRY/$PROJECT_ID/krakengaming-frontend:$IMAGE_TAG .
+        docker push $REGISTRY/$PROJECT_ID/krakengaming-frontend:$IMAGE_TAG
+
+    - name: Deploy to Cloud Run
+      run: |
+        ENV=${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+        SERVICE_NAME=${{ github.ref == 'refs/heads/main' && 'krakengaming-frontend' || 'krakengaming-frontend-preview' }}
+
+        gcloud run deploy $SERVICE_NAME \
+          --image $REGISTRY/$PROJECT_ID/krakengaming-frontend:$ENV \
+          --platform managed \
+          --region us-central1 \
+          --allow-unauthenticated \
+          --set-env-vars NEXT_PUBLIC_ENVIRONMENT=$ENV \
+          --memory 512Mi \
+          --cpu 1 \
+          --max-instances 10
+
+  # Build and Deploy Backend
+  build-deploy-backend:
+    needs: [lint-and-test, database-check]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/preview'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build backend
+      run: npm run build -w @krakengaming/backend
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Configure Docker for GCR
+      run: gcloud auth configure-docker
+
+    - name: Build and push backend Docker image
+      run: |
+        IMAGE_TAG=${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+        docker build -f apps/backend/Dockerfile -t $REGISTRY/$PROJECT_ID/krakengaming-backend:$IMAGE_TAG .
+        docker push $REGISTRY/$PROJECT_ID/krakengaming-backend:$IMAGE_TAG
+
+    - name: Run database migrations
+      run: |
+        ENV=${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+        # This would typically connect to Cloud SQL and run migrations
+        echo "Running database migrations for $ENV environment"
+
+    - name: Deploy to Cloud Run
+      run: |
+        ENV=${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+        SERVICE_NAME=${{ github.ref == 'refs/heads/main' && 'krakengaming-backend' || 'krakengaming-backend-preview' }}
+
+        gcloud run deploy $SERVICE_NAME \
+          --image $REGISTRY/$PROJECT_ID/krakengaming-backend:$ENV \
+          --platform managed \
+          --region us-central1 \
+          --allow-unauthenticated \
+          --set-env-vars NODE_ENV=$ENV \
+          --memory 1Gi \
+          --cpu 1 \
+          --max-instances 10
+
+  # Build and Deploy Discord Bot
+  build-deploy-discord-bot:
+    needs: [lint-and-test]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/preview'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build discord bot
+      run: npm run build -w @krakengaming/discord-bot
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Configure Docker for GCR
+      run: gcloud auth configure-docker
+
+    - name: Build and push Discord bot Docker image
+      run: |
+        IMAGE_TAG=${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+        docker build -f apps/discord-bot/Dockerfile -t $REGISTRY/$PROJECT_ID/krakengaming-discord-bot:$IMAGE_TAG .
+        docker push $REGISTRY/$PROJECT_ID/krakengaming-discord-bot:$IMAGE_TAG
+
+    - name: Deploy to Cloud Run
+      run: |
+        ENV=${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+        SERVICE_NAME=${{ github.ref == 'refs/heads/main' && 'krakengaming-discord-bot' || 'krakengaming-discord-bot-preview' }}
+
+        gcloud run deploy $SERVICE_NAME \
+          --image $REGISTRY/$PROJECT_ID/krakengaming-discord-bot:$ENV \
+          --platform managed \
+          --region us-central1 \
+          --no-allow-unauthenticated \
+          --set-env-vars NODE_ENV=$ENV \
+          --memory 512Mi \
+          --cpu 0.5 \
+          --max-instances 1
+
+  # Security and Dependency Scanning
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  # Cleanup Preview Environments
+  cleanup-preview:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+
+    steps:
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Cleanup preview services
+      run: |
+        # Delete preview Cloud Run services
+        gcloud run services delete krakengaming-frontend-preview --region us-central1 --quiet || true
+        gcloud run services delete krakengaming-backend-preview --region us-central1 --quiet || true
+        gcloud run services delete krakengaming-discord-bot-preview --region us-central1 --quiet || true
+
+        # Delete preview Docker images
+        gcloud container images delete $REGISTRY/$PROJECT_ID/krakengaming-frontend:preview --quiet || true
+        gcloud container images delete $REGISTRY/$PROJECT_ID/krakengaming-backend:preview --quiet || true
+        gcloud container images delete $REGISTRY/$PROJECT_ID/krakengaming-discord-bot:preview --quiet || true

@@ -1,0 +1,19 @@
+steps:
+  # Build the frontend Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-f'
+      - 'apps/frontend/Dockerfile'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/frontend-prod'
+      - '.'
+
+  # Push the image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/frontend-prod'
+
+images:
+  - 'gcr.io/$PROJECT_ID/frontend-prod'
