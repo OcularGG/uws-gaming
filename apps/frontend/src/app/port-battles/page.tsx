@@ -199,7 +199,7 @@ export default function PortBattlePage() {
   const calculateUsedBR = (pb: PortBattle) => {
     const activeFleet = pb.fleetCompositions.find(f => f.id === pb.activeFleetId);
     if (!activeFleet) return 0;
-    
+
     let totalBR = 0;
     activeFleet.roles.forEach(role => {
       const signUp = pb.signUps.find(s => s.roleId === role.id && s.status === 'approved');
@@ -208,7 +208,7 @@ export default function PortBattlePage() {
         totalBR += shipBR;
       }
     });
-    
+
     return totalBR;
   };
 
@@ -252,7 +252,7 @@ export default function PortBattlePage() {
           const usedBR = calculateUsedBR(pb);
           const remainingBR = pb.totalBRLimit - usedBR;
           const activeFleet = pb.fleetCompositions.find(f => f.id === pb.activeFleetId);
-          const filledRoles = activeFleet ? pb.signUps.filter(s => 
+          const filledRoles = activeFleet ? pb.signUps.filter(s =>
             activeFleet.roles.some(r => r.id === s.roleId) && s.status === 'approved'
           ).length : 0;
           const totalRoles = activeFleet ? activeFleet.roles.length : 0;
@@ -300,12 +300,12 @@ export default function PortBattlePage() {
                   )}
                 </div>
               </div>
-              
+
               <div className="bg-sandstone-100 p-4 border-2 border-navy-dark">
                 <div className="flex justify-between items-center">
                   <span className="font-semibold">Fleet Status:</span>
                   <span className={`px-3 py-1 rounded ${
-                    filledRoles === totalRoles ? 'bg-green-200 text-green-800' : 
+                    filledRoles === totalRoles ? 'bg-green-200 text-green-800' :
                     filledRoles > totalRoles * 0.7 ? 'bg-yellow-200 text-yellow-800' :
                     'bg-red-200 text-red-800'
                   }`}>
@@ -359,7 +359,7 @@ export default function PortBattlePage() {
 
         {/* Content */}
         {viewMode === 'list' && renderPortBattleList()}
-        
+
         {viewMode === 'create' && (
           <div className="max-w-4xl mx-auto">
             <div className="neo-brutal-box p-8">

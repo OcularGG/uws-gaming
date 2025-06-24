@@ -380,13 +380,13 @@ export default function GalleryPage() {
     // Optimistic update
     const currentVote = userVotes[itemId];
     const newVote = currentVote === voteType ? undefined : voteType;
-    
+
     // Update local state immediately
     setUserVotes(prev => ({
       ...prev,
       [itemId]: newVote
     }));
-    
+
     // Optimistically update vote counts
     setGalleryData(prev => {
       if (!prev) return prev;
@@ -394,18 +394,18 @@ export default function GalleryPage() {
         ...prev,
         items: prev.items.map(item => {
           if (item.id !== itemId) return item;
-          
+
           let newUpvotes = item.upvotes;
           let newDownvotes = item.downvotes;
-          
+
           // Remove previous vote effect
           if (currentVote === 'upvote') newUpvotes--;
           if (currentVote === 'downvote') newDownvotes--;
-          
+
           // Add new vote effect
           if (newVote === 'upvote') newUpvotes++;
           if (newVote === 'downvote') newDownvotes++;
-          
+
           return {
             ...item,
             upvotes: Math.max(0, newUpvotes),
@@ -725,7 +725,7 @@ export default function GalleryPage() {
               {session?.user && (
                 <div className="border-t border-navy-dark/10 pt-4">
                   <h4 className="font-semibold text-navy-dark mb-2">Comments</h4>
-                  
+
                   {/* Existing Comments */}
                   {(itemComments[item.id] || []).map((comment, index) => (
                     <div key={index} className="bg-gray-50 p-3 rounded mb-2 text-sm">
@@ -1061,8 +1061,8 @@ export default function GalleryPage() {
                         type="button"
                         onClick={() => setUploadForm({...uploadForm, uploadMethod: 'url'})}
                         className={`neo-brutal-button px-4 py-2 ${
-                          uploadForm.uploadMethod === 'url' 
-                            ? 'bg-brass text-navy-dark' 
+                          uploadForm.uploadMethod === 'url'
+                            ? 'bg-brass text-navy-dark'
                             : 'bg-sail-white text-navy-dark'
                         }`}
                       >
@@ -1072,8 +1072,8 @@ export default function GalleryPage() {
                         type="button"
                         onClick={() => setUploadForm({...uploadForm, uploadMethod: 'file'})}
                         className={`neo-brutal-button px-4 py-2 ${
-                          uploadForm.uploadMethod === 'file' 
-                            ? 'bg-brass text-navy-dark' 
+                          uploadForm.uploadMethod === 'file'
+                            ? 'bg-brass text-navy-dark'
                             : 'bg-sail-white text-navy-dark'
                         }`}
                       >

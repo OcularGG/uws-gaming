@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
     if (action === 'create') {
       // Create new port battle
       const data = await request.json();
-      
+
       const newPB = {
         id: `pb-${Date.now()}`,
         ...data,
@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
     if (action === 'signup') {
       // Handle sign-up submission
       const { pbId, roleId, signUpData } = await request.json();
-      
+
       const newSignUp = {
         id: `signup-${Date.now()}`,
         roleId,
@@ -179,7 +179,7 @@ export async function POST(request: NextRequest) {
     if (action === 'approve-signup') {
       // Handle sign-up approval/denial
       const { signUpId, status } = await request.json();
-      
+
       for (const pb of portBattles) {
         const signUpIndex = pb.signUps.findIndex((s: any) => s.id === signUpId);
         if (signUpIndex !== -1) {
@@ -222,7 +222,7 @@ export async function PUT(request: NextRequest) {
     if (action === 'move-signup') {
       const { signUpId, newRoleId } = await request.json();
       const signUpIndex = portBattles[pbIndex].signUps.findIndex((s: any) => s.id === signUpId);
-      
+
       if (signUpIndex !== -1) {
         portBattles[pbIndex].signUps[signUpIndex].roleId = newRoleId;
         return NextResponse.json({ success: true });
@@ -234,7 +234,7 @@ export async function PUT(request: NextRequest) {
     // Update entire port battle
     const updates = await request.json();
     portBattles[pbIndex] = { ...portBattles[pbIndex], ...updates };
-    
+
     return NextResponse.json({ success: true, portBattle: portBattles[pbIndex] });
   } catch (error) {
     console.error('Port battles PUT error:', error);

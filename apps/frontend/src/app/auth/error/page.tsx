@@ -15,7 +15,7 @@ function ErrorContent() {
           <p className="text-gray-600 mb-4">
             An error occurred during authentication.
           </p>
-          
+
           {error && (
             <div className="bg-red-50 border border-red-200 rounded p-4 mb-4">
               <p className="text-sm font-medium text-red-800">Error Type:</p>
