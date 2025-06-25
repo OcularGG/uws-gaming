@@ -10,9 +10,9 @@ interface NavalActionItem {
   MaxStack?: number
   Gold?: number
   Labor?: number
-  Requirements?: any
-  Results?: any
-  [key: string]: any
+  Requirements?: Record<string, unknown>
+  Results?: Record<string, unknown>
+  [key: string]: unknown
 }
 
 interface OrganizedItem {
@@ -24,8 +24,8 @@ interface OrganizedItem {
   maxStack?: number
   gold?: number
   labor?: number
-  requirements?: any
-  results?: any
+  requirements?: Record<string, unknown>
+  results?: Record<string, unknown>
   fullData: NavalActionItem
 }
 
