@@ -3,6 +3,10 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { randomUUID } from 'crypto';
 
+// Import the gallery data from the main route to add uploaded items
+// This is a workaround for the in-memory storage limitation
+let galleryItems: any[] = [];
+
 // File validation constants
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/ogg'];
@@ -48,6 +52,8 @@ function sanitizeFilename(filename: string): string {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('Starting file upload process...');
+    
     const formData = await request.formData();
     const files = formData.getAll('files') as File[];
     const title = formData.get('title') as string;
@@ -56,11 +62,15 @@ export async function POST(request: NextRequest) {
     const uploaderName = formData.get('uploaderName') as string;
     const uploaderId = formData.get('uploaderId') as string;
 
+    console.log(`Received ${files.length} files for upload`);
+
     if (!files || files.length === 0) {
+      console.log('No files provided in request');
       return NextResponse.json({ error: 'No files provided' }, { status: 400 });
     }
 
     if (files.length > 5) {
+      console.log(`Too many files: ${files.length}`);
       return NextResponse.json({ error: 'Maximum 5 files allowed' }, { status: 400 });
     }
 
@@ -80,8 +90,12 @@ export async function POST(request: NextRequest) {
     // Ensure upload directory exists
     try {
       await mkdir(uploadDir, { recursive: true });
+      console.log('Upload directory created/verified:', uploadDir);
     } catch (error) {
-      // Directory might already exist
+      console.error('Failed to create upload directory:', error);
+      return NextResponse.json({
+        error: 'Failed to create upload directory. Please try again.'
+      }, { status: 500 });
     }
 
     for (let i = 0; i < files.length; i++) {
@@ -103,12 +117,7 @@ export async function POST(request: NextRequest) {
 
       // Read and process file
       const bytes = await file.arrayBuffer();
-      let buffer = Buffer.from(new Uint8Array(bytes));
-
-      // Compress images
-      if (ALLOWED_IMAGE_TYPES.includes(file.type)) {
-        buffer = compressImage(buffer, file.type);
-      }
+      let buffer = Buffer.from(bytes);
 
       // Write file to disk
       await writeFile(filePath, buffer);
@@ -148,6 +157,34 @@ export async function POST(request: NextRequest) {
         originalFileName: file.name,
         mimeType: file.type
       });
+    }
+
+    // Add each uploaded item to the main gallery
+    for (const item of uploadResults) {
+      try {
+        const baseUrl = request.url.split('/api/')[0];
+        const galleryResponse = await fetch(`${baseUrl}/api/gallery`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: item.type,
+            url: item.url,
+            title: item.title,
+            description: item.description,
+            tags: item.tags.join(','),
+            uploaderName: item.uploader,
+            uploaderId: item.uploaderId
+          })
+        });
+
+        if (!galleryResponse.ok) {
+          console.error('Failed to add item to gallery:', await galleryResponse.text());
+        }
+      } catch (error) {
+        console.error('Error adding item to gallery:', error);
+      }
     }
 
     return NextResponse.json({
