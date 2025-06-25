@@ -54,7 +54,7 @@ export default function Navigation() {
                       >
                         <Link
                           href={item.href}
-                          className={`nav-item px-4 py-2 text-sm font-medium rounded ${
+                          className={`nav-item px-4 py-2 text-sm font-medium ${
                             isActive ? 'active' : ''
                           }`}
                           style={{fontFamily: 'Cinzel, serif', color: 'var(--navy-dark)'}}
@@ -62,12 +62,12 @@ export default function Navigation() {
                           {item.name} ↓
                         </Link>
 
-                        <div className="absolute top-full left-0 mt-1 w-36 bg-sandstone-light/95 backdrop-blur-sm shadow-lg z-50 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                        <div className="absolute top-full left-0 mt-1 w-36 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                           {item.submenu.map((subItem) => (
                             <Link
                               key={subItem.name}
                               href={subItem.href}
-                              className="block px-4 py-3 text-sm font-medium text-navy-dark hover:bg-transparent transition-colors first:rounded-t last:rounded-b border-b-2 border-transparent hover:border-b-2 hover:border-brass-bright"
+                              className="nav-submenu-item block px-4 py-3 text-sm font-medium text-navy-dark transition-all duration-200"
                               style={{fontFamily: 'Cinzel, serif'}}
                             >
                               {subItem.name}
@@ -82,7 +82,7 @@ export default function Navigation() {
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`nav-item px-4 py-2 text-sm font-medium rounded ${
+                      className={`nav-item px-4 py-2 text-sm font-medium ${
                         isActive ? 'active' : ''
                       }`}
                       style={{fontFamily: 'Cinzel, serif', color: 'var(--navy-dark)'}}
@@ -97,7 +97,7 @@ export default function Navigation() {
             {/* Mobile menu button */}
             <div className="md:hidden">            <button
               type="button"
-              className="nav-item p-2 rounded"
+              className="nav-item p-2"
               style={{color: 'var(--navy-dark)'}}
               aria-label="Open menu"
             >
@@ -118,7 +118,7 @@ export default function Navigation() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`nav-item block px-4 py-2 text-base font-medium rounded ${
+                  className={`nav-item block px-4 py-2 text-base font-medium ${
                     isActive ? 'active' : ''
                   }`}
                   style={{fontFamily: 'Cinzel, serif', color: 'var(--navy-dark)'}}
