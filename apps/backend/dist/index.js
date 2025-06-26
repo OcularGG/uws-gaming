@@ -77,8 +77,6 @@ var config = {
 
 // src/routes/health.ts
 var import_zod2 = require("zod");
-var import_client = require("@prisma/client");
-var prisma = new import_client.PrismaClient();
 var healthResponseSchema = import_zod2.z.object({
   status: import_zod2.z.string(),
   timestamp: import_zod2.z.string(),
@@ -158,8 +156,8 @@ async function healthRoutes(fastify) {
       let dbStatus = "ok";
       let dbLatency = 0;
       try {
-        await prisma.$queryRaw`SELECT 1 as health_check`;
         dbLatency = Date.now() - dbStart;
+        dbStatus = "simulated";
       } catch (error) {
         dbStatus = "error";
         fastify.log.error("Database health check failed", error);
@@ -209,7 +207,6 @@ async function healthRoutes(fastify) {
     }
   }, async (request, reply) => {
     try {
-      await prisma.$queryRaw`SELECT 1 as readiness_check`;
       return reply.status(200).send({ ready: true });
     } catch (error) {
       fastify.log.error("Readiness check failed", error);

@@ -51,31 +51,31 @@ interface OrganizedData {
 export async function GET() {
   try {
     console.log('Reading and organizing Naval Action data from local file...')
-    
+
     // Read the static JSON file from the public directory
     const filePath = path.join(process.cwd(), 'public', 'naval-action-data.json')
     const fileContents = fs.readFileSync(filePath, 'utf8')
     const rawData = JSON.parse(fileContents)
-    
+
     console.log('Local data loaded, organizing...')
-    
+
     // Convert to array if it's an object
     const itemsArray: NavalActionItem[] = Array.isArray(rawData) ? rawData : Object.values(rawData)
-    
+
     // Organize data by categories and subcategories
     const organizedData: OrganizedData = {
       categories: {},
       totalItems: itemsArray.length,
       items: itemsArray
     }
-    
+
     // Build category structure
     itemsArray.forEach((item, index) => {
       if (!item || typeof item !== 'object') return
-      
+
       // Get primary category (ItemType, SortingGroup, or ItemGroup)
       const primaryCategory = item.ItemType || item.SortingGroup || item.ItemGroup || 'Uncategorized'
-      
+
       if (!organizedData.categories[primaryCategory]) {
         organizedData.categories[primaryCategory] = {
           name: primaryCategory,
@@ -84,7 +84,7 @@ export async function GET() {
           items: []
         }
       }
-      
+
       organizedData.categories[primaryCategory].count++
       organizedData.categories[primaryCategory].items.push({
         index,
@@ -99,7 +99,7 @@ export async function GET() {
         results: item.Results,
         fullData: item
       })
-      
+
       // Build subcategories
       const subCategory = item.SortingGroup || item.ItemGroup || 'General'
       if (subCategory !== primaryCategory) {
@@ -118,9 +118,9 @@ export async function GET() {
         })
       }
     })
-    
+
     console.log(`Organized ${itemsArray.length} items into ${Object.keys(organizedData.categories).length} categories`)
-    
+
     return NextResponse.json(organizedData, {
       headers: {
         'Cache-Control': 'public, max-age=3600', // Cache for 1 hour

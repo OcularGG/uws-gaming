@@ -1,0 +1,395 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User management
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  discordId String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  sessions   Session[]
+  userRoles  UserRole[]
+  activities UserActivity[]
+  applications Application[]
+  applicationVouches ApplicationVouch[]
+  bugReports BugReport[]
+
+  @@map("users")
+}
+
+// Session management for authentication
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// Role-based access control
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  permissions Json     @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  userRoles UserRole[]
+
+  @@map("roles")
+}
+
+model UserRole {
+  id     String @id @default(cuid())
+  userId String
+  roleId String
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@map("user_roles")
+}
+
+// Discord integration
+model DiscordGuild {
+  id          String   @id // Discord Guild ID
+  name        String
+  iconUrl     String?
+  ownerId     String
+  memberCount Int      @default(0)
+  isActive    Boolean  @default(true)
+  settings    Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("discord_guilds")
+}
+
+// User activity tracking
+model UserActivity {
+  id        String            @id @default(cuid())
+  userId    String
+  type      UserActivityType
+  data      Json              @default("{}")
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime          @default(now())
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_activities")
+}
+
+enum UserActivityType {
+  LOGIN
+  LOGOUT
+  PASSWORD_CHANGE
+  EMAIL_CHANGE
+  PROFILE_UPDATE
+  DISCORD_LINK
+  DISCORD_UNLINK
+}
+
+// System configuration
+model SystemConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("system_config")
+}
+
+// API rate limiting
+model RateLimit {
+  id         String   @id @default(cuid())
+  identifier String   // IP address, user ID, or API key
+  endpoint   String
+  count      Int      @default(1)
+  resetTime  DateTime
+  createdAt  DateTime @default(now())
+
+  @@unique([identifier, endpoint])
+  @@map("rate_limits")
+}
+
+// Application system tables
+model Application {
+  id        String   @id @default(cuid())
+  
+  // Applicant information
+  applicantName String
+  discordUsername String?
+  discordId String?
+  email String?
+  
+  // Status and review
+  status String @default("pending") // pending, approved, rejected, withdrawn
+  submittedAt DateTime @default(now())
+  reviewedAt DateTime?
+  reviewedBy String?
+  reviewNotes String?
+  
+  // Discord integration
+  discordChannelId String? // Application channel ID
+  interviewChannelId String? // Interview voice channel ID
+  
+  // Personal Particulars
+  captainName String
+  preferredNickname String?
+  currentNation String
+  timeZone String
+  
+  // Naval Experience
+  hoursInNavalAction Int
+  steamConnected Boolean @default(false)
+  currentRank String
+  previousCommands String?
+  preferredRole String
+  isPortBattleCommander Boolean @default(false)
+  commanderExperience String?
+  
+  // Crafting & Availability
+  isCrafter Boolean @default(false)
+  weeklyPlayTime Int
+  portBattleAvailability String[]
+  typicalSchedule String
+  
+  // Declarations & Signature
+  declarationAccuracy Boolean
+  declarationHonor Boolean
+  declarationRules Boolean
+  signature String
+  
+  // Relationships
+  user User? @relation(fields: [discordId], references: [discordId])
+  attachments ApplicationAttachment[]
+  vouches ApplicationVouch[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("applications")
+}
+
+model ApplicationAttachment {
+  id String @id @default(cuid())
+  applicationId String
+  filename String
+  originalFilename String
+  fileSize BigInt
+  mimeType String
+  storagePath String
+  createdAt DateTime @default(now())
+
+  // Relationships
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("application_attachments")
+}
+
+model ApplicationVouch {
+  id String @id @default(cuid())
+  applicationId String
+  reviewerId String
+  reviewerName String
+  vouchType String // positive, negative
+  comments String?
+  createdAt DateTime @default(now())
+
+  // Relationships
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  reviewer User @relation(fields: [reviewerId], references: [id])
+
+  @@unique([applicationId, reviewerId])
+  @@map("application_vouches")
+}
+
+// Application cooldown tracking
+model ApplicationCooldown {
+  id String @id @default(cuid())
+  discordId String @unique
+  discordUsername String
+  deniedAt DateTime
+  cooldownEndsAt DateTime
+  canReapplyAt DateTime?
+  overriddenBy String?
+  overriddenAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@map("application_cooldowns")
+}
+
+// Bug report system
+model BugReport {
+  id String @id @default(cuid())
+  
+  // Reporter information
+  reporterDiscordUsername String
+  reporterEmail String?
+  reporterId String?
+  
+  // Bug details
+  title String
+  description String
+  severity String // Low, Medium, High, Critical
+  browser String?
+  
+  // Status and management
+  status String @default("Open") // Open, Being Fixed, Fixed, Duplicate Bug
+  isPubliclyVisible Boolean @default(false)
+  adminNotes String?
+  
+  // Duplicate tracking
+  duplicateOfId String?
+  duplicateOf BugReport? @relation("BugDuplicates", fields: [duplicateOfId], references: [id])
+  duplicates BugReport[] @relation("BugDuplicates")
+  
+  // Fixed information
+  fixedAt DateTime?
+  fixedBy String?
+  fixedInVersion String?
+  
+  // Relationships
+  reporter User? @relation(fields: [reporterId], references: [id])
+  attachments BugReportAttachment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("bug_reports")
+}
+
+model BugReportAttachment {
+  id String @id @default(cuid())
+  bugReportId String
+  filename String
+  originalFilename String
+  fileSize BigInt
+  mimeType String
+  storagePath String
+  isScreenshot Boolean @default(false)
+  createdAt DateTime @default(now())
+
+  // Relationships
+  bugReport BugReport @relation(fields: [bugReportId], references: [id], onDelete: Cascade)
+
+  @@map("bug_report_attachments")
+}
+
+// Gallery system (implementing the recommendations)
+model GalleryItem {
+  id String @id @default(cuid())
+  title String
+  description String?
+  url String
+  thumbnailUrl String?
+  type String // image, video, collection
+  uploaderId String
+  uploaderName String
+  fileSize BigInt?
+  mimeType String?
+  dimensions Json?
+  tags String[]
+  upvotes Int @default(0)
+  downvotes Int @default(0)
+  viewCount Int @default(0)
+  isFeatured Boolean @default(false)
+  isApproved Boolean @default(true)
+  
+  // Relationships
+  votes GalleryVote[]
+  comments GalleryComment[]
+  favorites GalleryFavorite[]
+  collections GalleryCollection[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("gallery_items")
+}
+
+model GalleryVote {
+  id String @id @default(cuid())
+  galleryItemId String
+  userId String
+  voteType String // upvote, downvote
+  createdAt DateTime @default(now())
+
+  // Relationships
+  galleryItem GalleryItem @relation(fields: [galleryItemId], references: [id], onDelete: Cascade)
+
+  @@unique([galleryItemId, userId])
+  @@map("gallery_votes")
+}
+
+model GalleryComment {
+  id String @id @default(cuid())
+  galleryItemId String
+  userId String
+  userName String
+  content String
+  isApproved Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  galleryItem GalleryItem @relation(fields: [galleryItemId], references: [id], onDelete: Cascade)
+
+  @@map("gallery_comments")
+}
+
+model GalleryFavorite {
+  id String @id @default(cuid())
+  galleryItemId String
+  userId String
+  createdAt DateTime @default(now())
+
+  // Relationships
+  galleryItem GalleryItem @relation(fields: [galleryItemId], references: [id], onDelete: Cascade)
+
+  @@unique([galleryItemId, userId])
+  @@map("gallery_favorites")
+}
+
+model GalleryCollection {
+  id String @id @default(cuid())
+  galleryItemId String
+  imageUrl String
+  displayOrder Int
+  createdAt DateTime @default(now())
+
+  // Relationships
+  galleryItem GalleryItem @relation(fields: [galleryItemId], references: [id], onDelete: Cascade)
+
+  @@map("gallery_collections")
+}

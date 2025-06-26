@@ -11,7 +11,7 @@ interface FileUploadProps {
 const FileUpload: React.FC<FileUploadProps> = ({
   onFilesSelected,
   maxFiles = 5,
-  acceptedTypes = ['image/*', 'video/*'],
+  acceptedTypes = ['image/*', 'video/*', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.mp4', '.mov', '.avi'],
   maxSize = 50 * 1024 * 1024, // 50MB
   disabled = false
 }) => {
@@ -39,6 +39,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
       const isValidType = acceptedTypes.some(type => {
         if (type.endsWith('/*')) {
           return file.type.startsWith(type.replace('/*', '/'));
+        }
+        if (type.startsWith('.')) {
+          // Check file extension
+          return file.name.toLowerCase().endsWith(type.toLowerCase());
         }
         return file.type === type;
       });

@@ -31,6 +31,8 @@ steps:
       - '--allow-unauthenticated'
       - '--set-env-vars'
       - 'NODE_ENV=production'
+      - '--set-secrets'
+      - 'DISCORD_TOKEN=discord-bot-token:latest,DISCORD_CLIENT_ID=discord-client-id:latest,DISCORD_CLIENT_SECRET=discord-client-secret:latest,DATABASE_URL=database-url:latest'
       - '--port'
       - '8080'
       - '--memory'

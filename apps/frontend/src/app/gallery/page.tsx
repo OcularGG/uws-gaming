@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/hooks/useSession';
 import Link from 'next/link';
 import FileUpload from '../../components/FileUpload';
 
@@ -63,7 +63,7 @@ const LazyImage: React.FC<LazyImageProps> = ({ src, alt, className, onError }) =
 
 interface GalleryItem {
   id: string;
-  type: 'image' | 'video';
+  type: 'image' | 'video' | 'collection';
   url: string;
   thumbnail?: string;
   title: string;
@@ -83,6 +83,9 @@ interface GalleryItem {
   };
   originalFileName?: string;
   mimeType?: string;
+  // Collection support
+  images?: string[]; // Array of image URLs for collections
+  imageCount?: number; // Number of images in collection
 }
 
 interface GalleryResponse {
@@ -121,7 +124,8 @@ export default function GalleryPage() {
   const [galleryData, setGalleryData] = useState<GalleryResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [showUploadForm, setShowUploadForm] = useState(false);
-  const [selectedMedia, setSelectedMedia] = useState<{item: GalleryItem, type: 'image' | 'video'} | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<{item: GalleryItem, type: 'image' | 'video' | 'collection'} | null>(null);
+  const [currentCollectionImageIndex, setCurrentCollectionImageIndex] = useState(0);
 
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -141,6 +145,9 @@ export default function GalleryPage() {
   const [itemComments, setItemComments] = useState<{[itemId: string]: any[]}>({});
   const [newComment, setNewComment] = useState('');
   const [showComments, setShowComments] = useState<{[itemId: string]: boolean}>({});
+
+  // Navigation state to prevent rapid clicking
+  const [navigationLocked, setNavigationLocked] = useState(false);
 
   const [uploadForm, setUploadForm] = useState({
     type: 'image' as 'image' | 'video',
@@ -335,7 +342,11 @@ export default function GalleryPage() {
   };
 
   const navigateModal = (direction: 'prev' | 'next') => {
-    if (!selectedMedia || !galleryData) return;
+    if (!selectedMedia || !galleryData || navigationLocked) return;
+
+    // Lock navigation to prevent rapid clicks
+    setNavigationLocked(true);
+    setTimeout(() => setNavigationLocked(false), 300);
 
     const currentIndex = galleryData.items.findIndex(item => item.id === selectedMedia.item.id);
     let newIndex;
@@ -348,6 +359,7 @@ export default function GalleryPage() {
 
     const newItem = galleryData.items[newIndex];
     setSelectedMedia({ item: newItem, type: newItem.type });
+    setCurrentCollectionImageIndex(0); // Reset collection image index when switching items
   };
 
   const handleDelete = async (itemId: string) => {
@@ -568,6 +580,61 @@ export default function GalleryPage() {
     }
   };
 
+  const handleReportGalleryItem = async (itemId: string, reason: string) => {
+    if (!session?.user) return;
+
+    try {
+      const response = await fetch('/api/gallery?feature=report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'gallery',
+          itemId,
+          reporterId: session.user.discordId || session.user.id,
+          reporterName: session.user.name,
+          reason
+        })
+      });
+
+      if (response.ok) {
+        alert('Gallery item reported successfully. Thank you for helping maintain our community standards.');
+      } else {
+        throw new Error('Failed to report item');
+      }
+    } catch (error) {
+      console.error('Failed to report gallery item:', error);
+      alert('Failed to report item. Please try again.');
+    }
+  };
+
+  const handleReportComment = async (commentId: string, galleryItemId: string, reason: string) => {
+    if (!session?.user) return;
+
+    try {
+      const response = await fetch('/api/gallery?feature=report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'comment',
+          itemId: commentId,
+          galleryItemId,
+          reporterId: session.user.discordId || session.user.id,
+          reporterName: session.user.name,
+          reason
+        })
+      });
+
+      if (response.ok) {
+        alert('Comment reported successfully. Thank you for helping maintain our community standards.');
+      } else {
+        throw new Error('Failed to report comment');
+      }
+    } catch (error) {
+      console.error('Failed to report comment:', error);
+      alert('Failed to report comment. Please try again.');
+    }
+  };
+
   // Load user's votes and favorites on mount
   useEffect(() => {
     if (session?.user && galleryData?.items) {
@@ -607,6 +674,7 @@ export default function GalleryPage() {
 
     const { item, type } = selectedMedia;
     const canDelete = session && (session.user.discordId === item.uploaderId || session.user.name === 'admin');
+    const isAdmin = session?.user?.discordId === '1207434980855259206';
 
     return (
       <div className="fixed inset-0 bg-navy-dark/90 z-50 flex items-center justify-center p-4 modal-backdrop">
@@ -625,6 +693,22 @@ export default function GalleryPage() {
               >
                 Share
               </button>
+
+              {/* Report Button */}
+              {session?.user && !canDelete && (
+                <button
+                  onClick={() => {
+                    const reason = prompt('Please provide a reason for reporting this content:');
+                    if (reason?.trim()) {
+                      handleReportGalleryItem(item.id, reason.trim());
+                    }
+                  }}
+                  className="neo-brutal-button bg-orange-500 text-white px-4 py-2"
+                  title="Report this content"
+                >
+                  Report
+                </button>
+              )}
 
               {canDelete && (
                 <button
@@ -648,26 +732,130 @@ export default function GalleryPage() {
 
           <div className="flex-1 overflow-y-auto min-h-0">
             {type === 'video' ? (
-              <div className="aspect-video">
-                <iframe
-                  src={`https://www.youtube.com/embed/${getYouTubeVideoId(item.url)}?autoplay=1`}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                />
+              <div className="p-4">
+                <div className="aspect-video bg-black rounded">
+                  {getYouTubeVideoId(item.url) ? (
+                    <iframe
+                      src={`https://www.youtube.com/embed/${getYouTubeVideoId(item.url)}?autoplay=1`}
+                      className="w-full h-full rounded"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : (
+                    // For non-YouTube videos, use HTML5 video player
+                    <video
+                      src={item.url}
+                      controls
+                      autoPlay
+                      className="w-full h-full rounded"
+                      onError={(e) => {
+                        console.error('Video failed to load:', item.url);
+                        e.currentTarget.style.display = 'none';
+                        const fallback = document.createElement('div');
+                        fallback.className = 'w-full h-full flex items-center justify-center text-white bg-gray-800 rounded';
+                        fallback.innerHTML = '<div class="text-center"><div class="text-4xl mb-2">⚠️</div><div>Video failed to load</div><div class="text-sm text-gray-400 mt-2">URL may be invalid or unsupported</div></div>';
+                        e.currentTarget.parentNode?.appendChild(fallback);
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+            ) : type === 'collection' && item.images ? (
+              <div className="p-4">
+                {/* Collection Image Container with Navigation */}
+                <div className="relative flex justify-center items-center mb-4 min-h-[50vh]">
+                  {/* Collection Left Arrow */}
+                  {item.images.length > 1 && (
+                    <button
+                      onClick={() => {
+                        setCurrentCollectionImageIndex(prev =>
+                          prev > 0 ? prev - 1 : item.images!.length - 1
+                        );
+                      }}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 z-10 neo-brutal-button bg-brass text-navy-dark w-12 h-12 flex items-center justify-center text-xl shadow-lg hover:bg-brass/80 transition-colors"
+                      title="Previous image in collection"
+                    >
+                      ←
+                    </button>
+                  )}
+
+                  {/* Collection Image */}
+                  <div className="text-center">
+                    <img
+                      src={item.images[currentCollectionImageIndex]}
+                      alt={`${item.title} - Image ${currentCollectionImageIndex + 1}`}
+                      className="max-w-full max-h-[50vh] object-contain mx-16"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder-image.jpg';
+                      }}
+                    />
+                    {/* Collection Counter */}
+                    <div className="mt-2 text-sm text-navy-dark/70">
+                      {currentCollectionImageIndex + 1} of {item.images.length}
+                    </div>
+                  </div>
+
+                  {/* Collection Right Arrow */}
+                  {item.images.length > 1 && (
+                    <button
+                      onClick={() => {
+                        setCurrentCollectionImageIndex(prev =>
+                          prev < item.images!.length - 1 ? prev + 1 : 0
+                        );
+                      }}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 z-10 neo-brutal-button bg-brass text-navy-dark w-12 h-12 flex items-center justify-center text-xl shadow-lg hover:bg-brass/80 transition-colors"
+                      title="Next image in collection"
+                    >
+                      →
+                    </button>
+                  )}
+
+                  {/* Navigation Arrows for Gallery Items */}
+                  {galleryData && galleryData.items.length > 1 && (
+                    <>
+                      <button
+                        onClick={() => navigateModal('prev')}
+                        disabled={navigationLocked}
+                        className={`absolute left-[-60px] top-1/2 -translate-y-1/2 z-10 neo-brutal-button bg-brass-bright text-navy-dark w-10 h-10 flex items-center justify-center text-lg shadow-lg hover:bg-brass/80 transition-colors ${
+                          navigationLocked ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                        title="Previous gallery item"
+                      >
+                        ‹‹
+                      </button>
+
+                      <button
+                        onClick={() => navigateModal('next')}
+                        disabled={navigationLocked}
+                        className={`absolute right-[-60px] top-1/2 -translate-y-1/2 z-10 neo-brutal-button bg-brass-bright text-navy-dark w-10 h-10 flex items-center justify-center text-lg shadow-lg hover:bg-brass/80 transition-colors ${
+                          navigationLocked ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                        title="Next gallery item"
+                      >
+                        ››
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="p-4">
-                {/* Image Container with Navigation Arrows */}
+                {/* Single Image Container with Navigation Arrows */}
                 <div className="relative flex justify-center items-center mb-4 min-h-[50vh]">
                   {/* Left Arrow */}
-                  <button
-                    onClick={() => navigateModal('prev')}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 z-10 neo-brutal-button bg-brass text-navy-dark w-12 h-12 flex items-center justify-center text-xl shadow-lg hover:bg-brass/80 transition-colors"
-                    title="Previous image"
-                  >
-                    ←
-                  </button>
-                  
+                  {galleryData && galleryData.items.length > 1 && (
+                    <button
+                      onClick={() => navigateModal('prev')}
+                      disabled={navigationLocked}
+                      className={`absolute left-4 top-1/2 -translate-y-1/2 z-10 neo-brutal-button bg-brass text-navy-dark w-12 h-12 flex items-center justify-center text-xl shadow-lg hover:bg-brass/80 transition-colors ${
+                        navigationLocked ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                      title="Previous image"
+                    >
+                      ←
+                    </button>
+                  )}
+
                   {/* Image */}
                   <img
                     src={item.url}
@@ -677,15 +865,20 @@ export default function GalleryPage() {
                       e.currentTarget.src = '/placeholder-image.jpg';
                     }}
                   />
-                  
+
                   {/* Right Arrow */}
-                  <button
-                    onClick={() => navigateModal('next')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 z-10 neo-brutal-button bg-brass text-navy-dark w-12 h-12 flex items-center justify-center text-xl shadow-lg hover:bg-brass/80 transition-colors"
-                    title="Next image"
-                  >
-                    →
-                  </button>
+                  {galleryData && galleryData.items.length > 1 && (
+                    <button
+                      onClick={() => navigateModal('next')}
+                      disabled={navigationLocked}
+                      className={`absolute right-4 top-1/2 -translate-y-1/2 z-10 neo-brutal-button bg-brass text-navy-dark w-12 h-12 flex items-center justify-center text-xl shadow-lg hover:bg-brass/80 transition-colors ${
+                        navigationLocked ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                      title="Next image"
+                    >
+                      →
+                    </button>
+                  )}
                 </div>
               </div>
             )}
@@ -717,6 +910,9 @@ export default function GalleryPage() {
                   <span>▲ {item.upvotes} upvotes</span>
                   <span>▼ {item.downvotes} downvotes</span>
                   <span>{item.viewCount} views</span>
+                  {item.type === 'collection' && item.imageCount && (
+                    <span className="text-brass">📸 {item.imageCount} images</span>
+                  )}
                 </div>
                 <div className="text-brass">
                   <span>Captain {item.uploader} • {formatDate(item.createdAt)}</span>
@@ -730,11 +926,29 @@ export default function GalleryPage() {
 
                   {/* Existing Comments */}
                   {(itemComments[item.id] || []).map((comment, index) => (
-                    <div key={index} className="bg-gray-50 p-3 rounded mb-2 text-sm">
-                      <div className="font-semibold text-navy-dark">{comment.userName}</div>
-                      <div className="text-gray-700">{comment.content}</div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {new Date(comment.createdAt).toLocaleDateString()}
+                    <div key={index} className="bg-gray-50 p-3 rounded mb-2 text-sm relative">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="font-semibold text-navy-dark">{comment.userName}</div>
+                          <div className="text-gray-700">{comment.content}</div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {new Date(comment.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                        {session?.user && session.user.name !== comment.userName && (
+                          <button
+                            onClick={() => {
+                              const reason = prompt('Please provide a reason for reporting this comment:');
+                              if (reason?.trim()) {
+                                handleReportComment(comment.id || `comment-${index}`, item.id, reason.trim());
+                              }
+                            }}
+                            className="text-red-500 hover:text-red-700 text-xs ml-2 px-2 py-1 border border-red-300 rounded hover:bg-red-50"
+                            title="Report this comment"
+                          >
+                            Report
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -997,6 +1211,7 @@ export default function GalleryPage() {
                     className="bg-white border-2 border-navy-dark p-3 cursor-pointer hover:bg-brass/10 transition-colors"
                     onClick={() => {
                       setSelectedMedia({item, type: item.type});
+                      setCurrentCollectionImageIndex(0); // Reset collection index when opening modal
                     }}
                   >
                     <div className="relative aspect-video mb-2 bg-navy-dark/10">
@@ -1093,7 +1308,7 @@ export default function GalleryPage() {
                       <FileUpload
                         onFilesSelected={handleFilesSelected}
                         maxFiles={5}
-                        acceptedTypes={['image/*', 'video/*']}
+                        acceptedTypes={['image/*', 'video/*', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.mp4', '.mov', '.avi']}
                         disabled={uploadLoading}
                       />
 
@@ -1255,6 +1470,7 @@ export default function GalleryPage() {
                     className="relative aspect-video bg-navy-dark/10 cursor-pointer"
                     onClick={() => {
                       setSelectedMedia({item, type: item.type});
+                      setCurrentCollectionImageIndex(0); // Reset collection index when opening modal
                     }}
                   >
                     {item.type === 'image' ? (
@@ -1266,6 +1482,24 @@ export default function GalleryPage() {
                           e.currentTarget.src = '/placeholder-image.jpg';
                         }}
                       />
+                    ) : item.type === 'collection' ? (
+                      <div className="relative w-full h-full">
+                        <LazyImage
+                          src={item.thumbnail || item.url}
+                          alt={`${item.title} - Collection`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = '/placeholder-image.jpg';
+                          }}
+                        />
+                        {/* Collection Indicator */}
+                        <div className="absolute top-2 left-2 bg-brass/90 text-navy-dark px-2 py-1 rounded text-xs font-semibold">
+                          📸 {item.imageCount || item.images?.length || 0}
+                        </div>
+                        {/* Stack Effect */}
+                        <div className="absolute inset-0 bg-white/20 transform translate-x-1 translate-y-1 -z-10"></div>
+                        <div className="absolute inset-0 bg-white/10 transform translate-x-2 translate-y-2 -z-20"></div>
+                      </div>
                     ) : (
                       <div className="relative w-full h-full">
                         <LazyImage
@@ -1288,20 +1522,55 @@ export default function GalleryPage() {
 
                     {/* Favorite Button - Top Right */}
                     {session?.user && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleFavorite(item.id);
-                        }}
-                        className={`absolute top-2 right-2 p-2 rounded-full transition-colors ${
-                          userFavorites.has(item.id)
-                            ? 'bg-red-500 text-white'
-                            : 'bg-white/80 text-navy-dark hover:bg-brass/80'
-                        }`}
-                        title={userFavorites.has(item.id) ? 'Remove from favorites' : 'Add to favorites'}
-                      >
-                        {userFavorites.has(item.id) ? '❤️' : '🤍'}
-                      </button>
+                      <div className="absolute top-2 right-2 flex gap-2">
+                        {/* Delete Button for Own Posts */}
+                        {(session.user.discordId === item.uploaderId || session.user.name === 'admin' || session.user.discordId === '1207434980855259206') && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (confirm('Are you sure you want to delete this item?')) {
+                                handleDelete(item.id);
+                              }
+                            }}
+                            className="p-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
+                            title="Delete this item"
+                          >
+                            🗑️
+                          </button>
+                        )}
+                        {/* Report Button for Others' Posts */}
+                        {session.user.discordId !== item.uploaderId && session.user.name !== 'admin' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const reason = prompt('Please provide a reason for reporting this content:');
+                              if (reason?.trim()) {
+                                handleReportGalleryItem(item.id, reason.trim());
+                              }
+                            }}
+                            className="p-2 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                            title="Report this content"
+                          >
+                            ⚠️
+                          </button>
+                        )}
+
+                        {/* Favorite Button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleFavorite(item.id);
+                          }}
+                          className={`p-2 rounded-full transition-colors ${
+                            userFavorites.has(item.id)
+                              ? 'bg-red-500 text-white'
+                              : 'bg-white/80 text-navy-dark hover:bg-brass/80'
+                          }`}
+                          title={userFavorites.has(item.id) ? 'Remove from favorites' : 'Add to favorites'}
+                        >
+                          {userFavorites.has(item.id) ? '❤️' : '🤍'}
+                        </button>
+                      </div>
                     )}
                   </div>
 

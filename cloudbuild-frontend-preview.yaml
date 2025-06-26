@@ -15,5 +15,23 @@ steps:
       - 'push'
       - 'gcr.io/$PROJECT_ID/frontend-preview'
 
+  # Deploy to Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'krakengaming-frontend-preview'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/frontend-preview'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'NEXT_PUBLIC_ENVIRONMENT=preview,NEXTAUTH_URL=https://preview.krakengaming.org'
+      - '--set-secrets'
+      - 'DISCORD_CLIENT_ID=discord-client-id:latest,DISCORD_CLIENT_SECRET=discord-client-secret:latest,NEXTAUTH_SECRET=nextauth-secret:latest,DATABASE_URL=database-url-preview:latest'
+
 images:
   - 'gcr.io/$PROJECT_ID/frontend-preview'

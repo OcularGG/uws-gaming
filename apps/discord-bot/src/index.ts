@@ -5,6 +5,7 @@ import { config } from './config/environment';
 import { logger } from './utils/logger';
 import { CommandManager } from './core/CommandManager';
 import { EventManager } from './core/EventManager';
+import ApplicationButtonHandler from './events/applicationButtons';
 
 // Initialize Sentry for error tracking
 if (config.sentry.dsn) {
@@ -19,6 +20,7 @@ class KrakenBot {
   public readonly client: Client;
   private commandManager: CommandManager;
   private eventManager: EventManager;
+  private buttonHandler: ApplicationButtonHandler;
   private healthServer: http.Server;
 
   constructor() {
@@ -39,6 +41,7 @@ class KrakenBot {
 
     this.commandManager = new CommandManager(this.client);
     this.eventManager = new EventManager(this.client);
+    this.buttonHandler = new ApplicationButtonHandler(this.client);
 
     // Create health check server for Cloud Run
     this.healthServer = http.createServer((req, res) => {

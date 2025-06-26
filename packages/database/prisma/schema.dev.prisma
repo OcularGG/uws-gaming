@@ -1,0 +1,167 @@
+// Development schema for SQLite - simplified version
+// This is a temporary development schema that avoids SQLite limitations
+// Production will use the full PostgreSQL schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User management - simplified for SQLite
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  discordId String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  sessions   Session[]
+  applications Application[]
+  applicationVouches ApplicationVouch[]
+  bugReports BugReport[]
+
+  @@map("users")
+}
+
+// Session management for authentication
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// Applications - simplified for SQLite
+model Application {
+  id        String   @id @default(cuid())
+  userId    String
+  status    String   @default("PENDING") // ApplicationStatus as string
+
+  // Basic information
+  discordUsername String
+  realName        String
+  age             Int
+  country         String
+  language        String
+  timezone        String
+
+  // Gaming experience
+  nwExperience    String
+  previousGuilds  String
+  gameplayStyle   String
+  expectations    String
+
+  // Availability (simplified)
+  weeklyPlayTime     Int
+  portBattleAvail    String // Simplified from String[]
+  typicalSchedule    String
+  discordActivity    String
+  voiceChatComfort   String
+  previousRejection  String?
+  referredBy         String?
+  additionalInfo     String?
+
+  // Discord integration
+  discordChannelId String?
+  applicationEmbed String? // JSON as string
+
+  // Timestamps
+  submittedAt DateTime @default(now())
+  reviewedAt  DateTime?
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vouches ApplicationVouch[]
+
+  @@map("applications")
+}
+
+// Application vouches
+model ApplicationVouch {
+  id            String   @id @default(cuid())
+  applicationId String
+  reviewerId    String
+  isPositive    Boolean
+  comment       String?
+  createdAt     DateTime @default(now())
+
+  // Relationships
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  reviewer    User        @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@unique([applicationId, reviewerId])
+  @@map("application_vouches")
+}
+
+// Application cooldowns
+model ApplicationCooldown {
+  id             String    @id @default(cuid())
+  userId         String    @unique
+  cooldownUntil  DateTime
+  reason         String
+  overriddenBy   String?
+  overriddenAt   DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@map("application_cooldowns")
+}
+
+// Bug reports - simplified for SQLite
+model BugReport {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  severity    String   @default("MEDIUM") // BugSeverity as string
+  status      String   @default("OPEN")   // BugStatus as string
+  reporterId  String
+  assigneeId  String?
+
+  // Additional info (simplified)
+  stepsToReproduce String?
+  expectedBehavior String?
+  actualBehavior   String?
+  environment      String?
+  attachments      String? // File paths as JSON string
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  reporter User  @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@map("bug_reports")
+}
+
+// Gallery items - simplified for SQLite
+model GalleryItem {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  filePath    String
+  fileName    String
+  fileSize    Int?
+  mimeType    String?
+  dimensions  String?  // JSON as string instead of Json type
+  tags        String?  // Comma-separated instead of String[]
+  upvotes     Int      @default(0)
+  downvotes   Int      @default(0)
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("gallery_items")
+}

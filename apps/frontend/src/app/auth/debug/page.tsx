@@ -1,6 +1,7 @@
 'use client';
 
-import { useSession, getProviders } from 'next-auth/react';
+import { useSession } from '@/hooks/useSession';
+import { getProviders } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 
 export default function AuthDebugPage() {

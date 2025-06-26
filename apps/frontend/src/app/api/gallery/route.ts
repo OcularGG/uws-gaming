@@ -1,149 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Helper function to create gallery items with default enhanced fields
-const createGalleryItem = (item: Partial<GalleryItem>): GalleryItem => ({
-  upvotes: Math.floor(Math.random() * 20),
-  downvotes: Math.floor(Math.random() * 3),
-  viewCount: Math.floor(Math.random() * 500) + 50,
-  tags: [],
-  ...item,
-} as GalleryItem);
-
-// Interfaces
-export interface GalleryItem {
-  id: string;
-  type: 'image' | 'video';
-  url: string;
-  thumbnail?: string;
-  title: string;
-  description: string;
-  uploader: string;
-  uploaderId: string;
-  createdAt: string;
-  // New fields for enhanced features
-  upvotes: number;
-  downvotes: number;
-  viewCount: number;
-  tags: string[];
-  fileSize?: number;
-  dimensions?: {
-    width: number;
-    height: number;
-  };
-  originalFileName?: string;
-  mimeType?: string;
-}
-
-export interface GalleryComment {
-  id: string;
-  galleryItemId: string;
-  userId: string;
-  userName: string;
-  content: string;
-  createdAt: string;
-  updatedAt?: string;
-}
-
-export interface GalleryVote {
-  id: string;
-  galleryItemId: string;
-  userId: string;
-  voteType: 'upvote' | 'downvote';
-  createdAt: string;
-}
-
-export interface GalleryFavorite {
-  id: string;
-  galleryItemId: string;
-  userId: string;
-  createdAt: string;
-}
-
-export interface SearchHistory {
-  id: string;
-  userId: string;
-  searchTerm: string;
-  createdAt: string;
-}
-
-// In-memory storage for development (replace with database in production)
-const galleryItems: GalleryItem[] = [
-  createGalleryItem({
-    id: '1',
-    type: 'image',
-    url: 'https://www.directart.co.uk/mall/images/800s/dhm1519.jpg',
-    thumbnail: 'https://www.directart.co.uk/mall/images/800s/dhm1519.jpg',
-    title: 'The Battle of Trafalgar',
-    description: 'The decisive naval engagement that broke the combined French and Spanish fleets, securing British naval supremacy',
-    uploader: 'Admiral Nelson',
-    uploaderId: 'demo1',
-    createdAt: new Date('2024-06-20T10:30:00Z').toISOString(),
-    tags: ['naval-battle', 'trafalgar', 'nelson', 'historic'],
-    upvotes: 15,
-    downvotes: 2,
-    viewCount: 324,
-  }),
-  createGalleryItem({
-    id: '2',
-    type: 'image',
-    url: 'https://www.directart.co.uk/mall/images/800s/dhm6802pc.jpg',
-    thumbnail: 'https://www.directart.co.uk/mall/images/800s/dhm6802pc.jpg',
-    title: 'Ships of the Line in Formation',
-    description: 'Majestic warships maintaining battle formation, displaying the power and discipline of the Royal Navy',
-    uploader: 'Captain Blackwood',
-    uploaderId: 'demo2',
-    createdAt: new Date('2024-06-21T14:15:00Z').toISOString(),
-    tags: ['ships', 'formation', 'royal-navy', 'tactics'],
-    upvotes: 8,
-    downvotes: 1,
-    viewCount: 156,
-  }),
-  createGalleryItem({
-    id: '3',
-    type: 'image',
-    url: 'https://www.directart.co.uk/mall/images/800s/dhm1165.jpg',
-    thumbnail: 'https://www.directart.co.uk/mall/images/800s/dhm1165.jpg',
-    title: 'Naval Battle in Stormy Seas',
-    description: 'Ships engaging in fierce combat amidst turbulent waters, showcasing the courage of sailors in battle',
-    uploader: 'Captain Hardy',
-    uploaderId: 'demo3',
-    createdAt: new Date('2024-06-21T16:45:00Z').toISOString(),
-    tags: ['storm', 'battle', 'courage', 'naval-combat'],
-    upvotes: 12,
-    downvotes: 0,
-    viewCount: 289,
-  }),
-  createGalleryItem({
-    id: '4',
-    type: 'image',
-    url: 'https://www.directart.co.uk/mall/images/800s/dhm0150.jpg',
-    thumbnail: 'https://www.directart.co.uk/mall/images/800s/dhm0150.jpg',
-    title: 'Victory at Sea',
-    description: 'A triumphant moment as British ships claim victory over enemy vessels in the age of wooden walls',
-    uploader: 'Admiral Collingwood',
-    uploaderId: 'demo4',
-    createdAt: new Date('2024-06-22T09:20:00Z').toISOString(),
-    tags: ['victory', 'triumph', 'british-navy'],
-  }),
-  createGalleryItem({
-    id: '5',
-    type: 'image',
-    url: 'https://www.directart.co.uk/mall/images/800s/dhm0515.jpg',
-    thumbnail: 'https://www.directart.co.uk/mall/images/800s/dhm0515.jpg',
-    title: 'Fleet Engagement',
-    description: 'Multiple ships of the line engaging in a grand naval battle, with cannon smoke filling the horizon',
-    uploader: 'Captain Troubridge',
-    uploaderId: 'demo5',
-    createdAt: new Date('2024-06-22T11:30:00Z').toISOString(),
-    tags: ['fleet', 'engagement', 'cannons', 'smoke'],
-  })
-];
-
-// In-memory storage for development
-const comments: GalleryComment[] = [];
-const votes: GalleryVote[] = [];
-const favorites: GalleryFavorite[] = [];
-const searchHistoryItems: SearchHistory[] = [];
+import {
+  galleryItems,
+  comments,
+  votes,
+  favorites,
+  searchHistoryItems,
+  createGalleryItem,
+  type GalleryItem,
+  type GalleryComment,
+  type GalleryVote,
+  type GalleryFavorite,
+  type SearchHistory
+} from './data';
 
 export async function GET(request: NextRequest) {
   try {
@@ -447,6 +315,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, searchHistory: newSearchHistory });
     }
 
+    if (feature === 'report') {
+      const { type, itemId, galleryItemId, reporterId, reporterName, reason } = await request.json();
+
+      if (!type || !itemId || !reporterId || !reporterName || !reason) {
+        return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      }
+
+      // In a real app, this would save to a reports database table
+      console.log('Content reported:', {
+        type, // 'gallery' or 'comment'
+        itemId,
+        galleryItemId,
+        reporterId,
+        reporterName,
+        reason,
+        reportedAt: new Date().toISOString()
+      });
+
+      // For now, just log the report - in production this would:
+      // 1. Save to database
+      // 2. Send notification to moderators
+      // 3. Maybe auto-hide content based on report count/type
+
+      return NextResponse.json({ success: true, message: 'Report submitted successfully' });
+    }
+
     // Regular gallery item upload
     const { type, url, title, description, tags, uploaderName, uploaderId } = await request.json();
 
@@ -560,5 +454,5 @@ function generateVideoThumbnail(url: string): string {
   }
 
   // Default video placeholder
-  return '/api/placeholder/video-thumbnail';
+  return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjMmEyYTJhIi8+Cjxwb2x5Z29uIHBvaW50cz0iMTIwLDcwIDEyMCwxMzAgMTgwLDEwMCIgZmlsbD0iIzRkNGQ0ZCIvPgo8L3N2Zz4=';
 }
