@@ -73,7 +73,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
-    
+
     if (!Array.isArray(data)) {
       return NextResponse.json(
         { error: 'Expected array of feature cards' },

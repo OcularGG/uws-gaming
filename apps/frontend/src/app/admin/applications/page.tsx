@@ -23,7 +23,6 @@ interface Application {
   currentNation: string;
   timeZone: string;
   hoursInNavalAction: number;
-  steamConnected: boolean;
   currentRank: string;
   previousCommands?: string;
   preferredRole: string;
@@ -452,7 +451,6 @@ function ApplicationDetailsModal({ application, onClose }: { application: Applic
               <h3 className="text-lg font-semibold text-white mb-3">Naval Experience</h3>
               <div className="space-y-2 text-sm">
                 <div><span className="text-slate-400">Hours in Naval Action:</span> <span className="text-white">{application.hoursInNavalAction}</span></div>
-                <div><span className="text-slate-400">Steam Connected:</span> <span className="text-white">{application.steamConnected ? 'Yes' : 'No'}</span></div>
                 <div><span className="text-slate-400">Current Rank:</span> <span className="text-white">{application.currentRank}</span></div>
                 <div><span className="text-slate-400">Preferred Role:</span> <span className="text-white">{application.preferredRole}</span></div>
                 <div><span className="text-slate-400">Port Battle Commander:</span> <span className="text-white">{application.isPortBattleCommander ? 'Yes' : 'No'}</span></div>

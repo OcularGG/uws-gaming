@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Cinzel, Crimson_Text } from "next/font/google";
+import { Inter, JetBrains_Mono, Cinzel, Crimson_Text, Cedarville_Cursive } from "next/font/google";
 import "./globals.css";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
 import { Providers } from "@/components/Providers";
+import ClientLayout from "@/components/ClientLayout";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -29,13 +28,19 @@ const crimsonText = Crimson_Text({
   style: ["normal", "italic"],
 });
 
+const cedarvilleCursive = Cedarville_Cursive({
+  variable: "--font-cedarville-cursive",
+  subsets: ["latin"],
+  weight: ["400"],
+});
+
 export const metadata: Metadata = {
   title: "Kraken - Naval Gaming Empire",
   description: "Join the legendary fleet. Cloud-native gaming platform with Age of Sail aesthetics and modern brutalist design.",
   icons: {
-    icon: 'https://i.imgur.com/VwfpogC.png',
-    shortcut: 'https://i.imgur.com/VwfpogC.png',
-    apple: 'https://i.imgur.com/VwfpogC.png',
+    icon: '/uws-logo.png',
+    shortcut: '/uws-logo.png',
+    apple: '/uws-logo.png',
   },
 };
 
@@ -65,14 +70,12 @@ export default function RootLayout({
         )}
       </head>
       <body
-        className={`${inter.variable} ${jetBrainsMono.variable} ${cinzel.variable} ${crimsonText.variable} antialiased`}
+        className={`${inter.variable} ${jetBrainsMono.variable} ${cinzel.variable} ${crimsonText.variable} ${cedarvilleCursive.variable} antialiased`}
       >
         <Providers>
-          <Navigation />
-          <main className="min-h-screen">
+          <ClientLayout>
             {children}
-          </main>
-          <Footer />
+          </ClientLayout>
           <CookieConsent />
         </Providers>
       </body>

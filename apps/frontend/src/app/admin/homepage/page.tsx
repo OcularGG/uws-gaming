@@ -10,13 +10,13 @@ interface CommandRole {
 
 export default function HomepageManagement() {
   const { settings, featureCards, admiraltyLetter, welcomeContent, refreshAll } = useSiteContext();
-  
+
   // Local state for editing
   const [editingWelcome, setEditingWelcome] = useState({
     title: '',
     content: ''
   });
-  
+
   const [editingFeatures, setEditingFeatures] = useState<Array<{
     id: string;
     title: string;
@@ -24,16 +24,16 @@ export default function HomepageManagement() {
     icon: string;
     order: number;
   }>>([]);
-  
+
   const [editingLetter, setEditingLetter] = useState({
     title: '',
     content: '',
     author: '',
     role: ''
   });
-  
+
   const [editingCommand, setEditingCommand] = useState<CommandRole[]>([]);
-  
+
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -125,7 +125,7 @@ export default function HomepageManagement() {
 
       // Refresh context to update the site
       await refreshAll();
-      
+
       setMessage('All homepage content saved successfully!');
     } catch (error) {
       console.error('Error saving homepage content:', error);
@@ -151,7 +151,7 @@ export default function HomepageManagement() {
   };
 
   const updateFeature = (id: string, field: string, value: string | number) => {
-    setEditingFeatures(editingFeatures.map(f => 
+    setEditingFeatures(editingFeatures.map(f =>
       f.id === id ? { ...f, [field]: value } : f
     ));
   };
@@ -165,7 +165,7 @@ export default function HomepageManagement() {
   };
 
   const updateCommandRole = (index: number, field: string, value: string) => {
-    setEditingCommand(editingCommand.map((role, i) => 
+    setEditingCommand(editingCommand.map((role, i) =>
       i === index ? { ...role, [field]: value } : role
     ));
   };

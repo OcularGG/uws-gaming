@@ -31,11 +31,6 @@ const getNavigationItems = (session: any, isAdmin: boolean) => {
     baseItems.push({ name: 'Admin', href: '/admin' });
   }
 
-  // Add Dev Login link in development mode
-  if (process.env.NODE_ENV === 'development') {
-    baseItems.push({ name: 'Dev Login', href: '/dev-login' });
-  }
-
   return baseItems;
 };
 
@@ -43,8 +38,11 @@ export default function Navigation() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
 
-  // Admin user ID
-  const isAdmin = session?.user?.discordId === '1207434980855259206';
+  // Check if we're on the homepage
+  const isHomepage = pathname === '/';
+
+  // Check if user is admin based on role
+  const isAdmin = session?.user?.role === 'admin';
 
   // Get navigation items based on user state
   const navigationItems = getNavigationItems(session, isAdmin);
@@ -54,21 +52,11 @@ export default function Navigation() {
 
   const handleAuth = async () => {
     if (session) {
-      // Check if it's a mock session in development
-      if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
-        const mockSession = localStorage.getItem('mock-session')
-        if (mockSession) {
-          localStorage.removeItem('mock-session')
-          window.location.reload()
-          return
-        }
-      }
-
-      // For production, redirect to logout endpoint
+      // Redirect to logout endpoint
       window.location.href = '/api/auth/signout';
     } else {
-      // For production, redirect to login endpoint
-      window.location.href = '/api/auth/signin/discord';
+      // Redirect to login page
+      window.location.href = '/auth/login';
     }
   };
 
@@ -93,8 +81,12 @@ export default function Navigation() {
                           href={item.href}
                           className={`nav-item px-4 py-2 text-sm font-medium ${
                             isActive ? 'active' : ''
-                          }`}
-                          style={{fontFamily: 'Cinzel, serif', color: 'var(--navy-dark)'}}
+                          } ${isHomepage ? 'hero-title-gradient' : ''}`}
+                          style={{
+                            fontFamily: 'Cinzel, serif', 
+                            color: isHomepage ? 'transparent' : 'var(--navy-dark)',
+                            textShadow: isHomepage ? 'none' : 'none'
+                          }}
                         >
                           {item.name} ↓
                         </Link>
@@ -121,8 +113,12 @@ export default function Navigation() {
                       href={item.href}
                       className={`nav-item px-4 py-2 text-sm font-medium ${
                         isActive ? 'active' : ''
-                      }`}
-                      style={{fontFamily: 'Cinzel, serif', color: 'var(--navy-dark)'}}
+                      } ${isHomepage ? 'hero-title-gradient' : ''}`}
+                      style={{
+                        fontFamily: 'Cinzel, serif', 
+                        color: isHomepage ? 'transparent' : 'var(--navy-dark)',
+                        textShadow: isHomepage ? 'none' : 'none'
+                      }}
                     >
                       {item.name}
                     </Link>
@@ -136,7 +132,10 @@ export default function Navigation() {
               <button
                 type="button"
                 className="nav-item p-2"
-                style={{color: 'var(--navy-dark)'}}
+                style={{
+                  color: isHomepage ? 'white' : 'var(--navy-dark)',
+                  textShadow: isHomepage ? '1px 1px 2px rgba(0,0,0,0.8)' : 'none'
+                }}
                 aria-label="Open menu"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >

@@ -86,10 +86,10 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ portBattles });
       } catch (dbError) {
         console.warn('Database unavailable for port battles, using fallback data:', dbError);
-        
+
         // Return mock data when database is unavailable
-        return NextResponse.json({ 
-          portBattles: mockPortBattles, 
+        return NextResponse.json({
+          portBattles: mockPortBattles,
           isMockData: true,
           message: 'Using fallback data - database temporarily unavailable'
         });
@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
           return NextResponse.json({ events });
         } catch (dbError) {
           console.error('Database error fetching calendar:', dbError);
-          return NextResponse.json({ 
+          return NextResponse.json({
             events: mockPortBattles.map(pb => ({
               id: pb.id,
               title: pb.title,
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
     }
   } catch (error) {
     console.error('Port battles API error:', error);
-    return NextResponse.json({ 
+    return NextResponse.json({
       error: 'Server error',
       portBattles: action === 'list' ? mockPortBattles : undefined,
       isMockData: true
@@ -193,8 +193,8 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ portBattle });
         } catch (dbError) {
           console.error('Database error creating port battle:', dbError);
-          return NextResponse.json({ 
-            error: 'Database temporarily unavailable - port battle creation disabled' 
+          return NextResponse.json({
+            error: 'Database temporarily unavailable - port battle creation disabled'
           }, { status: 500 });
         }
       }

@@ -16,11 +16,10 @@ export interface UnifiedSession {
 }
 
 /**
- * Get session from either Auth.js or mock session (in development)
- * This allows API routes to work with both real and dev login sessions
+ * Get session from Auth.js
  */
 export async function getUnifiedSession(request: NextRequest): Promise<UnifiedSession | null> {
-  // First try to get real Auth.js session
+  // Get real Auth.js session
   const realSession = await auth();
   if (realSession?.user?.id) {
     return {
@@ -36,33 +35,6 @@ export async function getUnifiedSession(request: NextRequest): Promise<UnifiedSe
         isAdmin: (realSession.user as any).isAdmin,
       }
     };
-  }
-
-  // In development, check for mock session in headers
-  if (process.env.NODE_ENV === 'development') {
-    const mockSessionHeader = request.headers.get('x-mock-session');
-    if (mockSessionHeader) {
-      try {
-        const mockSession = JSON.parse(mockSessionHeader);
-        if (mockSession.user) {
-          return {
-            user: {
-              id: mockSession.user.id,
-              name: mockSession.user.name,
-              email: mockSession.user.email,
-              image: mockSession.user.image,
-              discordId: mockSession.user.discordId,
-              username: mockSession.user.username,
-              discriminator: mockSession.user.discriminator,
-              isMember: mockSession.user.isMember,
-              isAdmin: mockSession.user.isAdmin,
-            }
-          };
-        }
-      } catch (error) {
-        console.error('Error parsing mock session:', error);
-      }
-    }
   }
 
   return null;

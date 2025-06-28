@@ -92,7 +92,7 @@ export default function PortBattlesPage() {
     try {
       setLoading(true)
       setError(null)
-      
+
       // Check if we have session before making the request
       if (!session) {
         setError('Authentication required')
@@ -166,8 +166,8 @@ export default function PortBattlesPage() {
             <p className="text-navy-dark/70 mb-6">
               Please authenticate to access the Port Battle Command Center
             </p>
-            <Link 
-              href="/api/auth/signin" 
+            <Link
+              href="/api/auth/signin"
               className="bg-navy-dark text-sail-white px-6 py-3 rounded border-2 border-navy-dark hover:bg-navy font-bold transition-all"
               style={{fontFamily: 'Cinzel, serif'}}
             >
@@ -215,8 +215,8 @@ export default function PortBattlesPage() {
               Retry Communication
             </button>
             <div className="mt-4">
-              <Link 
-                href="/admin" 
+              <Link
+                href="/admin"
                 className="text-navy-dark hover:text-navy underline"
                 style={{fontFamily: 'Cinzel, serif'}}
               >
@@ -246,22 +246,22 @@ export default function PortBattlesPage() {
         <div className="flex justify-center mb-8">
           <div className="neo-brutal-box bg-sail-white p-4">
             <div className="flex gap-4 flex-wrap justify-center">
-              <Link 
-                href="/port-battles/calendar" 
+              <Link
+                href="/port-battles/calendar"
                 className="bg-green-600 text-white px-6 py-2 rounded border-2 border-green-700 hover:bg-green-700 font-bold transition-all"
                 style={{fontFamily: 'Cinzel, serif'}}
               >
                 📅 Battle Calendar
               </Link>
-              <Link 
-                href="/port-battles/create" 
+              <Link
+                href="/port-battles/create"
                 className="bg-blue-600 text-white px-6 py-2 rounded border-2 border-blue-700 hover:bg-blue-700 font-bold transition-all"
                 style={{fontFamily: 'Cinzel, serif'}}
               >
                 ⚔️ Plan New Battle
               </Link>
-              <Link 
-                href="/admin" 
+              <Link
+                href="/admin"
                 className="bg-navy-dark text-sail-white px-6 py-2 rounded border-2 border-navy-dark hover:bg-navy font-bold transition-all"
                 style={{fontFamily: 'Cinzel, serif'}}
               >
@@ -280,8 +280,8 @@ export default function PortBattlesPage() {
             <p className="text-navy-dark/70 mb-6">
               The seas are calm, Admiral. No battles currently scheduled.
             </p>
-            <Link 
-              href="/port-battles/create" 
+            <Link
+              href="/port-battles/create"
               className="bg-blue-600 text-white px-6 py-3 rounded border-2 border-blue-700 hover:bg-blue-700 font-bold transition-all"
               style={{fontFamily: 'Cinzel, serif'}}
             >
@@ -301,7 +301,7 @@ export default function PortBattlesPage() {
                     <span className="font-medium">Fleet Admiral:</span> {portBattle.creator.username}
                   </p>
                   <p className="text-sm text-navy-dark/60">
-                    {portBattle.isDeepWater ? '🌊 Deep Water' : '🏝️ Shallow Water'} • 
+                    {portBattle.isDeepWater ? '🌊 Deep Water' : '🏝️ Shallow Water'} •
                     <span className="font-medium"> BR Limit: {portBattle.brLimit}</span>
                   </p>
                 </div>

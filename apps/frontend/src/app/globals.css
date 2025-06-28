@@ -2,50 +2,101 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
 
 :root {
-  /* Age of Sail Naval Warfare Color Scheme - Neo Brutalist */
-  --background: #f4f0e8; /* Aged parchment/sandstone */
-  --foreground: #1a1a1a; /* Deep black */
+  /* New Color Palette - Warm Earth Tones */
+  
+  /* Accent colors - Bright colors for highlights and important details */
+  --accent-primary: #9c642c; /* Primary accent */
+  --accent-light: #e6e3dd; /* Light accent */
+  --accent-warm: #b2905f; /* Warm accent */
+  --accent-mid: #ab7d4f; /* Mid-tone accent */
+  --accent-tan: #ba9773; /* Tan accent */
+  --accent-beige: #c8b096; /* Beige accent */
+  --accent-cream: #d7caba; /* Cream accent */
+  
+  /* Muted colors - For notifications, cards, and blocks */
+  --muted-primary: #8d847c; /* Primary muted */
+  --muted-dark: #201810; /* Dark muted */
+  --muted-brown: #5b5445; /* Brown muted */
+  --muted-charcoal: #564c44; /* Charcoal muted */
+  
+  /* Light colors - For backgrounds and substrates */
+  --light-white: #ffffff; /* Pure white */
+  --light-cream: #f6f1ec; /* Light cream */
+  --light-beige: #ede3d9; /* Light beige */
+  --light-tan: #e4d5c5; /* Light tan */
+  --light-warm: #dbc7b2; /* Light warm */
+  --light-gold: #d2b99f; /* Light gold */
+  --light-bronze: #c9aa8c; /* Light bronze */
+  --light-copper: #c09c79; /* Light copper */
+  --light-rust: #b78e66; /* Light rust */
+  --light-earth: #ae8052; /* Light earth */
+  --light-sienna: #a5723f; /* Light sienna */
+  
+  /* Dark colors - For text and headings */
+  --dark-black: #000000; /* Pure black */
+  --dark-charcoal: #0e0904; /* Dark charcoal */
+  --dark-brown: #1c1208; /* Dark brown */
+  --dark-umber: #2b1b0c; /* Dark umber */
+  --dark-earth: #392410; /* Dark earth */
+  --dark-bronze: #472d14; /* Dark bronze */
+  --dark-copper: #553718; /* Dark copper */
+  --dark-rust: #63401c; /* Dark rust */
+  --dark-sienna: #714920; /* Dark sienna */
+  --dark-gold: #805224; /* Dark gold */
+  --dark-tan: #8e5b28; /* Dark tan */
+  
+  /* Invert colors - Contrast colors */
+  --invert-blue: #639bd3; /* Blue invert */
+  --invert-dark: #191c22; /* Dark invert */
+  --invert-navy: #4d6fa0; /* Navy invert */
+  --invert-sky: #88afd6; /* Sky invert */
+  --invert-light: #b2cce1; /* Light invert */
+  --invert-gray: #6b7381; /* Gray invert */
+  --invert-steel: #727b83; /* Steel invert */
+  --invert-silver: #dfe7ef; /* Silver invert */
+  --invert-mist: #a4abba; /* Mist invert */
+  --invert-fog: #a9b3bb; /* Fog invert */
 
-  /* Naval inspired colors */
-  --navy-dark: #0f1419; /* Deep ocean */
-  --navy-blue: #1e3a5f; /* Naval uniform blue */
-  --navy-light: #2c5aa0; /* Lighter naval blue */
-  --brass: #b8860b; /* Ship brass fittings */
-  --brass-bright: #daa520; /* Polished brass */
-  --bronze: #cd7f32; /* Ship cannons */
-  --rope: #8b7355; /* Ship rope/cordage */
-  --sail-white: #faf8f3; /* Ship sails */
-  --wood-dark: #3e2723; /* Ship deck wood */
-  --wood-light: #5d4037; /* Ship hull wood */
-  --cannon-smoke: #4a4a4a; /* Gunpowder smoke */
-  --blood-red: #8b0000; /* Battle flag red */
-  --ocean-foam: #87ceeb; /* Ocean waves */
-
-  /* Sandstone variants */
-  --sandstone-100: #faf8f3;
-  --sandstone-200: #f5f1e8;
-  --sandstone-300: #f0ead6;
-  --sandstone-400: #e8ddc7;
-  --sandstone-500: #f4f0e8;
-  --sandstone-600: #d4c4a8;
-  --sandstone-700: #b8a082;
-  --sandstone-800: #9c7c5c;
-
-  /* Dark gold variants */
-  --dark-gold: #b8860b;
-  --dark-gold-hover: #daa520;
-  --dark-gold-light: #f4d03f;
-  --dark-gold-dark: #856404;
-
+  /* Semantic color mappings */
+  --background: #f6f1ec; /* Light cream background */
+  --foreground: #201810; /* Dark muted text */
+  
+  /* Primary brand colors */
+  --primary: #9c642c; /* Primary accent */
+  --primary-hover: #8e5b28; /* Dark tan hover */
+  --primary-light: #b2905f; /* Warm accent light */
+  --primary-dark: #714920; /* Dark sienna */
+  
+  /* Secondary colors */
+  --secondary: #8d847c; /* Muted primary */
+  --secondary-hover: #564c44; /* Charcoal muted */
+  --secondary-light: #e6e3dd; /* Light accent */
+  
   /* Text colors */
-  --text-primary: #0f1419;
-  --text-secondary: #3e2723;
-  --text-light: #faf8f3;
-  --text-brass: #b8860b;
-
-  /* Accent colors */
-  --accent-black: #1a1a1a;
-  --accent-white: #ffffff;
+  --text-primary: #201810; /* Dark muted */
+  --text-secondary: #564c44; /* Charcoal muted */
+  --text-light: #ffffff; /* White */
+  --text-accent: #9c642c; /* Primary accent */
+  
+  /* Background variants */
+  --bg-primary: #f6f1ec; /* Light cream */
+  --bg-secondary: #ede3d9; /* Light beige */
+  --bg-dark: #201810; /* Dark muted */
+  --bg-card: #ffffff; /* White */
+  
+  /* Border colors */
+  --border-primary: #8d847c; /* Muted primary */
+  --border-light: #e6e3dd; /* Light accent */
+  --border-dark: #564c44; /* Charcoal muted */
+  
+  /* Legacy mappings for backward compatibility */
+  --navy-dark: #201810; /* Dark muted */
+  --navy-blue: #564c44; /* Charcoal muted */
+  --navy-light: #8d847c; /* Muted primary */
+  --brass: #9c642c; /* Primary accent */
+  --brass-bright: #b2905f; /* Warm accent */
+  --sail-white: #ffffff; /* White */
+  --sandstone-light: #f6f1ec; /* Light cream */
 }
 
 body {
@@ -64,14 +115,15 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Neo Brutalist elements */
 .neo-brutal-box {
-  border: 4px solid var(--accent-black);
-  box-shadow: 8px 8px 0px var(--accent-black);
-  background: var(--sail-white);
+  border: 4px solid var(--dark-black);
+  box-shadow: 8px 8px 0px var(--dark-black);
+  background: var(--background);
+  color: var(--text-primary);
 }
 
 .neo-brutal-button {
-  border: 3px solid var(--accent-black);
-  box-shadow: 4px 4px 0px var(--accent-black);
+  border: 3px solid var(--dark-black);
+  box-shadow: 4px 4px 0px var(--dark-black);
   font-family: 'Cinzel', serif;
   font-weight: 600;
   text-transform: uppercase;
@@ -82,45 +134,94 @@ h1, h2, h3, h4, h5, h6 {
 
 .neo-brutal-button:hover {
   transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0px var(--accent-black);
+  box-shadow: 2px 2px 0px var(--dark-black);
 }
 
 .neo-brutal-button:active {
   transform: translate(4px, 4px);
-  box-shadow: 0px 0px 0px var(--accent-black);
+  box-shadow: 0px 0px 0px var(--dark-black);
 }
 
 /* Custom utility classes for the new color scheme */
+.bg-primary {
+  background-color: var(--primary);
+}
+
+.bg-primary-light {
+  background-color: var(--primary-light);
+}
+
+.bg-primary-hover {
+  background-color: var(--primary-hover);
+}
+
+.bg-secondary {
+  background-color: var(--secondary);
+}
+
+.bg-secondary-light {
+  background-color: var(--secondary-light);
+}
+
+.bg-light-cream {
+  background-color: var(--light-cream);
+}
+
+.bg-light-beige {
+  background-color: var(--light-beige);
+}
+
+.text-primary-accent {
+  color: var(--primary);
+}
+
+.text-secondary-muted {
+  color: var(--secondary);
+}
+
+.text-warm {
+  color: var(--accent-warm);
+}
+
+.border-primary {
+  border-color: var(--primary);
+}
+
+.border-secondary {
+  border-color: var(--secondary);
+}
+
+/* Legacy utility classes (updated to use new colors) */
 .bg-sandstone {
-  background-color: var(--sandstone-500);
+  background-color: var(--light-cream);
 }
 
 .bg-sandstone-light {
-  background-color: var(--sandstone-100);
+  background-color: var(--light-cream);
 }
 
 .bg-sandstone-dark {
-  background-color: var(--sandstone-800);
+  background-color: var(--accent-warm);
 }
 
 .bg-dark-gold {
-  background-color: var(--dark-gold);
+  background-color: var(--primary);
 }
 
 .bg-dark-gold-hover {
-  background-color: var(--dark-gold-hover);
+  background-color: var(--primary-hover);
 }
 
 .text-dark-gold {
-  color: var(--dark-gold);
+  color: var(--primary);
 }
 
 .text-sandstone {
-  color: var(--sandstone-600);
+  color: var(--accent-warm);
 }
 
 .border-dark-gold {
-  border-color: var(--dark-gold);
+  border-color: var(--primary);
 }
 
 /* YouTube video container - Full width coverage */
@@ -142,10 +243,10 @@ h1, h2, h3, h4, h5, h6 {
   height: 100%;
   background: linear-gradient(
     135deg,
-    rgba(15, 20, 25, 0.6) 0%,
-    rgba(184, 134, 11, 0.15) 30%,
-    rgba(62, 39, 35, 0.3) 70%,
-    rgba(15, 20, 25, 0.7) 100%
+    rgba(32, 24, 16, 0.6) 0%,
+    rgba(156, 100, 44, 0.15) 30%,
+    rgba(139, 132, 124, 0.3) 70%,
+    rgba(32, 24, 16, 0.7) 100%
   );
   z-index: 1;
 }
@@ -449,6 +550,10 @@ h1, h2, h3, h4, h5, h6 {
 
 .bg-brass-bright {
   background-color: var(--brass-bright);
+}
+
+.bg-sail-white {
+  background-color: var(--sail-white);
 }
 
 .border-brass {
@@ -823,4 +928,83 @@ a:focus-visible {
   50% {
     background-position: 100% 50%;
   }
+}
+
+/* Hero Title Gradient Effect - Warm Earth Tones Animated */
+.hero-title-gradient {
+  background: linear-gradient(
+    90deg,
+    #201810 0%,
+    #714920 20%,
+    #9c642c 40%,
+    #b2905f 60%,
+    #805224 80%,
+    #201810 100%
+  );
+  background-size: 300% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: hero-gradient-flow 8s ease-in-out infinite alternate;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  text-shadow: none; /* Remove text shadow for clean gradient effect */
+}
+
+@keyframes hero-gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Additional Gradient Text Effects */
+.captain-gradient,
+.typewriter-gradient,
+.uws-gradient {
+  background: linear-gradient(
+    90deg,
+    #201810 0%,
+    #714920 20%,
+    #9c642c 40%,
+    #b2905f 60%,
+    #805224 80%,
+    #201810 100%
+  );
+  background-size: 300% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: hero-gradient-flow 8s ease-in-out infinite alternate;
+  font-weight: 700;
+}
+
+/* Fallback for browsers that don't support background-clip: text */
+@supports not (background-clip: text) or not (-webkit-background-clip: text) {
+  .captain-gradient,
+  .typewriter-gradient,
+  .uws-gradient {
+    background: none;
+    -webkit-text-fill-color: initial;
+    color: #9c642c; /* Fallback to primary accent */
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+  }
+}
+
+/* Navigation gradient hover fix */
+.nav-item.hero-title-gradient:hover {
+  background: transparent !important;
+  transform: translateY(-2px);
+  border-bottom: 2px solid var(--primary);
+  color: transparent !important; /* Ensure gradient shows through */
+}
+
+.nav-item.hero-title-gradient.active {
+  background: transparent !important;
+  border-bottom: 2px solid var(--primary);
+  color: transparent !important; /* Ensure gradient shows through */
 }

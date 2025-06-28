@@ -649,7 +649,7 @@ export default function CombinedAdminPanel() {
       // Save to localStorage for now (later implement API call)
       localStorage.setItem('command-roles', JSON.stringify(commandRoles))
       localStorage.setItem('command-sections', JSON.stringify(commandSections))
-      
+
       alert('Command structure saved successfully! Changes will be reflected on the homepage.');
 
       // TODO: Later implement API call to save command structure
@@ -659,9 +659,9 @@ export default function CombinedAdminPanel() {
       //     ...getAuthHeaders(),
       //     'Content-Type': 'application/json',
       //   },
-      //   body: JSON.stringify({ 
+      //   body: JSON.stringify({
       //     roles: commandRoles,
-      //     sections: commandSections 
+      //     sections: commandSections
       //   }),
       // })
 
@@ -803,7 +803,7 @@ export default function CombinedAdminPanel() {
                   Fleet Administration
                 </h2>
               </div>
-              
+
               {/* Tab Categories */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
                 {/* Personnel Management */}
@@ -931,7 +931,7 @@ export default function CombinedAdminPanel() {
               {activeTab === 'command' && '⭐ Command Structure'}
             </h2>
           </div>
-          
+
           <div className="p-6">
           {/* Users Management */}
           {activeTab === 'users' && (
@@ -1031,7 +1031,7 @@ export default function CombinedAdminPanel() {
                     </tbody>
                   </table>
                 </div>
-                
+
                 {users.length === 0 && (
                   <div className="text-center py-12 text-gray-500">
                     <div className="text-4xl mb-4">🏴‍☠️</div>
@@ -1332,7 +1332,7 @@ export default function CombinedAdminPanel() {
                   >
                     + Add Section
                   </button>
-                  
+
                   <button
                     onClick={() => {
                       const defaultSection = commandSections.find(s => s.id === 'defense-council') || commandSections[0];
@@ -1393,7 +1393,7 @@ export default function CombinedAdminPanel() {
                             ({commandRoles.filter(r => r.sectionId === section.id).length} officers)
                           </span>
                         </div>
-                        
+
                         <div className="flex items-center gap-2">
                           {/* Move Section Up/Down */}
                           <button
@@ -1401,7 +1401,7 @@ export default function CombinedAdminPanel() {
                               const currentIndex = commandSections.findIndex(s => s.id === section.id);
                               if (currentIndex > 0) {
                                 const newSections = [...commandSections];
-                                [newSections[currentIndex], newSections[currentIndex - 1]] = 
+                                [newSections[currentIndex], newSections[currentIndex - 1]] =
                                 [newSections[currentIndex - 1], newSections[currentIndex]];
                                 newSections.forEach((s, i) => s.order = i + 1);
                                 setCommandSections(newSections);
@@ -1412,13 +1412,13 @@ export default function CombinedAdminPanel() {
                           >
                             ↑
                           </button>
-                          
+
                           <button
                             onClick={() => {
                               const currentIndex = commandSections.findIndex(s => s.id === section.id);
                               if (currentIndex < commandSections.length - 1) {
                                 const newSections = [...commandSections];
-                                [newSections[currentIndex], newSections[currentIndex + 1]] = 
+                                [newSections[currentIndex], newSections[currentIndex + 1]] =
                                 [newSections[currentIndex + 1], newSections[currentIndex]];
                                 newSections.forEach((s, i) => s.order = i + 1);
                                 setCommandSections(newSections);
@@ -1429,7 +1429,7 @@ export default function CombinedAdminPanel() {
                           >
                             ↓
                           </button>
-                          
+
                           {/* Delete Section */}
                           <button
                             onClick={() => {
@@ -1469,7 +1469,7 @@ export default function CombinedAdminPanel() {
                       onDrop={(e) => {
                         e.preventDefault();
                         e.currentTarget.classList.remove('bg-blue-100');
-                        
+
                         if (draggedRole) {
                           // Move role to this section
                           const newRoles = commandRoles.map(role =>
@@ -1520,7 +1520,7 @@ export default function CombinedAdminPanel() {
                                 <div className="absolute top-2 left-2 text-xs bg-navy-dark text-sail-white px-2 py-1 rounded">
                                   Drag to move
                                 </div>
-                                
+
                                 <div className="absolute top-2 right-2">
                                   <img
                                     src={`https://flagcdn.com/24x18/${role.flagCountry || 'us'}.png`}
@@ -1772,7 +1772,7 @@ export default function CombinedAdminPanel() {
           )}
           </div>
         </div>
-        
+
         {/* Admin Footer */}
         <div className="mt-8 text-center">
           <div className="neo-brutal-box bg-navy-dark p-6">

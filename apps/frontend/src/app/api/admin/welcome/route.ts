@@ -65,7 +65,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
-    
+
     // Basic validation
     if (!data.title || !data.content) {
       return NextResponse.json(

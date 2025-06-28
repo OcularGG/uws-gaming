@@ -60,7 +60,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
-    
+
     // Basic validation
     if (!data.siteName || !data.tagline || !data.description) {
       return NextResponse.json(

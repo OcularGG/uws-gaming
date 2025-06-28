@@ -2,15 +2,15 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-navy-dark py-12 border-t-4 footer-border-gradient">
+    <footer className="py-12 border-t-4 footer-border-gradient" style={{backgroundColor: '#4d6fa0'}}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="md:col-span-2">
-            <h3 className="text-brass font-bold text-lg mb-4" style={{fontFamily: 'Cinzel, serif'}}>
-              KRAKEN
+            <h3 className="font-bold text-lg mb-4 text-white" style={{fontFamily: 'Cinzel, serif'}}>
+              United We Stand
             </h3>
-            <p className="text-gray-200 mb-4" style={{fontFamily: 'Crimson Text, serif'}}>
+            <p className="text-gray-100 mb-4" style={{fontFamily: 'Crimson Text, serif'}}>
               His Majesty's Naval Service - Elite squadron commanding the Caribbean waters in Naval Action.
             </p>
             <div className="flex space-x-4">
@@ -18,7 +18,7 @@ export default function Footer() {
                 href="https://discord.gg/krakengaming"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="social-link-gradient transition-all duration-300"
+                className="text-white hover:text-gray-200 transition-all duration-300"
                 title="Join our Discord"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -29,7 +29,7 @@ export default function Footer() {
                 href="https://twitch.tv/krakengaming"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="social-link-gradient transition-all duration-300"
+                className="text-white hover:text-gray-200 transition-all duration-300"
                 title="Follow us on Twitch"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -40,7 +40,7 @@ export default function Footer() {
                 href="https://youtube.com/@krakengaming"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="social-link-gradient transition-all duration-300"
+                className="text-white hover:text-gray-200 transition-all duration-300"
                 title="Subscribe to our YouTube"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -52,14 +52,14 @@ export default function Footer() {
 
           {/* Support */}
           <div>
-            <h4 className="text-brass font-semibold mb-4" style={{fontFamily: 'Cinzel, serif'}}>
+            <h4 className="font-semibold mb-4 text-white" style={{fontFamily: 'Cinzel, serif'}}>
               Support
             </h4>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="/faq"
-                  className="text-gray-200 hover:text-brass transition-colors"
+                  className="text-gray-100 hover:text-white transition-colors"
                   style={{fontFamily: 'Crimson Text, serif'}}
                 >
                   FAQ
@@ -68,7 +68,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/bugs"
-                  className="text-gray-200 hover:text-brass transition-colors"
+                  className="text-gray-100 hover:text-white transition-colors"
                   style={{fontFamily: 'Crimson Text, serif'}}
                 >
                   Report Bugs
@@ -79,14 +79,14 @@ export default function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="text-brass font-semibold mb-4" style={{fontFamily: 'Cinzel, serif'}}>
+            <h4 className="font-semibold mb-4 text-white" style={{fontFamily: 'Cinzel, serif'}}>
               Legal
             </h4>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="/legal"
-                  className="text-gray-200 hover:text-brass transition-colors"
+                  className="text-gray-100 hover:text-white transition-colors"
                   style={{fontFamily: 'Crimson Text, serif'}}
                 >
                   Privacy Policy
@@ -96,12 +96,12 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-brass-dark pt-6 mt-8">
+        <div className="border-t border-white/30 pt-6 mt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-brass text-sm" style={{fontFamily: 'Cinzel, serif'}}>
-              © 2025 KRAKEN. All rights reserved.
+            <p className="text-white text-sm" style={{fontFamily: 'Cinzel, serif'}}>
+              © 2025 United We Stand. All rights reserved.
             </p>
-            <p className="text-gray-200 text-sm mt-2 md:mt-0" style={{fontFamily: 'Crimson Text, serif'}}>
+            <p className="text-gray-100 text-sm mt-2 md:mt-0" style={{fontFamily: 'Crimson Text, serif'}}>
               Rule the Caribbean waters with honor and strategy.
             </p>
           </div>

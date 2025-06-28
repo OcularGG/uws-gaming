@@ -12,20 +12,21 @@ interface AdmiraltyLetter {
 }
 
 const defaultLetter: AdmiraltyLetter = {
-  title: 'Letter from the Admiralty',
-  content: `Esteemed Captain,
+  title: 'Letter of Marque and Reprisal',
+  content: `George the Second, by the Grace of God, King of Great Britain, France and Ireland, Defender of the Faith, &c.
 
-The winds of change blow across the Caribbean, and the time has come for those of exceptional skill and unwavering loyalty to step forward. The Kraken Gaming naval command seeks captains of the highest caliber to join our prestigious fleet.
+To all who shall see these Presents, Greeting:
 
-Our operations span the vast expanse of the Caribbean, where strategic warfare and tactical brilliance determine the fate of nations. Under our banner, you will command some of the finest vessels ever to grace these waters, leading elite crews in battles that will be remembered for generations.
+Know Ye, that We, reposing especial Trust and Confidence in the Loyalty, Courage and good Conduct of the Officers and Crew of the United We Stand naval command, do by these Presents grant unto them full Power and Authority to arm and equip suitable Vessels of War, and therewith by Force of Arms to attack, subdue, and take all Ships and other Vessels belonging to the Crown of France, or to any of the Subjects of the French King.
 
-We offer not merely a position, but a brotherhood forged in the crucible of naval combat. Our captains are bound by honor, united in purpose, and relentless in their pursuit of maritime supremacy.
+We do hereby authorize and empower the said United We Stand to bring such Vessels, with their Tackle, Apparel, Furniture, and Lading, into any of Our Ports within Our Dominions; and We do further will and require all Our Officers, both Civil and Military, and all others Our loving Subjects whatsoever, to be aiding and assisting unto the said United We Stand in the Execution of these Our Letters.
 
-Should you possess the courage, skill, and dedication required to serve under the Kraken banner, we invite you to submit your application. Only those who demonstrate exceptional leadership and unwavering commitment to our cause will be considered.
+Given under Our Royal Seal at Our Palace of Westminster, this Twenty-eighth Day of June, in the Year of Our Lord One Thousand Seven Hundred and Twenty-five, and in the Eleventh Year of Our Reign.
 
-The sea calls, Captain. Will you answer?`,
-  author: 'The Admiralty',
-  role: 'Naval High Command'
+By His Majesty's Command,
+The Lords Commissioners of the Admiralty`,
+  author: 'By Royal Authority',
+  role: 'Letter of Marque issued to United We Stand'
 };
 
 async function ensureDataDir() {
@@ -65,7 +66,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
-    
+
     // Basic validation
     if (!data.title || !data.content) {
       return NextResponse.json(

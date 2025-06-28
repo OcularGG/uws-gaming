@@ -67,19 +67,37 @@ const PORT_BATTLE_AVAILABILITY = [
 
 export default function ApplicationPage() {
   const { data: session } = useSession();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [discordMembershipVerified, setDiscordMembershipVerified] = useState(false);
-  const [verifyingMembership, setVerifyingMembership] = useState(false);
+  const [currentStep, setCurrentStep] = useState(session ? 1 : 0); // Start with registration if not logged in
+  
+  // Password strength function
+  const getPasswordStrength = (password: string) => {
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (password.length >= 12) score++;
+    if (/[a-z]/.test(password)) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+    
+    if (score <= 2) return { strength: 'Weak', color: 'bg-red-500', width: '33%' };
+    if (score <= 4) return { strength: 'Medium', color: 'bg-yellow-500', width: '66%' };
+    return { strength: 'Strong', color: 'bg-green-500', width: '100%' };
+  };
   const [formData, setFormData] = useState({
+    // User Registration (new)
+    email: '',
+    confirmEmail: '',
+    captainName: '', // Changed from username to captainName
+    password: '',
+    confirmPassword: '',
+
     // Personal Particulars
-    captainName: '',
     preferredNickname: '',
     currentNation: '',
     timeZone: '',
 
     // Naval Experience
     hoursInNavalAction: '',
-    steamConnected: false,
     currentRank: '',
     previousCommands: '',
     preferredRole: '',
@@ -106,39 +124,6 @@ export default function ApplicationPage() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
-  // Check Discord membership on component mount
-  useEffect(() => {
-    if (session?.user?.discordId) {
-      verifyDiscordMembership();
-    }
-  }, [session]);
-
-  const verifyDiscordMembership = async () => {
-    if (!session?.user?.discordId) return;
-
-    setVerifyingMembership(true);
-    try {
-      const response = await fetch('/api/discord/verify-membership', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ discordId: session.user.discordId })
-      });
-
-      if (response.ok) {
-        const { isMember } = await response.json();
-        setDiscordMembershipVerified(isMember);
-        if (!isMember) {
-          setSubmitError('You must be a member of our Discord server to apply. Please join our Discord first.');
-        }
-      }
-    } catch (error) {
-      console.error('Error verifying Discord membership:', error);
-      setSubmitError('Unable to verify Discord membership. Please try again.');
-    } finally {
-      setVerifyingMembership(false);
-    }
-  };
-
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
@@ -155,29 +140,22 @@ export default function ApplicationPage() {
     }));
   };
 
-  const handleSteamAuth = async () => {
-    // In a real implementation, this would integrate with Steam API
-    // For now, we'll simulate it
-    try {
-      // Simulate Steam API call
-      const mockSteamData = {
-        steamId: '76561198000000000',
-        navalActionHours: Math.floor(Math.random() * 1000) + 100
-      };
-
-      handleInputChange('steamConnected', true);
-      handleInputChange('hoursInNavalAction', mockSteamData.navalActionHours.toString());
-
-      alert(`Steam connected! Detected ${mockSteamData.navalActionHours} hours in Naval Action.`);
-    } catch (error) {
-      alert('Failed to connect to Steam. Please enter hours manually.');
-    }
-  };
-
   const validateStep = (step: number): boolean => {
     switch (step) {
+      case 0: // User Registration (for new users)
+        if (session) return true; // Skip if already logged in
+        return !!(
+          formData.email &&
+          formData.confirmEmail &&
+          formData.email === formData.confirmEmail &&
+          formData.captainName &&
+          formData.password &&
+          formData.confirmPassword &&
+          formData.password === formData.confirmPassword &&
+          formData.password.length >= 8
+        );
       case 1:
-        return !!(formData.captainName && formData.preferredNickname && formData.currentNation && formData.timeZone);
+        return !!(formData.preferredNickname && formData.currentNation && formData.timeZone);
       case 2:
         return !!(formData.hoursInNavalAction && formData.currentRank && formData.preferredRole);
       case 3:
@@ -200,11 +178,36 @@ export default function ApplicationPage() {
     }
 
     try {
+      let userId = session?.user?.id;
+
+      // If user is not logged in, register them first
+      if (!session) {
+        const registrationResponse = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            username: formData.captainName,
+            password: formData.password,
+          }),
+        });
+
+        if (!registrationResponse.ok) {
+          const errorData = await registrationResponse.json();
+          setSubmitError(errorData.error || 'Failed to register user');
+          return;
+        }
+
+        const registrationData = await registrationResponse.json();
+        userId = registrationData.user.id;
+      }
+
       const applicationData = {
         ...formData,
         submittedAt: new Date().toISOString(),
-        submittedBy: session?.user?.discordId || 'unknown',
-        submitterName: session?.user?.name || 'Anonymous',
+        userId: userId,
       };
 
       const response = await fetch('/api/applications', {
@@ -219,7 +222,8 @@ export default function ApplicationPage() {
         setSubmitSuccess(true);
         setSubmitError('');
       } else {
-        throw new Error('Failed to submit application');
+        const errorData = await response.json();
+        setSubmitError(errorData.error || 'Failed to submit application');
       }
     } catch (error) {
       setSubmitError('Failed to submit application. Please try again.');
@@ -234,7 +238,8 @@ export default function ApplicationPage() {
   };
 
   const prevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
+    const minStep = session ? 1 : 0; // Can't go below step 0 if not logged in
+    setCurrentStep(prev => Math.max(prev - 1, minStep));
   };
 
   const getCurrentDate = () => {
@@ -259,15 +264,15 @@ export default function ApplicationPage() {
             </p>
             <div className="bg-sandstone-100 p-6 rounded border-l-4 border-brass mb-6">
               <p className="text-navy-dark" style={{fontFamily: 'Crimson Text, serif'}}>
-                A private Discord channel has been created for your application review.
-                You will be contacted via Discord regarding the status of your application.
+                Your application has been submitted and assigned to the recruitment review queue.
+                You will be contacted via email regarding the status of your application.
                 In the meantime, feel free to explore our port facilities and observe ongoing operations.
               </p>
             </div>
             <div className="flex gap-4 justify-center">
               <a
                 href="/"
-                className="neo-brutal-button bg-brass text-navy-dark px-8 py-3 font-semibold"
+                className="neo-brutal-button bg-brass text-white px-8 py-3 font-semibold"
                 style={{fontFamily: 'Cinzel, serif'}}
               >
                 Return to Port
@@ -286,118 +291,23 @@ export default function ApplicationPage() {
     );
   }
 
-  // Discord membership verification screen
-  if (!session) {
-    return (
-      <div className="bg-gradient-to-br from-ocean-dark via-ocean-medium to-ocean-light pt-20 p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="neo-brutal-box bg-sail-white p-8 text-center">
-            <div className="text-6xl mb-6">🔒</div>
-            <h1 className="text-4xl font-bold text-navy-dark mb-4" style={{fontFamily: 'Cinzel, serif'}}>
-              Discord Authentication Required
-            </h1>
-            <p className="text-xl text-navy-dark/80 mb-6" style={{fontFamily: 'Crimson Text, serif'}}>
-              You must be logged in with Discord to submit an application.
-            </p>
-            <div className="bg-sandstone-100 p-6 rounded border-l-4 border-brass mb-6">
-              <p className="text-navy-dark" style={{fontFamily: 'Crimson Text, serif'}}>
-                We require Discord authentication to verify your membership in our server and
-                to create your personalized application review channel.
-              </p>
-            </div>
-            <button
-              onClick={() => signIn('discord')}
-              className="neo-brutal-button bg-brass text-navy-dark px-8 py-3 font-semibold"
-              style={{fontFamily: 'Cinzel, serif'}}
-            >
-              Login with Discord
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // The application form now includes user registration for new users
+  // Existing users can login before applying if they prefer
+  // No authentication required to start the application process
 
-  if (verifyingMembership) {
-    return (
-      <div className="bg-gradient-to-br from-ocean-dark via-ocean-medium to-ocean-light pt-20 p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="neo-brutal-box bg-sail-white p-8 text-center">
-            <div className="text-6xl mb-6 animate-spin">⚓</div>
-            <h1 className="text-4xl font-bold text-navy-dark mb-4" style={{fontFamily: 'Cinzel, serif'}}>
-              Verifying Discord Membership
-            </h1>
-            <p className="text-xl text-navy-dark/80" style={{fontFamily: 'Crimson Text, serif'}}>
-              Please wait while we verify your membership in our Discord server...
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!discordMembershipVerified) {
-    return (
-      <div className="bg-gradient-to-br from-ocean-dark via-ocean-medium to-ocean-light pt-20 p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="neo-brutal-box bg-sail-white p-8 text-center">
-            <div className="text-6xl mb-6">❌</div>
-            <h1 className="text-4xl font-bold text-navy-dark mb-4" style={{fontFamily: 'Cinzel, serif'}}>
-              Discord Membership Required
-            </h1>
-            <p className="text-xl text-navy-dark/80 mb-6" style={{fontFamily: 'Crimson Text, serif'}}>
-              You must be a member of our Discord server to submit an application.
-            </p>
-            <div className="bg-sandstone-100 p-6 rounded border-l-4 border-brass mb-6">
-              <p className="text-navy-dark mb-4" style={{fontFamily: 'Crimson Text, serif'}}>
-                Our application process requires Discord membership to enable:
-              </p>
-              <ul className="text-left text-navy-dark space-y-2" style={{fontFamily: 'Crimson Text, serif'}}>
-                <li>• Private application review channel creation</li>
-                <li>• Direct communication with recruiters</li>
-                <li>• Interview scheduling and coordination</li>
-                <li>• Access to member-only resources</li>
-              </ul>
-            </div>
-            <div className="flex gap-4 justify-center">
-              <a
-                href="https://discord.gg/krakengaming"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="neo-brutal-button bg-indigo-600 text-white px-8 py-3 font-semibold"
-                style={{fontFamily: 'Cinzel, serif'}}
-              >
-                Join Our Discord
-              </a>
-              <button
-                onClick={verifyDiscordMembership}
-                className="neo-brutal-button bg-brass text-navy-dark px-8 py-3 font-semibold"
-                style={{fontFamily: 'Cinzel, serif'}}
-              >
-                Re-check Membership
-              </button>
-            </div>
-            {submitError && (
-              <div className="mt-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                {submitError}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // If user is already authenticated, we can proceed directly to the application
+  // New users will register as part of the application process
 
   return (
     <div className="bg-gradient-to-br from-ocean-dark via-ocean-medium to-ocean-light pt-20 p-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-sail-white mb-4" style={{fontFamily: 'Cinzel, serif'}}>
-            Officer Commission Application
+          <h1 className="text-5xl font-bold text-green-800 mb-4" style={{fontFamily: 'Cinzel, serif'}}>
+            Apply for a Letter of Marque
           </h1>
           <p className="text-sail-white/80 text-xl" style={{fontFamily: 'Crimson Text, serif'}}>
-            His Majesty's Naval Service • KRAKEN Squadron
+            United We Stand - It's the Pirates Life for Me!
           </p>
         </div>
 
@@ -407,7 +317,7 @@ export default function ApplicationPage() {
             {[1, 2, 3, 4, 5, 6].map(step => (
               <div key={step} className="flex items-center">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                  step === currentStep ? 'bg-brass text-navy-dark' :
+                  step === currentStep ? 'bg-brass text-white' :
                   step < currentStep ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
                 }`}>
                   {step < currentStep ? '✓' : step}
@@ -422,7 +332,8 @@ export default function ApplicationPage() {
           </div>
           <div className="text-center mt-4">
             <span className="text-navy-dark font-semibold" style={{fontFamily: 'Cinzel, serif'}}>
-              Step {currentStep} of 6: {
+              Step {currentStep + 1} of 7: {
+                currentStep === 0 ? 'Account Registration' :
                 currentStep === 1 ? 'Personal Particulars' :
                 currentStep === 2 ? 'Naval Experience' :
                 currentStep === 3 ? 'Crafting Experience' :
@@ -435,6 +346,147 @@ export default function ApplicationPage() {
 
         {/* Form Content */}
         <div className="neo-brutal-box bg-sail-white p-8">
+          {/* Step 0: User Registration (only if not logged in) */}
+          {currentStep === 0 && !session && (
+            <div>
+              <h2 className="text-2xl font-bold text-navy-dark mb-6" style={{fontFamily: 'Cinzel, serif'}}>
+                Create Your Account
+              </h2>
+              <p className="text-navy-dark/80 mb-6" style={{fontFamily: 'Crimson Text, serif'}}>
+                To apply for a{' '}
+                <span 
+                  className="text-brass hover:text-brass-bright font-semibold cursor-help relative group"
+                >
+                  Letter of Marque
+                  <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-sail-white border-4 border-navy-dark text-navy-dark text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 shadow-2xl max-w-xs w-max neo-brutal-box" style={{fontFamily: 'Crimson Text, serif'}}>
+                    A Letter of Marque and Reprisal was a government license in the Age of Sail that authorized a private person, known as a privateer or corsair, to attack and capture vessels of a foreign state at war with the issuing state.
+                  </span>
+                </span>
+                {' '}from His Majesty's Royal Navy, you'll need to create an account. If you already have an account,{' '}
+                <a href="/auth/login" className="text-brass hover:text-brass-bright font-semibold">
+                  login here
+                </a>.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-navy-dark font-semibold mb-2" style={{fontFamily: 'Cinzel, serif'}}>
+                    Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    className="w-full p-3 border-2 border-navy-dark rounded"
+                    placeholder="captain@example.com"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-navy-dark font-semibold mb-2" style={{fontFamily: 'Cinzel, serif'}}>
+                    Confirm Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.confirmEmail}
+                    onChange={(e) => handleInputChange('confirmEmail', e.target.value)}
+                    className={`w-full p-3 border-2 rounded ${
+                      formData.confirmEmail && formData.email !== formData.confirmEmail 
+                        ? 'border-red-500' 
+                        : 'border-navy-dark'
+                    }`}
+                    placeholder="captain@example.com"
+                    required
+                  />
+                  {formData.confirmEmail && formData.email !== formData.confirmEmail && (
+                    <p className="text-red-500 text-xs mt-1">Email addresses do not match</p>
+                  )}
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-navy-dark font-semibold mb-2" style={{fontFamily: 'Cinzel, serif'}}>
+                    Captain Name (Username) *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.captainName}
+                    onChange={(e) => handleInputChange('captainName', e.target.value)}
+                    className="w-full p-3 border-2 border-navy-dark rounded"
+                    placeholder="Captain Jack Sparrow"
+                    required
+                  />
+                  <p className="text-xs text-navy-dark/60 mt-1">This will be your captain name and username</p>
+                </div>
+
+                <div>
+                  <label className="block text-navy-dark font-semibold mb-2" style={{fontFamily: 'Cinzel, serif'}}>
+                    Password *
+                  </label>
+                  <input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => handleInputChange('password', e.target.value)}
+                    className="w-full p-3 border-2 border-navy-dark rounded"
+                    placeholder="••••••••"
+                    minLength={8}
+                    required
+                  />
+                  {formData.password && (
+                    <div className="mt-2">
+                      <div className="flex justify-between text-xs mb-1">
+                        <span>Password Strength</span>
+                        <span className={`font-semibold ${
+                          getPasswordStrength(formData.password).strength === 'Strong' ? 'text-green-600' :
+                          getPasswordStrength(formData.password).strength === 'Medium' ? 'text-yellow-600' : 'text-red-600'
+                        }`}>
+                          {getPasswordStrength(formData.password).strength}
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full transition-all ${getPasswordStrength(formData.password).color}`}
+                          style={{width: getPasswordStrength(formData.password).width}}
+                        ></div>
+                      </div>
+                      <p className="text-xs text-navy-dark/60 mt-1">
+                        Use 8+ characters with uppercase, lowercase, numbers, and symbols
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-navy-dark font-semibold mb-2" style={{fontFamily: 'Cinzel, serif'}}>
+                    Confirm Password *
+                  </label>
+                  <input
+                    type="password"
+                    value={formData.confirmPassword}
+                    onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                    className={`w-full p-3 border-2 rounded ${
+                      formData.confirmPassword && formData.password !== formData.confirmPassword 
+                        ? 'border-red-500' 
+                        : 'border-navy-dark'
+                    }`}
+                    placeholder="••••••••"
+                    required
+                  />
+                  {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                    <p className="text-red-500 text-xs mt-1">Passwords do not match</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-6 p-4 bg-brass/10 border border-brass/30 rounded">
+                <p className="text-sm text-navy-dark" style={{fontFamily: 'Crimson Text, serif'}}>
+                  <strong>Note:</strong> Your account will be created when you submit your application.
+                  This allows you to apply and creates your login credentials simultaneously.
+                </p>
+              </div>
+            </div>
+          )}
+
           {currentStep === 1 && (
             <div>
               <h2 className="text-2xl font-bold text-navy-dark mb-6" style={{fontFamily: 'Cinzel, serif'}}>
@@ -513,34 +565,14 @@ export default function ApplicationPage() {
                   <label className="block text-navy-dark font-semibold mb-2" style={{fontFamily: 'Cinzel, serif'}}>
                     Hours in Naval Action *
                   </label>
-                  <div className="flex gap-4">
-                    <input
-                      type="number"
-                      value={formData.hoursInNavalAction}
-                      onChange={(e) => handleInputChange('hoursInNavalAction', e.target.value)}
-                      className="flex-1 p-3 border-2 border-navy-dark rounded"
-                      placeholder="Enter hours manually"
-                      style={{fontFamily: 'Crimson Text, serif'}}
-                      disabled={formData.steamConnected}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleSteamAuth}
-                      className={`neo-brutal-button px-6 py-3 font-semibold ${
-                        formData.steamConnected
-                          ? 'bg-green-500 text-white'
-                          : 'bg-brass text-navy-dark'
-                      }`}
-                      style={{fontFamily: 'Cinzel, serif'}}
-                    >
-                      {formData.steamConnected ? '✓ Steam Connected' : 'Connect Steam'}
-                    </button>
-                  </div>
-                  {formData.steamConnected && (
-                    <p className="text-green-600 text-sm mt-2">
-                      ✅ Hours verified via Steam API
-                    </p>
-                  )}
+                  <input
+                    type="number"
+                    value={formData.hoursInNavalAction}
+                    onChange={(e) => handleInputChange('hoursInNavalAction', e.target.value)}
+                    className="w-full p-3 border-2 border-navy-dark rounded"
+                    placeholder="Enter your total hours in Naval Action"
+                    style={{fontFamily: 'Crimson Text, serif'}}
+                  />
                 </div>
 
                 <div>
@@ -724,7 +756,7 @@ export default function ApplicationPage() {
                   />
                   <span className="text-navy-dark" style={{fontFamily: 'Crimson Text, serif'}}>
                     I hereby declare that the information provided in this application is true and accurate to the best of my knowledge.
-                    I understand that providing false information may result in the rejection of this application or termination of service.
+                    I understand that providing false information may result in the denial of this Letter of Marque or revocation of privateering privileges.
                   </span>
                 </label>
 
@@ -736,8 +768,8 @@ export default function ApplicationPage() {
                     className="w-5 h-5 mt-1"
                   />
                   <span className="text-navy-dark" style={{fontFamily: 'Crimson Text, serif'}}>
-                    I pledge to uphold the honor and traditions of His Majesty's Naval Service and the KRAKEN Squadron,
-                    to conduct myself with integrity and professionalism, and to serve with distinction in all naval operations.
+                    I pledge to honor the terms of this Letter of Marque and conduct all privateering operations within the bounds of His Majesty's law,
+                    to act with honor in my dealings with allies and enemies alike, and to serve the Crown's interests with courage and distinction upon the high seas.
                   </span>
                 </label>
 
@@ -749,8 +781,8 @@ export default function ApplicationPage() {
                     className="w-5 h-5 mt-1"
                   />
                   <span className="text-navy-dark" style={{fontFamily: 'Crimson Text, serif'}}>
-                    I understand that membership in KRAKEN requires adherence to squadron rules, regular participation in organized activities,
-                    and maintaining the high standards expected of a Royal Navy officer.
+                    I understand that this Letter of Marque requires adherence to the Articles of Agreement, regular reports of captured prizes,
+                    and maintaining the conduct befitting a commissioned privateer in service to His Majesty's Crown.
                   </span>
                 </label>
               </div>
@@ -776,7 +808,7 @@ export default function ApplicationPage() {
                     onChange={(e) => handleInputChange('signature', e.target.value)}
                     className="w-full p-4 border-2 border-navy-dark rounded text-2xl"
                     placeholder="Sign your name here..."
-                    style={{fontFamily: 'cursive'}}
+                    style={{fontFamily: 'var(--font-cedarville-cursive), cursive'}}
                   />
                 </div>
 
@@ -785,7 +817,7 @@ export default function ApplicationPage() {
                     <p className="text-navy-dark font-semibold mb-2" style={{fontFamily: 'Cinzel, serif'}}>
                       Date of Application
                     </p>
-                    <p className="text-xl text-navy-dark" style={{fontFamily: 'cursive'}}>
+                    <p className="text-xl text-navy-dark" style={{fontFamily: 'var(--font-cedarville-cursive), cursive'}}>
                       {getCurrentDate()}
                     </p>
                   </div>
@@ -802,18 +834,18 @@ export default function ApplicationPage() {
 
           {/* Navigation Buttons */}
           <div className="flex justify-between mt-8 pt-6 border-t-2 border-navy-dark/20">
-            <button
-              onClick={prevStep}
-              disabled={currentStep === 1}
-              className={`neo-brutal-button px-6 py-3 font-semibold ${
-                currentStep === 1
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-cannon-smoke text-sail-white'
-              }`}
-              style={{fontFamily: 'Cinzel, serif'}}
-            >
-              ← Previous
-            </button>
+            {/* Only show Previous button if not on the first step */}
+            {currentStep > (session ? 1 : 0) ? (
+              <button
+                onClick={prevStep}
+                className="neo-brutal-button px-6 py-3 font-semibold bg-cannon-smoke text-sail-white"
+                style={{fontFamily: 'Cinzel, serif'}}
+              >
+                ← Previous
+              </button>
+            ) : (
+              <div></div> // Empty div to maintain flex layout
+            )}
 
             {currentStep < 6 ? (
               <button
@@ -821,7 +853,7 @@ export default function ApplicationPage() {
                 disabled={!validateStep(currentStep)}
                 className={`neo-brutal-button px-6 py-3 font-semibold ${
                   validateStep(currentStep)
-                    ? 'bg-brass text-navy-dark'
+                    ? 'bg-brass text-white'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
                 style={{fontFamily: 'Cinzel, serif'}}

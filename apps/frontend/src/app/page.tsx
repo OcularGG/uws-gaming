@@ -1,66 +1,30 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useTypewriter } from '@/hooks/useTypewriter';
 import { useSiteContext } from '@/contexts/SiteContext';
 
 export default function HomePage() {
   const { settings, featureCards, admiraltyLetter, welcomeContent, loading } = useSiteContext();
 
-  useEffect(() => {
-    const ships = [
-      'Duke of Kent',
-      'L\'Ocean',
-      'Santa Ana',
-      'Santisima Trinidad',
-      'Victory',
-      'Christian',
-      'Le Bucentaure',
-      'San Pedro',
-      'St. Pavel',
-      'Admiral de Ruyter',
-      'Implacable',
-      'Redoubtable',
-      'Constitution',
-      'Wapen von Hamburg',
-      'Indefatigable'
-    ];
+  const ships = [
+    'Duke of Kent',
+    'L\'Ocean',
+    'Santa Ana',
+    'Santisima Trinidad',
+    'Victory',
+    'Christian',
+    'Le Bucentaure',
+    'San Pedro',
+    'St. Pavel',
+    'Admiral de Ruyter',
+    'Implacable',
+    'Redoubtable',
+    'Constitution',
+    'Wapen von Hamburg',
+    'Indefatigable'
+  ];
 
-    let currentShipIndex = 0;
-    let currentCharIndex = 0;
-    let isDeleting = false;
-    const typewriterElement = document.getElementById('typewriter-ship');
-
-    const typeWriter = () => {
-      if (!typewriterElement) return;
-
-      const currentShip = ships[currentShipIndex];
-
-      if (isDeleting) {
-        typewriterElement.textContent = currentShip.substring(0, currentCharIndex - 1);
-        currentCharIndex--;
-
-        if (currentCharIndex === 0) {
-          isDeleting = false;
-          currentShipIndex = (currentShipIndex + 1) % ships.length;
-          setTimeout(typeWriter, 500);
-          return;
-        }
-      } else {
-        typewriterElement.textContent = currentShip.substring(0, currentCharIndex + 1);
-        currentCharIndex++;
-
-        if (currentCharIndex === currentShip.length) {
-          isDeleting = true;
-          setTimeout(typeWriter, 2000);
-          return;
-        }
-      }
-
-      setTimeout(typeWriter, isDeleting ? 50 : 100);
-    };
-
-    setTimeout(typeWriter, 1000);
-  }, []);
+  useTypewriter('typewriter-ship', ships, 1000);
 
   if (loading) {
     return (
@@ -75,12 +39,12 @@ export default function HomePage() {
 
   return (
     <main className="relative">
-      {/* Hero Section with Historical Naval Image Background */}
+      {/* Hero Section with Pirate Ship Background */}
       <section className="relative h-screen">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: 'url(https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/John_Cleveley_the_Elder%2C_The_Royal_George_at_Deptford_Showing_the_Launch_of_The_Cambridge_%281757%29.jpg/1200px-John_Cleveley_the_Elder%2C_The_Royal_George_at_Deptford_Showing_the_Launch_of_The_Cambridge_%281757%29.jpg)'
+            backgroundImage: 'url(https://wallpapersok.com/images/hd/4k-pirate-ship-painting-k1duez8ka3g6oib5.jpg)'
           }}
         />
 
@@ -90,26 +54,51 @@ export default function HomePage() {
         {/* Hero Content */}
         <div className="relative z-10 flex items-center justify-center h-full pt-16">
           <div className="text-center px-4 max-w-5xl mx-auto">
-            {/* Kraken Logo */}
+            {/* Kraken Gaming Logo */}
             <div className="mb-8 flex justify-center">
-              <img
-                src="https://i.imgur.com/VwfpogC.png"
-                alt={`${settings.siteName} Logo`}
-                className="logo-floating w-32 h-32 md:w-48 md:h-48 object-contain drop-shadow-2xl"
-              />
+              <div className="w-48 h-48 md:w-80 md:h-80 drop-shadow-2xl logo-floating">
+                <img 
+                  src="/uws-logo.png"
+                  alt="UWS Logo"
+                  className="w-full h-full object-contain filter drop-shadow-lg"
+                  onError={(e) => {
+                    // Fallback to SVG if image fails to load
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent) {
+                      parent.innerHTML = `
+                        <svg viewBox="0 0 200 200" class="w-full h-full">
+                          <rect x="0" y="0" width="200" height="200" fill="#1a1a1a"/>
+                          <circle cx="100" cy="80" r="25" fill="white"/>
+                          <circle cx="90" cy="75" r="4" fill="black"/>
+                          <circle cx="110" cy="75" r="4" fill="black"/>
+                          <polygon points="100,85 95,95 105,95" fill="black"/>
+                          <rect x="60" y="125" width="80" height="8" fill="white" transform="rotate(45 100 129)"/>
+                          <rect x="60" y="125" width="80" height="8" fill="white" transform="rotate(-45 100 129)"/>
+                          <circle cx="67" cy="122" r="6" fill="white"/>
+                          <circle cx="133" cy="122" r="6" fill="white"/>
+                          <circle cx="67" cy="136" r="6" fill="white"/>
+                          <circle cx="133" cy="136" r="6" fill="white"/>
+                        </svg>
+                      `;
+                    }
+                  }}
+                />
+              </div>
             </div>
 
-            <h1 className="hero-title-brutal text-5xl md:text-8xl mb-6">
-              <span className="text-brass-bright">{settings.siteName}</span>
+            <h1 className="hero-title-gradient text-5xl md:text-8xl mb-6 font-bold tracking-wider">
+              {settings.siteName}
             </h1>
-            
+
             <div className="hero-subtitle text-xl md:text-3xl mb-12 max-w-3xl mx-auto"
                style={{
                  color: 'var(--sail-white)',
-                 textShadow: '2px 2px 4px rgba(0,0,0,0.7), 0 0 10px rgba(184, 134, 11, 0.3)'
+                 textShadow: '2px 2px 4px rgba(0,0,0,0.7), 0 0 10px rgba(22, 101, 52, 0.3)'
                }}>
               <p>
-                Set sail with us in your <span id="typewriter-ship" className="text-brass-bright font-bold"></span>
+                Set sail with us in your <span id="typewriter-ship" className="typewriter-gradient font-bold"></span>
               </p>
             </div>
           </div>
@@ -121,17 +110,13 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-5xl md:text-6xl font-bold text-navy-dark mb-12" style={{fontFamily: 'Cinzel, serif'}}>
-              {welcomeContent.title.replace('{{siteName}}', settings.siteName)}
+              {welcomeContent.title.replace('{{siteName}}', settings.siteName).split('Captain').map((part, index, array) => (
+                <span key={index}>
+                  {part}
+                  {index < array.length - 1 && <span className="captain-gradient">Captain</span>}
+                </span>
+              ))}
             </h2>
-            <div className="neo-brutal-box max-w-4xl mx-auto p-8 mb-16">
-              <div className="text-xl md:text-2xl text-navy-dark leading-relaxed">
-                {welcomeContent.content.split('\n\n').map((paragraph, index) => (
-                  <p key={index} className="mb-6 last:mb-0">
-                    {paragraph.replace(/\{\{siteName\}\}/g, settings.siteName)}
-                  </p>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -164,7 +149,7 @@ export default function HomePage() {
                   </p>
                 );
               })}
-              
+
               <div className="text-right mt-12">
                 <p className="text-xl italic mb-2" style={{fontFamily: 'Cinzel, serif'}}>
                   With deepest respect and fair winds,
@@ -195,7 +180,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-5xl md:text-6xl font-bold text-navy-dark mb-8" style={{fontFamily: 'Cinzel, serif'}}>
-              Why Sail with <span className="text-brass">{settings.siteName}</span>?
+              Why Sail with <span className="uws-gradient">{settings.siteName}</span>?
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -227,7 +212,7 @@ export default function HomePage() {
               The highest echelons of naval command, leading our fleet through strategic waters
             </p>
           </div>
-          
+
           <div className="grid gap-6 max-w-4xl mx-auto">
             {settings.commandStructure.map((role, index) => (
               <div key={index} className="officer-card bg-sandstone-light border-4 border-brass relative">
@@ -251,19 +236,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-navy-dark py-12 border-t-4 border-brass">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="border-t border-brass-dark pt-6">
-              <p className="text-brass text-sm" style={{fontFamily: 'Cinzel, serif'}}>
-                © 2025 {settings.siteName} Gaming. All rights reserved.
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
     </main>
   );
 }

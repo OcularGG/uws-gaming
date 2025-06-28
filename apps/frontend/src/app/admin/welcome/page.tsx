@@ -71,8 +71,8 @@ export default function AdminWelcomePage() {
               <button
                 onClick={handleSave}
                 className={`px-6 py-2 rounded border-2 font-bold transition-all ${
-                  hasChanges 
-                    ? 'bg-brass hover:bg-brass-bright text-navy-dark border-brass-bright' 
+                  hasChanges
+                    ? 'bg-brass hover:bg-brass-bright text-navy-dark border-brass-bright'
                     : 'bg-gray-400 text-gray-600 border-gray-400 cursor-not-allowed'
                 }`}
                 style={{fontFamily: 'Cinzel, serif'}}
