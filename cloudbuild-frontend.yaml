@@ -29,9 +29,9 @@ steps:
       - 'managed'
       - '--allow-unauthenticated'
       - '--set-env-vars'
-      - 'NEXT_PUBLIC_ENVIRONMENT=production,NEXTAUTH_URL=https://krakengaming.org'
+      - 'NEXT_PUBLIC_ENVIRONMENT=production'
       - '--set-secrets'
-      - 'DISCORD_CLIENT_ID=discord-client-id:latest,DISCORD_CLIENT_SECRET=discord-client-secret:latest,NEXTAUTH_SECRET=nextauth-secret:latest,DATABASE_URL=database-url:latest'
+      - 'AUTH_DISCORD_ID=auth-discord-id:latest,AUTH_DISCORD_SECRET=auth-discord-secret:latest,AUTH_SECRET=auth-secret:latest,AUTH_URL=auth-url:latest,DATABASE_URL=database-url:latest'
 
 images:
   - 'gcr.io/$PROJECT_ID/frontend-prod'

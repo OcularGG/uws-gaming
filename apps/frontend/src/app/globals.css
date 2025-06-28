@@ -751,3 +751,76 @@ a:focus-visible {
   outline: 2px solid var(--brass);
   outline-offset: 2px;
 }
+
+/* Footer border gradient - matches Tommy Templeman's gold effect */
+.footer-border-gradient {
+  border-image: linear-gradient(45deg,
+    var(--brass),
+    var(--brass-bright),
+    #ffd700,
+    var(--brass-bright),
+    var(--brass)
+  ) 1;
+  position: relative;
+}
+
+.footer-border-gradient::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(45deg,
+    var(--brass),
+    var(--brass-bright),
+    #ffd700,
+    var(--brass-bright),
+    var(--brass)
+  );
+  background-size: 300% 300%;
+  animation: footer-gradient-pulse 3s ease-in-out infinite;
+}
+
+/* Social link gradient effect */
+.social-link-gradient {
+  color: var(--sail-white);
+  position: relative;
+  padding: 8px;
+  border-radius: 4px;
+  background: linear-gradient(45deg,
+    var(--brass),
+    var(--brass-bright),
+    #ffd700,
+    var(--brass-bright),
+    var(--brass)
+  );
+  background-size: 300% 300%;
+  animation: social-gradient-pulse 2.5s ease-in-out infinite;
+}
+
+.social-link-gradient:hover {
+  animation-duration: 1.5s;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(184, 134, 11, 0.3);
+}
+
+@keyframes footer-gradient-pulse {
+  0%, 100% {
+    background-position: 0% 50%;
+    opacity: 1;
+  }
+  50% {
+    background-position: 100% 50%;
+    opacity: 0.8;
+  }
+}
+
+@keyframes social-gradient-pulse {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}

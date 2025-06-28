@@ -1,8 +1,0 @@
-{
-  "/page": "app/page.js",
-  "/apply/page": "app/apply/page.js",
-  "/legal/privacy/page": "app/legal/privacy/page.js",
-  "/legal/page": "app/legal/page.js",
-  "/_not-found/page": "app/_not-found/page.js",
-  "/bugs/page": "app/bugs/page.js"
-}

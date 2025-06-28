@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useSession } from '@/hooks/useSession';
+import { useSession } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 
 const BUG_TYPES = [

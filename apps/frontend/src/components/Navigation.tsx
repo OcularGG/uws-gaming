@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { signIn, signOut } from 'next-auth/react';
-import { useSession } from '@/hooks/useSession';
+import { signIn, signOut } from '@/lib/auth';
+import { useSession } from '@/hooks/useAuth';
 
 const getNavigationItems = (session: any, isAdmin: boolean) => {
   const baseItems = [
@@ -64,14 +64,11 @@ export default function Navigation() {
         }
       }
 
-      await signOut();
+      // For production, redirect to logout endpoint
+      window.location.href = '/api/auth/signout';
     } else {
-      try {
-        await signIn('discord');
-      } catch {
-        console.warn('Discord authentication not configured');
-        // For development, you could redirect to a setup page or show a message
-      }
+      // For production, redirect to login endpoint
+      window.location.href = '/api/auth/signin/discord';
     }
   };
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useSession } from '@/hooks/useSession';
+import { useSession } from '@/hooks/useAuth';
 import Link from 'next/link';
 import FileUpload from '../../components/FileUpload';
 

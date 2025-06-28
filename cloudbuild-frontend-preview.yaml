@@ -31,7 +31,10 @@ steps:
       - '--set-env-vars'
       - 'NEXT_PUBLIC_ENVIRONMENT=preview,NEXTAUTH_URL=https://preview.krakengaming.org'
       - '--set-secrets'
-      - 'DISCORD_CLIENT_ID=discord-client-id:latest,DISCORD_CLIENT_SECRET=discord-client-secret:latest,NEXTAUTH_SECRET=nextauth-secret:latest,DATABASE_URL=database-url-preview:latest'
+      - 'AUTH_DISCORD_ID=auth-discord-id:latest,AUTH_DISCORD_SECRET=auth-discord-secret:latest,AUTH_SECRET=auth-secret:latest,AUTH_URL=auth-url-preview:latest,DATABASE_URL=database-url:latest'
 
 images:
   - 'gcr.io/$PROJECT_ID/frontend-preview'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

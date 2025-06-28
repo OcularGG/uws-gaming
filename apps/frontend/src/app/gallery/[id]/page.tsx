@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useSession } from '@/hooks/useSession';
+import { useSession } from '@/hooks/useAuth';
 import Link from 'next/link';
 
 interface GalleryItem {

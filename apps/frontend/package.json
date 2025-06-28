@@ -51,7 +51,11 @@
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.6",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "engines": {
     "node": ">=18.0.0",

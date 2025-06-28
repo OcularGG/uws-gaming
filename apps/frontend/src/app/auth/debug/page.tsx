@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from '@/hooks/useSession';
+import { useSession } from '@/hooks/useAuth';
 import { getProviders } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 

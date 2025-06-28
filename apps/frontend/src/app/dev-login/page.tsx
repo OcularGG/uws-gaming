@@ -1,36 +1,37 @@
 'use client'
 
-import { signIn } from 'next-auth/react'
-import { useSession } from '@/hooks/useSession'
+import { useSession } from '@/hooks/useAuth'
 
 // Mock user data for local development
 const MOCK_USERS = {
   admin: {
-    id: 'admin-user-id',
-    name: 'Admin User',
+    id: 'dev-admin-user-id',
+    name: 'KrakenGaming Admin',
     email: 'admin@krakengaming.org',
     image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRkY0MDQ0Ii8+CjxwYXRoIGQ9Ik0yMCAyOEM0IDI4IDQgMjQgNCAyMEM0IDE2IDggMTIgMjAgMTJDMzIgMTIgMzYgMTYgMzYgMjBDMzYgMjQgMzYgMjggMjAgMjhaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K',
     discordId: '1207434980855259206', // This matches the admin ID in Navigation.tsx
     username: 'AdminKraken',
     discriminator: '0001',
     isMember: true,
-    isAdmin: true
+    isAdmin: true,
+    canCreatePortBattles: true
   },
   user: {
-    id: 'regular-user-id',
-    name: 'Regular User',
-    email: 'user@krakengaming.org',
+    id: 'dev-regular-user-id',
+    name: 'Regular Pirate',
+    email: 'pirate@krakengaming.org',
     image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjMDA3Q0ZGIi8+CjxwYXRoIGQ9Ik0yMCAyOEM0IDI4IDQgMjQgNCAyMEM0IDE2IDggMTIgMjAgMTJDMzIgMTIgMzYgMTYgMzYgMjBDMzYgMjQgMzYgMjggMjAgMjhaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K',
-    discordId: '123456789012345678',
-    username: 'RegularKraken',
+    discordId: '987654321098765432',
+    username: 'RegularPirate',
     discriminator: '0002',
     isMember: true,
-    isAdmin: false
+    isAdmin: false,
+    canCreatePortBattles: false
   }
 }
 
 export default function DevLogin() {
-  const { data: session } = useSession()
+  const { data: session, isMockSession } = useSession()
 
   // Only show in development
   if (process.env.NODE_ENV !== 'development') {
@@ -82,10 +83,37 @@ export default function DevLogin() {
             <div className="space-y-4">
               <div className="bg-green-50 border border-green-200 rounded p-4">
                 <h3 className="font-semibold text-green-800 mb-2">Currently Logged In</h3>
-                <div className="text-sm text-green-700">
+                <div className="text-sm text-green-700 space-y-1">
                   <p><strong>Name:</strong> {session.user?.name}</p>
-                  <p><strong>Role:</strong> {(session.user as any)?.discordId === '1207434980855259206' ? 'Admin' : 'Regular User'}</p>
+                  <p><strong>Email:</strong> {session.user?.email}</p>
                   <p><strong>Discord ID:</strong> {(session.user as any)?.discordId}</p>
+                  <p><strong>Username:</strong> {(session.user as any)?.username}</p>
+                  <p><strong>Role:</strong> {(session.user as any)?.discordId === '1207434980855259206' ? 'Admin' : 'Regular User'}</p>
+                  <p><strong>Admin Access:</strong> {(session.user as any)?.discordId === '1207434980855259206' ? '✅ YES' : '❌ NO'}</p>
+                  <p><strong>Session Type:</strong> {isMockSession ? 'Mock (Dev Mode)' : 'Real Discord Session'}</p>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded p-4">
+                <h3 className="font-semibold text-blue-800 mb-2">Admin Features Test</h3>
+                <div className="text-sm text-blue-700 space-y-2">
+                  <p>Try these admin features:</p>
+                  <div className="space-y-1">
+                    <a
+                      href="/admin"
+                      className="block text-blue-600 hover:text-blue-800 hover:underline"
+                      style={{fontFamily: 'Cinzel, serif'}}
+                    >
+                      → Admin Panel {(session.user as any)?.discordId === '1207434980855259206' ? '(Should work)' : '(Should be denied)'}
+                    </a>
+                    <a
+                      href="/port-battles/create"
+                      className="block text-blue-600 hover:text-blue-800 hover:underline"
+                      style={{fontFamily: 'Cinzel, serif'}}
+                    >
+                      → Create Port Battle {(session.user as any)?.discordId === '1207434980855259206' ? '(Should work)' : '(Should be denied)'}
+                    </a>
+                  </div>
                 </div>
               </div>
 
@@ -115,14 +143,13 @@ export default function DevLogin() {
                 ⚓ Login as Regular User
               </button>
 
-              <div className="border-t border-gray-200 pt-4">
-                <button
-                  onClick={() => signIn('discord')}
-                  className="w-full bg-blue-600 text-white py-3 px-4 rounded font-medium hover:bg-blue-700 transition-colors"
-                  style={{fontFamily: 'Cinzel, serif'}}
-                >
-                  🔗 Login with Discord (Real)
-                </button>
+              <div className="border-t border-gray-200 pt-4">              <button
+                onClick={() => window.location.href = '/api/auth/signin/discord'}
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded font-medium hover:bg-blue-700 transition-colors"
+                style={{fontFamily: 'Cinzel, serif'}}
+              >
+                🔗 Login with Discord (Real)
+              </button>
               </div>
             </div>
           )}
@@ -130,6 +157,13 @@ export default function DevLogin() {
           <div className="mt-8 pt-4 border-t border-gray-200 text-center">
             <p className="text-xs text-gray-500 mb-2">Development Tools</p>
             <div className="space-y-2">
+              <a
+                href="/dev-login/test"
+                className="block text-sm text-purple-600 hover:text-purple-800 hover:underline font-medium"
+                style={{fontFamily: 'Cinzel, serif'}}
+              >
+                🧪 Run Automated Tests
+              </a>
               <a
                 href="/"
                 className="block text-sm text-navy hover:text-brass transition-colors"

@@ -25,14 +25,14 @@ $BOT_STATUS = gcloud run services describe discord-bot-prod --region=$REGION --f
 
 if ($BOT_STATUS -eq "True") {
     Write-Host "✅ Discord bot service is running" -ForegroundColor Green
-    
+
     # Get bot URL
     $BOT_URL = gcloud run services describe discord-bot-prod --region=$REGION --format="value(status.url)"
     Write-Host "🔗 Bot URL: $BOT_URL" -ForegroundColor Cyan
-    
+
     # Register commands by calling the bot's registration endpoint
     Write-Host "📝 Registering Discord commands..." -ForegroundColor Yellow
-    
+
     # Try to trigger command registration via HTTP call
     try {
         $response = Invoke-WebRequest -Uri "$BOT_URL/health" -Method GET -TimeoutSec 30
@@ -42,13 +42,13 @@ if ($BOT_STATUS -eq "True") {
     } catch {
         Write-Host "⚠️  Bot may still be starting up: $($_.Exception.Message)" -ForegroundColor Yellow
     }
-    
+
     Write-Host "🎉 Discord bot deployment complete!" -ForegroundColor Green
     Write-Host "📋 Next steps:" -ForegroundColor Cyan
     Write-Host "  1. Go to Discord Developer Portal" -ForegroundColor White
     Write-Host "  2. Add bot to your server with proper permissions" -ForegroundColor White
     Write-Host "  3. Commands will auto-register when bot starts" -ForegroundColor White
-    
+
 } else {
     Write-Host "❌ Discord bot service is not running properly" -ForegroundColor Red
     Write-Host "🔍 Check the logs: gcloud run logs read discord-bot-prod --region=$REGION" -ForegroundColor Yellow

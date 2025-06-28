@@ -4,10 +4,11 @@ steps:
     args:
       - 'build'
       - '-f'
-      - 'apps/discord-bot/Dockerfile'
+      - 'Dockerfile'
       - '-t'
       - 'gcr.io/$PROJECT_ID/discord-bot-prod'
-      - 'apps/discord-bot'
+      - '.'
+    dir: 'apps/discord-bot'
 
   # Push the image to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
@@ -32,7 +33,7 @@ steps:
       - '--set-env-vars'
       - 'NODE_ENV=production'
       - '--set-secrets'
-      - 'DISCORD_TOKEN=discord-bot-token:latest,DISCORD_CLIENT_ID=discord-client-id:latest,DISCORD_CLIENT_SECRET=discord-client-secret:latest,DATABASE_URL=database-url:latest'
+      - 'DISCORD_BOT_TOKEN=discord-bot-token:latest,DISCORD_CLIENT_ID=discord-client-id:latest,DISCORD_CLIENT_SECRET=discord-client-secret:latest,DATABASE_URL=database-url:latest'
       - '--port'
       - '8080'
       - '--memory'

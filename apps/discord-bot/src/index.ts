@@ -7,6 +7,10 @@ import { CommandManager } from './core/CommandManager';
 import { EventManager } from './core/EventManager';
 import ApplicationButtonHandler from './events/applicationButtons';
 
+// Set environment variables to avoid common issues
+process.env.FORCE_COLOR = '0';
+process.env.NO_UPDATE_NOTIFIER = '1';
+
 // Initialize Sentry for error tracking
 if (config.sentry.dsn) {
   Sentry.init({
@@ -64,6 +68,12 @@ class KrakenBot {
     try {
       logger.info('🤖 Initializing KrakenGaming Discord Bot...');
 
+      // Start health check server for Cloud Run first
+      const port = parseInt(process.env.PORT || '8080', 10);
+      this.healthServer.listen(port, () => {
+        logger.info(`✅ Health check server running on port ${port}`);
+      });
+
       // Set up error handling
       this.setupErrorHandling();
 
@@ -80,14 +90,10 @@ class KrakenBot {
         this.client.user?.setActivity('KrakenGaming.org', {
           type: ActivityType.Watching,
         });
-      });      // Login to Discord
-      await this.client.login(config.discord.token);
-
-      // Start health check server for Cloud Run
-      const port = parseInt(process.env.PORT || '8080', 10);
-      this.healthServer.listen(port, () => {
-        logger.info(`✅ Health check server running on port ${port}`);
       });
+
+      // Login to Discord
+      await this.client.login(config.discord.token);
     } catch (error) {
       logger.error('Failed to initialize bot:', error);
       Sentry.captureException(error);

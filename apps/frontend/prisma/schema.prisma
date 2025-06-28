@@ -20,11 +20,19 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Port Battle permissions
+  canCreatePortBattles Boolean @default(false)
+
   // Relationships
   sessions   Session[]
   applications Application[]
   applicationVouches ApplicationVouch[]
   bugReports BugReport[]
+  createdPortBattles PortBattle[] @relation("PortBattleCreator")
+  portBattleSignups PortBattleSignup[]
+  screeningSignups ScreeningSignup[]
+  userStrikes UserStrike[]
+  commandRoles CommandStructureRole[]
 
   @@map("users")
 }
@@ -167,4 +175,280 @@ model GalleryItem {
   updatedAt   DateTime @updatedAt
 
   @@map("gallery_items")
+}
+
+// Cookie consent tracking
+model CookieConsent {
+  id        String   @id @default(cuid())
+  ip        String
+  userAgent String
+  accepted  Boolean
+  timestamp DateTime
+  createdAt DateTime @default(now())
+
+  @@map("cookie_consent")
+}
+
+// Port Battle Management System
+model PortBattle {
+  id                String   @id @default(cuid())
+  creatorId         String
+  portName          String
+  meetupTime        DateTime
+  battleStartTime   DateTime
+  isDeepWater       Boolean
+  meetupLocation    String
+  brLimit           Int
+  commanderName     String?
+  secondICName      String?
+  reqCommanderName  String?
+  status            String   @default("ACTIVE") // ACTIVE, COMPLETED, CANCELLED
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  creator          User @relation("PortBattleCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  fleetSetups      FleetSetup[]
+  screeningFleets  ScreeningFleet[]
+  captainsCodes    CaptainsCode[]
+
+  @@map("port_battles")
+}
+
+model FleetSetup {
+  id            String   @id @default(cuid())
+  portBattleId  String
+  setupName     String   @default("Main Fleet")
+  isActive      Boolean  @default(true)
+  setupOrder    Int      @default(1)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relationships
+  portBattle PortBattle @relation(fields: [portBattleId], references: [id], onDelete: Cascade)
+  roles      FleetRole[]
+
+  @@map("fleet_setups")
+}
+
+model FleetRole {
+  id               String   @id @default(cuid())
+  fleetSetupId     String
+  roleOrder        Int
+  shipName         String
+  brValue          Int
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relationships
+  fleetSetup FleetSetup @relation(fields: [fleetSetupId], references: [id], onDelete: Cascade)
+  signups    PortBattleSignup[]
+
+  @@map("fleet_roles")
+}
+
+model PortBattleSignup {
+  id                String   @id @default(cuid())
+  userId            String
+  fleetRoleId       String
+  captainName       String
+  clanName          String
+  shipName          String
+  books             Int      @default(1) // 1-5
+  alternateShip     String?
+  alternateBooks    Int?     @default(1) // 1-5
+  willingToScreen   Boolean  @default(false)
+  comments          String?
+  status            String   @default("PENDING") // PENDING, APPROVED, DENIED
+  signupTime        DateTime @default(now())
+  lastEditTime      DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fleetRole FleetRole @relation(fields: [fleetRoleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, fleetRoleId])
+  @@map("port_battle_signups")
+}
+
+model ScreeningFleet {
+  id               String   @id @default(cuid())
+  portBattleId     String
+  fleetType        String   // OFFENSIVE, DEFENSIVE
+  commanderName    String?
+  secondICName     String?  // Second in Command
+  meetupLocation   String?  // Where screening fleet meets
+  observation      String?
+  shipsRequired    String   // Specific ships or rate classes
+  nation           String   // GB, USA, France, Pirates, Russia, Sweden
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relationships
+  portBattle PortBattle @relation(fields: [portBattleId], references: [id], onDelete: Cascade)
+  signups    ScreeningSignup[]
+
+  @@map("screening_fleets")
+}
+
+model ScreeningSignup {
+  id                String   @id @default(cuid())
+  screeningFleetId  String
+  userId            String
+  captainName       String
+  clanName          String
+  status            String   @default("PENDING") // PENDING, APPROVED, DENIED
+  signupTime        DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  user           User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  screeningFleet ScreeningFleet @relation(fields: [screeningFleetId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, screeningFleetId])
+  @@map("screening_signups")
+}
+
+model CaptainsCode {
+  id             String    @id @default(cuid())
+  code           String    @unique
+  portBattleId   String
+  description    String?
+  isActive       Boolean   @default(true)
+  usageCount     Int       @default(0)
+  maxUsage       Int?      // null for unlimited
+  expiresAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relationships
+  portBattle PortBattle @relation(fields: [portBattleId], references: [id], onDelete: Cascade)
+
+  @@map("captains_codes")
+}
+
+model UserStrike {
+  id               String    @id @default(cuid())
+  userId           String
+  reason           String
+  issuedBy         String?   // Admin who issued the strike
+  isRemoved        Boolean   @default(false)
+  removedBy        String?
+  removedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_strikes")
+}
+
+model Clan {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("clans")
+}
+
+model Port {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  region    String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ports")
+}
+
+model BlacklistEntry {
+  id               String    @id @default(cuid())
+  discordId        String?   // Discord user ID if available
+  name             String?   // Text-based name fallback
+  reason           String
+  addedBy          String    // Admin who added the entry
+  isActive         Boolean   @default(true)
+  removedBy        String?
+  removedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@map("blacklist_entries")
+}
+
+model CommandStructureRole {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  level       Int      @default(1)
+  permissions String   // JSON string of permissions array
+  assignedUserId String? // User assigned to this role
+  flagCountry String?  // Country flag to display
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  assignedUser User? @relation(fields: [assignedUserId], references: [id], onDelete: SetNull)
+
+  @@map("command_structure_roles")
+}
+
+// Site settings for admin configuration
+model SiteSettings {
+  id               String   @id @default(cuid())
+  siteName         String   @default("KrakenGaming")
+  tagline          String   @default("Legendary Fleet Command")
+  description      String   @default("Join the most prestigious naval command in the Caribbean. Elite captains, strategic warfare, and maritime dominance await.")
+  commandStructure String?  // JSON string of command structure array
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+// Feature cards for homepage
+model FeatureCard {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  icon        String   @default("⚓")
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("feature_cards")
+}
+
+// Admiralty letter content
+model AdmiraltyLetter {
+  id        String   @id @default(cuid())
+  title     String   @default("Letter from the Admiralty")
+  content   String
+  author    String   @default("The Admiralty")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admiralty_letters")
+}
+
+// Welcome content
+model WelcomeContent {
+  id        String   @id @default(cuid())
+  title     String   @default("Welcome Aboard Captain")
+  content   String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("welcome_content")
 }

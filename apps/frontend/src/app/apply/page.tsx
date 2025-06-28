@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from '@/hooks/useSession';
+import { useSession } from '@/hooks/useAuth';
 import { signIn } from 'next-auth/react';
 
 const NATIONS = [

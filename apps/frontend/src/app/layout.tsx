@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono, Cinzel, Crimson_Text } from "next/font/google";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import CookieConsent from "@/components/CookieConsent";
 import { Providers } from "@/components/Providers";
 
 const inter = Inter({
@@ -72,6 +73,7 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
+          <CookieConsent />
         </Providers>
       </body>
     </html>

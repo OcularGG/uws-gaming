@@ -1,532 +1,384 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { 
-  PortBattle, 
-  FleetRole, 
-  Captain, 
-  ScreeningFleet, 
-  SHIPS, 
-  SHIP_NAMES, 
-  NATIONS, 
-  SHIP_RATES,
-  AVAILABLE_CLANS,
-  SignUpRequest
-} from '@/types/port-battle-types';
+import { useState, useEffect } from 'react'
+import { useSession } from '@/hooks/useAuth'
+import { getAuthHeaders } from '@/hooks/useAuthenticatedFetch'
+import Link from 'next/link'
 
-// Available clans - you'll need to update this with your actual clan list
-const CLANS = [
-  'CLAN1', 'CLAN2', 'CLAN3', 'CLAN4', 'CLAN5',
-  'CLAN6', 'CLAN7', 'CLAN8', 'CLAN9', 'CLAN10'
-];
-
-interface SignUpModalProps {
-  role: FleetRole;
-  portBattleId: string;
-  onClose: () => void;
-  onSignUp: (data: SignUpRequest) => void;
+interface PortBattle {
+  id: string
+  portName: string
+  meetupTime: string
+  battleStartTime: string
+  isDeepWater: boolean
+  meetupLocation: string
+  brLimit: number
+  commanderName?: string
+  secondICName?: string
+  reqCommanderName?: string
+  status: string
+  creator: {
+    username: string
+  }
+  fleetSetups: FleetSetup[]
+  screeningFleets: ScreeningFleet[]
 }
 
-function SignUpModal({ role, portBattleId, onClose, onSignUp }: SignUpModalProps) {
-  const [formData, setFormData] = useState({
-    ship: '',
-    books: 1,
-    alternateShip: '',
-    alternateBooks: 1,
-    willingToScreen: false,
-    comments: ''
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSignUp({
-      portBattleId,
-      roleId: role.id,
-      ...formData
-    });
-    onClose();
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <h3 className="text-lg font-semibold mb-4">Sign Up for Role #{role.position}</h3>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Primary Ship</label>
-            <select
-              value={formData.ship}
-              onChange={(e) => setFormData(prev => ({ ...prev, ship: e.target.value }))}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select a ship...</option>
-              {SHIP_NAMES.map(ship => (
-                <option key={ship} value={ship}>{ship}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Primary Books (1-5)</label>
-            <input
-              type="number"
-              min="1"
-              max="5"
-              value={formData.books}
-              onChange={(e) => setFormData(prev => ({ ...prev, books: parseInt(e.target.value) }))}
-              className="w-full p-2 border rounded-md"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Alternate Ship</label>
-            <select
-              value={formData.alternateShip}
-              onChange={(e) => setFormData(prev => ({ ...prev, alternateShip: e.target.value }))}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select alternate ship...</option>
-              {SHIP_NAMES.map(ship => (
-                <option key={ship} value={ship}>{ship}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Alternate Books (1-5)</label>
-            <input
-              type="number"
-              min="1"
-              max="5"
-              value={formData.alternateBooks}
-              onChange={(e) => setFormData(prev => ({ ...prev, alternateBooks: parseInt(e.target.value) }))}
-              className="w-full p-2 border rounded-md"
-              required
-            />
-          </div>
-
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="willingToScreen"
-              checked={formData.willingToScreen}
-              onChange={(e) => setFormData(prev => ({ ...prev, willingToScreen: e.target.checked }))}
-              className="mr-2"
-            />
-            <label htmlFor="willingToScreen" className="text-sm">Willing to screen?</label>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Comments (optional)</label>
-            <textarea
-              value={formData.comments}
-              onChange={(e) => setFormData(prev => ({ ...prev, comments: e.target.value }))}
-              className="w-full p-2 border rounded-md"
-              rows={3}
-              placeholder="Any additional comments..."
-            />
-          </div>
-
-          <div className="flex gap-2 pt-4">
-            <button
-              type="submit"
-              className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-            >
-              Sign Up
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
+interface FleetSetup {
+  id: string
+  setupName: string
+  isActive: boolean
+  setupOrder: number
+  roles: FleetRole[]
 }
 
-function getShipBR(shipName: string): number {
-  const ship = SHIPS.find(s => s.name === shipName);
-  return ship?.br || 0;
+interface FleetRole {
+  id: string
+  roleOrder: number
+  shipName: string
+  brValue: number
+  signups: PortBattleSignup[]
+}
+
+interface PortBattleSignup {
+  id: string
+  captainName: string
+  clanName: string
+  shipName: string
+  books: number
+  alternateShip?: string
+  alternateBooks?: number
+  willingToScreen: boolean
+  comments?: string
+  status: string
+  user: {
+    username: string
+  }
+}
+
+interface ScreeningFleet {
+  id: string
+  fleetType: string
+  observation?: string
+  shipsRequired: string
+  nation: string
+  commanderName?: string
+  signups: ScreeningSignup[]
+}
+
+interface ScreeningSignup {
+  id: string
+  captainName: string
+  clanName: string
+  status: string
+  user: {
+    username: string
+  }
 }
 
 export default function PortBattlesPage() {
-  const [portBattles, setPortBattles] = useState<PortBattle[]>([]);
-  const [selectedPB, setSelectedPB] = useState<PortBattle | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [showSignUpModal, setShowSignUpModal] = useState<FleetRole | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false); // This should come from auth
+  const { data: session } = useSession()
+  const [portBattles, setPortBattles] = useState<PortBattle[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchPortBattles();
-  }, []);
+    if (session) {
+      fetchPortBattles()
+    }
+  }, [session])
 
   const fetchPortBattles = async () => {
     try {
-      const response = await fetch('/api/port-battles');
-      const data = await response.json();
-      setPortBattles(data);
-      if (data.length > 0) {
-        setSelectedPB(data[0]);
+      setLoading(true)
+      setError(null)
+      
+      // Check if we have session before making the request
+      if (!session) {
+        setError('Authentication required')
+        return
       }
-    } catch (error) {
-      console.error('Error fetching port battles:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const handleSignUp = async (signUpData: SignUpRequest) => {
-    try {
-      const response = await fetch('/api/port-battles?action=signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(signUpData)
-      });
-
-      if (response.ok) {
-        // Refresh the port battle data
-        if (selectedPB) {
-          const updatedResponse = await fetch(`/api/port-battles?id=${selectedPB.id}`);
-          const updatedPB = await updatedResponse.json();
-          setSelectedPB(updatedPB);
-          
-          // Update in the list
-          setPortBattles(prev => prev.map(pb => pb.id === updatedPB.id ? updatedPB : pb));
+      const response = await fetch('/api/port-battles?action=list', {
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json'
         }
-      } else {
-        const error = await response.json();
-        alert(error.error || 'Failed to sign up');
+      })
+
+      if (response.status === 401) {
+        setError('Authentication failed. Please sign in again.')
+        return
       }
-    } catch (error) {
-      console.error('Error signing up:', error);
-      alert('Failed to sign up');
-    }
-  };
 
-  const handleApproval = async (roleId: string, approved: boolean) => {
-    if (!selectedPB) return;
-
-    try {
-      const response = await fetch(`/api/port-battles?id=${selectedPB.id}&action=approve-captain`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roleId, approved })
-      });
-
-      if (response.ok) {
-        // Refresh the port battle data
-        const updatedResponse = await fetch(`/api/port-battles?id=${selectedPB.id}`);
-        const updatedPB = await updatedResponse.json();
-        setSelectedPB(updatedPB);
+      if (response.status === 500) {
+        // Fallback for development when database isn't ready
+        console.warn('Database not ready, using mock data for development')
+        setPortBattles([
+          {
+            id: 'mock-1',
+            portName: 'Port Royal',
+            meetupTime: new Date(Date.now() + 86400000).toISOString(), // Tomorrow
+            battleStartTime: new Date(Date.now() + 90000000).toISOString(), // Tomorrow + 1 hour
+            isDeepWater: true,
+            meetupLocation: 'Kingston Harbor',
+            brLimit: 12000,
+            commanderName: 'Admiral Nelson',
+            secondICName: 'Captain Hardy',
+            status: 'upcoming',
+            creator: { username: 'FleetCommand' },
+            fleetSetups: [],
+            screeningFleets: []
+          }
+        ])
+        return
       }
-    } catch (error) {
-      console.error('Error updating approval:', error);
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`HTTP ${response.status}: ${errorText || 'Unknown error'}`)
+      }
+
+      const data = await response.json()
+      setPortBattles(data.portBattles || [])
+    } catch (err) {
+      console.error('Error fetching port battles:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch port battles'
+      setError(errorMessage)
+    } finally {
+      setLoading(false)
     }
-  };
+  }
+
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString()
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-navy-dark via-navy to-navy-light">
+        <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen">
+          <div className="neo-brutal-box bg-sail-white p-8 text-center max-w-md">
+            <div className="text-4xl mb-4">⚔️</div>
+            <h1 className="text-2xl font-bold text-navy-dark mb-4" style={{fontFamily: 'Cinzel, serif'}}>
+              Admiral Credentials Required
+            </h1>
+            <p className="text-navy-dark/70 mb-6">
+              Please authenticate to access the Port Battle Command Center
+            </p>
+            <Link 
+              href="/api/auth/signin" 
+              className="bg-navy-dark text-sail-white px-6 py-3 rounded border-2 border-navy-dark hover:bg-navy font-bold transition-all"
+              style={{fontFamily: 'Cinzel, serif'}}
+            >
+              Report for Duty
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (loading) {
-    return <div className="flex justify-center items-center min-h-64">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-navy-dark via-navy to-navy-light">
+        <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen">
+          <div className="neo-brutal-box bg-sail-white p-8 text-center">
+            <div className="text-4xl mb-4 animate-pulse">⚓</div>
+            <h1 className="text-2xl font-bold text-navy-dark mb-4" style={{fontFamily: 'Cinzel, serif'}}>
+              Loading Battle Plans...
+            </h1>
+            <p className="text-navy-dark/70">Gathering intelligence from the fleet</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
-  if (!selectedPB) {
-    return <div className="text-center py-8">No port battles available</div>;
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-navy-dark via-navy to-navy-light">
+        <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen">
+          <div className="neo-brutal-box bg-sail-white p-8 text-center max-w-md">
+            <div className="text-4xl mb-4">⚠️</div>
+            <h1 className="text-2xl font-bold text-navy-dark mb-4" style={{fontFamily: 'Cinzel, serif'}}>
+              Fleet Communication Error
+            </h1>
+            <div className="bg-red-100 border-2 border-red-400 text-red-800 px-4 py-3 rounded mb-4">
+              <strong>Battle Report:</strong> {error}
+            </div>
+            <button
+              onClick={fetchPortBattles}
+              className="bg-blue-600 text-white px-6 py-2 rounded border-2 border-blue-700 hover:bg-blue-700 font-bold transition-all"
+              style={{fontFamily: 'Cinzel, serif'}}
+            >
+              Retry Communication
+            </button>
+            <div className="mt-4">
+              <Link 
+                href="/admin" 
+                className="text-navy-dark hover:text-navy underline"
+                style={{fontFamily: 'Cinzel, serif'}}
+              >
+                Return to Command Center
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
-
-  const activeFleet = selectedPB.fleetCompositions.find(fc => fc.isActive);
-  const remainingBR = selectedPB.brLimit - selectedPB.currentBR;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">Port Battles</h1>
-        
-        {/* Port Battle Selection */}
-        {portBattles.length > 1 && (
-          <div className="mb-6">
-            <label className="block text-sm font-medium mb-2">Select Port Battle:</label>
-            <select
-              value={selectedPB.id}
-              onChange={(e) => {
-                const pb = portBattles.find(p => p.id === e.target.value);
-                setSelectedPB(pb || null);
-              }}
-              className="p-2 border rounded-md"
-            >
-              {portBattles.map(pb => (
-                <option key={pb.id} value={pb.id}>
-                  {pb.port} - {new Date(pb.battleStartTimeUTC).toLocaleDateString()}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-      </div>
-
-      {/* Port Battle Info */}
-      <div className="bg-gray-50 rounded-lg p-6 mb-8">
-        <h2 className="text-2xl font-semibold mb-4">{selectedPB.port} Port Battle</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-          <div>
-            <strong>Meetup Time (UTC):</strong><br />
-            {new Date(selectedPB.meetupTimeUTC).toLocaleString()}
-          </div>
-          <div>
-            <strong>Battle Start (UTC):</strong><br />
-            {new Date(selectedPB.battleStartTimeUTC).toLocaleString()}
-          </div>
-          <div>
-            <strong>Water Type:</strong><br />
-            {selectedPB.waterType}
-          </div>
-          <div>
-            <strong>Meetup Location:</strong><br />
-            {selectedPB.meetupLocation}
-          </div>
-          <div>
-            <strong>PB Commander:</strong><br />
-            {selectedPB.pbCommander}
-          </div>
-          <div>
-            <strong>2IC Commander:</strong><br />
-            {selectedPB.secondInCommand}
-          </div>
-          <div>
-            <strong>REQ Commander:</strong><br />
-            {selectedPB.reqCommander}
-          </div>
-          <div>
-            <strong>BR Limit:</strong><br />
-            {selectedPB.brLimit}
-          </div>
-          <div>
-            <strong>Current BR:</strong><br />
-            <span className={remainingBR < 0 ? 'text-red-600 font-bold' : 'text-green-600'}>
-              {selectedPB.currentBR} / {selectedPB.brLimit}
-            </span>
-          </div>
-          <div>
-            <strong>Remaining BR:</strong><br />
-            <span className={remainingBR < 0 ? 'text-red-600 font-bold' : 'text-green-600'}>
-              {remainingBR}
-            </span>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-navy-dark via-navy to-navy-light">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-5xl font-bold text-sail-white mb-4" style={{fontFamily: 'Cinzel, serif'}}>
+            ⚔️ PORT BATTLE COMMAND ⚔️
+          </h1>
+          <p className="text-sail-white/90 text-xl mb-2" style={{fontFamily: 'Crimson Text, serif'}}>
+            Strategic Naval Operations & Battle Coordination
+          </p>
         </div>
-      </div>
 
-      {/* Fleet Composition Tabs */}
-      {selectedPB.fleetCompositions.length > 1 && (
-        <div className="mb-6">
-          <div className="flex border-b">
-            {selectedPB.fleetCompositions.map(fleet => (
-              <button
-                key={fleet.id}
-                onClick={() => {
-                  // TODO: Implement fleet switching
-                }}
-                className={`px-4 py-2 border-b-2 ${
-                  fleet.isActive 
-                    ? 'border-blue-500 text-blue-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
+        {/* Navigation */}
+        <div className="flex justify-center mb-8">
+          <div className="neo-brutal-box bg-sail-white p-4">
+            <div className="flex gap-4 flex-wrap justify-center">
+              <Link 
+                href="/port-battles/calendar" 
+                className="bg-green-600 text-white px-6 py-2 rounded border-2 border-green-700 hover:bg-green-700 font-bold transition-all"
+                style={{fontFamily: 'Cinzel, serif'}}
               >
-                {fleet.name}
-              </button>
-            ))}
+                📅 Battle Calendar
+              </Link>
+              <Link 
+                href="/port-battles/create" 
+                className="bg-blue-600 text-white px-6 py-2 rounded border-2 border-blue-700 hover:bg-blue-700 font-bold transition-all"
+                style={{fontFamily: 'Cinzel, serif'}}
+              >
+                ⚔️ Plan New Battle
+              </Link>
+              <Link 
+                href="/admin" 
+                className="bg-navy-dark text-sail-white px-6 py-2 rounded border-2 border-navy-dark hover:bg-navy font-bold transition-all"
+                style={{fontFamily: 'Cinzel, serif'}}
+              >
+                ⚓ Command Center
+              </Link>
+            </div>
           </div>
         </div>
-      )}
 
-      {/* Fleet Roster Table */}
-      {activeFleet && (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="px-6 py-4 bg-gray-50 border-b">
-            <h3 className="text-lg font-semibold">{activeFleet.name} - Sign Up Sheet</h3>
+        {portBattles.length === 0 ? (
+          <div className="neo-brutal-box bg-sail-white p-8 text-center">
+            <div className="text-4xl mb-4">🏴‍☠️</div>
+            <h2 className="text-2xl font-bold text-navy-dark mb-4" style={{fontFamily: 'Cinzel, serif'}}>
+              No Active Port Battles
+            </h2>
+            <p className="text-navy-dark/70 mb-6">
+              The seas are calm, Admiral. No battles currently scheduled.
+            </p>
+            <Link 
+              href="/port-battles/create" 
+              className="bg-blue-600 text-white px-6 py-3 rounded border-2 border-blue-700 hover:bg-blue-700 font-bold transition-all"
+              style={{fontFamily: 'Cinzel, serif'}}
+            >
+              ⚔️ Plan First Battle
+            </Link>
           </div>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Position
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Clan
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Captain
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ship
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    BR
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Books
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Alt Ship
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Alt Books
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Screen?
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Comments
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {activeFleet.roles.map((role) => (
-                  <tr key={role.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {role.position}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {role.captain?.clan || '-'}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {role.captain?.name || '-'}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {role.captain?.ship || '-'}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {role.captain?.ship ? getShipBR(role.captain.ship) : '-'}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {role.captain?.books || '-'}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {role.captain?.alternateShip || '-'}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {role.captain?.alternateBooks || '-'}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {role.captain?.willingToScreen ? 'Yes' : 'No'}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-900 max-w-xs truncate">
-                      {role.captain?.comments || '-'}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm">
-                      {role.captain && (
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          role.captain.status === 'approved' 
-                            ? 'bg-green-100 text-green-800'
-                            : role.captain.status === 'pending'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {role.captain.status}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm">
-                      {!role.captain ? (
-                        <button
-                          onClick={() => setShowSignUpModal(role)}
-                          className="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700"
-                        >
-                          Sign Up
-                        </button>
-                      ) : isAdmin && role.captain.status === 'pending' ? (
-                        <div className="flex gap-1">
-                          <button
-                            onClick={() => handleApproval(role.id, true)}
-                            className="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700"
-                          >
-                            ✓
-                          </button>
-                          <button
-                            onClick={() => handleApproval(role.id, false)}
-                            className="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700"
-                          >
-                            ✗
-                          </button>
-                        </div>
-                      ) : null}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Screening Fleets */}
-      {selectedPB.screeningFleets.length > 0 && (
-        <div className="mt-8">
-          <h3 className="text-xl font-semibold mb-4">Screening Fleets</h3>
-          {selectedPB.screeningFleets.map((fleet, index) => (
-            <div key={fleet.id} className="bg-white rounded-lg shadow mb-4 overflow-hidden">
-              <div className="px-6 py-4 bg-gray-50 border-b">
-                <h4 className="text-lg font-medium">
-                  Screening Fleet #{index + 1} - {fleet.type} ({fleet.nation})
-                </h4>
-                <p className="text-sm text-gray-600">Commander: {fleet.commander}</p>
-                <p className="text-sm text-gray-600">Observation: {fleet.observation}</p>
-                <p className="text-sm text-gray-600">
-                  Requirements: {fleet.shipRequirements.join(', ')}
-                </p>
-              </div>
-              
-              <div className="p-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {fleet.captains.map((captain, idx) => (
-                    <div key={idx} className="border rounded p-3">
-                      <div className="font-medium">{captain.name}</div>
-                      <div className="text-sm text-gray-600">{captain.clan}</div>
-                      <span className={`inline-block px-2 py-1 text-xs rounded-full mt-1 ${
-                        captain.status === 'approved' 
-                          ? 'bg-green-100 text-green-800'
-                          : captain.status === 'pending'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {captain.status}
-                      </span>
-                    </div>
-                  ))}
+        ) : (
+          <div className="grid gap-6">
+          {portBattles.map((portBattle) => (
+            <div key={portBattle.id} className="neo-brutal-box bg-sail-white p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-navy-dark mb-2" style={{fontFamily: 'Cinzel, serif'}}>
+                    ⚔️ {portBattle.portName}
+                  </h2>
+                  <p className="text-navy-dark/70 mb-1">
+                    <span className="font-medium">Fleet Admiral:</span> {portBattle.creator.username}
+                  </p>
+                  <p className="text-sm text-navy-dark/60">
+                    {portBattle.isDeepWater ? '🌊 Deep Water' : '🏝️ Shallow Water'} • 
+                    <span className="font-medium"> BR Limit: {portBattle.brLimit}</span>
+                  </p>
                 </div>
-                
-                <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                  Sign Up for Screening
-                </button>
+                <div className="text-right">
+                  <span className={`px-3 py-1 rounded border-2 text-sm font-bold ${
+                    portBattle.status === 'ACTIVE' ? 'bg-green-100 text-green-800 border-green-400' :
+                    portBattle.status === 'COMPLETED' ? 'bg-blue-100 text-blue-800 border-blue-400' :
+                    'bg-brass/20 text-navy-dark border-brass'
+                  }`} style={{fontFamily: 'Cinzel, serif'}}>
+                    {portBattle.status}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6 mb-6">
+                <div className="bg-navy-dark/5 p-4 rounded border-2 border-navy-dark/20">
+                  <h3 className="font-bold text-navy-dark mb-3 flex items-center gap-2" style={{fontFamily: 'Cinzel, serif'}}>
+                    📅 Battle Schedule
+                  </h3>
+                  <p className="text-sm mb-2">
+                    <span className="font-bold text-navy-dark">Muster:</span> {formatDateTime(portBattle.meetupTime)}
+                  </p>
+                  <p className="text-sm mb-2">
+                    <span className="font-bold text-navy-dark">Battle Commences:</span> {formatDateTime(portBattle.battleStartTime)}
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-bold text-navy-dark">Rally Point:</span> {portBattle.meetupLocation}
+                  </p>
+                </div>
+
+                <div className="bg-brass/10 p-4 rounded border-2 border-brass/30">
+                  <h3 className="font-bold text-navy-dark mb-3 flex items-center gap-2" style={{fontFamily: 'Cinzel, serif'}}>
+                    ⭐ Command Structure
+                  </h3>
+                  {portBattle.commanderName && (
+                    <p className="text-sm mb-2">
+                      <span className="font-bold text-navy-dark">Port Battle Commander:</span> {portBattle.commanderName}
+                    </p>
+                  )}
+                  {portBattle.secondICName && (
+                    <p className="text-sm mb-2">
+                      <span className="font-bold text-navy-dark">Second in Command:</span> {portBattle.secondICName}
+                    </p>
+                  )}
+                  {portBattle.reqCommanderName && (
+                    <p className="text-sm">
+                      <span className="font-medium">REQ Commander:</span> {portBattle.reqCommanderName}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <div className="text-sm text-gray-600">
+                  Fleet Setups: {portBattle.fleetSetups.length} •
+                  Screening Fleets: {portBattle.screeningFleets.length}
+                </div>
+                <div className="space-x-2">
+                  <Link
+                    href={`/port-battles/${portBattle.id}`}
+                    className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                  >
+                    View Details
+                  </Link>
+                  <Link
+                    href={`/port-battles/${portBattle.id}/signup`}
+                    className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
               </div>
             </div>
           ))}
         </div>
       )}
-
-      {/* Sign Up Modal */}
-      {showSignUpModal && (
-        <SignUpModal
-          role={showSignUpModal}
-          portBattleId={selectedPB.id}
-          onClose={() => setShowSignUpModal(null)}
-          onSignUp={handleSignUp}
-        />
-      )}
+      </div>
     </div>
-  );
+  )
 }

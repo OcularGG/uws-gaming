@@ -11,20 +11,70 @@
       "static/chunks/main-app.js",
       "static/chunks/app/not-found.js"
     ],
-    "/api/auth/[...nextauth]/route": [
+    "/admin/homepage/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/auth/[...nextauth]/route.js"
+      "static/chunks/app/admin/homepage/page.js"
     ],
-    "/port-battles/page": [
+    "/admin/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/port-battles/page.js"
+      "static/chunks/app/admin/page.js"
     ],
-    "/api/port-battles/route": [
+    "/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/port-battles/route.js"
+      "static/chunks/app/page.js"
+    ],
+    "/api/admin/settings/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/admin/settings/route.js"
+    ],
+    "/api/admin/welcome/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/admin/welcome/route.js"
+    ],
+    "/api/admin/features/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/admin/features/route.js"
+    ],
+    "/api/auth/[...auth]/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/auth/[...auth]/route.js"
+    ],
+    "/api/admin/letter/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/admin/letter/route.js"
+    ],
+    "/api/admin/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/admin/route.js"
+    ],
+    "/admin/settings/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/settings/page.js"
+    ],
+    "/bugs/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/bugs/layout.js"
+    ],
+    "/bugs/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/bugs/page.js"
+    ],
+    "/api/bug-reports/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/bug-reports/route.js"
     ]
   }
 }
