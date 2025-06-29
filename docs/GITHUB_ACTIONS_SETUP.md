@@ -6,7 +6,7 @@ This guide will help you set up the CI/CD pipeline for the UWS Gaming project us
 ## Prerequisites
 - Access to the GitHub repository: https://github.com/OcularGG/uws-gaming
 - Google Cloud project `uws-gaming` configured
-- Service account key created (github-actions-key.json)
+- Service account key created and added to GitHub secrets ✅
 
 ## GitHub Secrets Setup
 
