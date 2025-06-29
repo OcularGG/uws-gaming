@@ -26,8 +26,8 @@ COPY . .
 
 # Set build-time environment variables
 ARG NEXT_PUBLIC_ENV=production
-ARG NEXT_PUBLIC_DOMAIN=krakengaming.org
-ARG NEXT_PUBLIC_API_URL=https://api.krakengaming.org
+ARG NEXT_PUBLIC_DOMAIN=uwsgaming.org
+ARG NEXT_PUBLIC_API_URL=https://api.uwsgaming.org
 ARG NEXT_PUBLIC_APP_NAME=KrakenGaming
 ARG NEXT_PUBLIC_APP_VERSION=0.1.0
 
