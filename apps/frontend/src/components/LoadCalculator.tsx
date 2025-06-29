@@ -151,17 +151,17 @@ export default function LoadCalculator({
   const [isExpanded, setIsExpanded] = useState(false)
 
   const shipData = SHIP_LOAD_DATA[shipName]
-  
+
   // Calculate wood modifiers for dynamic values
   const woodModifiers = calculateWoodModifiers(frame, planking)
-  
+
   // Apply wood modifiers to base ship stats
   const modifiedCargoCapacity = Math.round(applyWoodModifiers(shipData?.baseCargoCapacity || 0, woodModifiers['Hold weight'] || 0))
   const modifiedSpeed = applyCaps(
     applyWoodModifiers(shipData?.baseSpeed || 0, woodModifiers['Max speed'] || 0),
     'Max speed'
   )
-  
+
   if (!shipData) {
     return (
       <div className={`border border-navy-dark/30 rounded-lg p-3 ${className}`}>
@@ -195,8 +195,8 @@ export default function LoadCalculator({
     speedKnots: modifiedSpeed // Use modified speed instead of base speed
   }
 
-  calculation.totalTons = calculation.ballsTons + calculation.gunpowderTons + 
-                         calculation.hullRepairsTons + calculation.rigRepairsTons + 
+  calculation.totalTons = calculation.ballsTons + calculation.gunpowderTons +
+                         calculation.hullRepairsTons + calculation.rigRepairsTons +
                          calculation.medicineTons
 
   calculation.cargoPercentage = Math.round((calculation.totalTons / modifiedCargoCapacity) * 100)
@@ -241,7 +241,7 @@ export default function LoadCalculator({
         <div className="font-medium text-navy-dark border-b border-navy-dark/20 pb-1" style={{fontFamily: 'Cinzel, serif'}}>
           {showFullCalculator ? 'Ammunition & Supplies:' : 'Required Supplies:'}
         </div>
-        
+
         <div className="grid grid-cols-2 gap-2">
           <div className="text-navy-dark">
             <span className="font-medium">{calculation.balls}</span> balls
@@ -250,7 +250,7 @@ export default function LoadCalculator({
             {calculation.ballsTons}t
           </div>
         </div>
-        
+
         <div className="grid grid-cols-2 gap-2">
           <div className="text-navy-dark">
             <span className="font-medium">{calculation.gunpowder}</span> gunpowder
@@ -259,7 +259,7 @@ export default function LoadCalculator({
             {calculation.gunpowderTons}t
           </div>
         </div>
-        
+
         <div className="grid grid-cols-2 gap-2">
           <div className="text-navy-dark">
             <span className="font-medium">{calculation.hullRepairs}</span> hull repairs
@@ -268,7 +268,7 @@ export default function LoadCalculator({
             {calculation.hullRepairsTons}t
           </div>
         </div>
-        
+
         <div className="grid grid-cols-2 gap-2">
           <div className="text-navy-dark">
             <span className="font-medium">{calculation.rigRepairs}</span> rig repairs
@@ -277,7 +277,7 @@ export default function LoadCalculator({
             {calculation.rigRepairsTons}t
           </div>
         </div>
-        
+
         <div className="grid grid-cols-2 gap-2">
           <div className="text-navy-dark">
             <span className="font-medium">{calculation.medicine}</span> medicine
@@ -329,7 +329,7 @@ export default function LoadCalculator({
                 </div>
               </div>
             )}
-            
+
             {/* Ship Performance Section */}
             <div className="border-t border-navy-dark/20 pt-2 mt-2">
               <div className="font-medium text-navy-dark border-b border-navy-dark/20 pb-1 mb-2" style={{fontFamily: 'Cinzel, serif'}}>
@@ -391,10 +391,10 @@ export default function LoadCalculator({
 
 // Export calculation function for other components to use
 export function calculateShipLoad(
-  shipName: string, 
-  broadsides: number, 
-  repairSets: number, 
-  frame?: string, 
+  shipName: string,
+  broadsides: number,
+  repairSets: number,
+  frame?: string,
   planking?: string
 ) {
   const shipData = SHIP_LOAD_DATA[shipName]
@@ -413,7 +413,7 @@ export function calculateShipLoad(
   const hullRepairs = shipData.hullRepairsPerSet * repairSets
   const rigRepairs = shipData.rigRepairsPerSet * repairSets
   const medicine = shipData.medicinePerSet * repairSets
-  
+
   const totalTons = (shipData.ballsTonsPerBroadside * broadsides) +
                    (shipData.gunpowderTonsPerBroadside * broadsides) +
                    (shipData.hullRepairsTonsPerSet * repairSets) +

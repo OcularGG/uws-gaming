@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { signIn, signOut } from '@/lib/auth';
 import { useSession } from '@/hooks/useAuth';
 
 const getNavigationItems = (session: any, isAdmin: boolean) => {
@@ -52,8 +51,8 @@ export default function Navigation() {
 
   const handleAuth = async () => {
     if (session) {
-      // Redirect to logout endpoint
-      window.location.href = '/api/auth/signout';
+      // Use the NextAuth signout endpoint directly with proper callback
+      window.location.href = '/api/auth/signout?callbackUrl=' + encodeURIComponent(window.location.origin);
     } else {
       // Redirect to login page
       window.location.href = '/auth/login';
@@ -83,7 +82,7 @@ export default function Navigation() {
                             isActive ? 'active' : ''
                           } ${isHomepage ? 'hero-title-gradient' : ''}`}
                           style={{
-                            fontFamily: 'Cinzel, serif', 
+                            fontFamily: 'Cinzel, serif',
                             color: isHomepage ? 'transparent' : 'var(--navy-dark)',
                             textShadow: isHomepage ? 'none' : 'none'
                           }}
@@ -115,7 +114,7 @@ export default function Navigation() {
                         isActive ? 'active' : ''
                       } ${isHomepage ? 'hero-title-gradient' : ''}`}
                       style={{
-                        fontFamily: 'Cinzel, serif', 
+                        fontFamily: 'Cinzel, serif',
                         color: isHomepage ? 'transparent' : 'var(--navy-dark)',
                         textShadow: isHomepage ? 'none' : 'none'
                       }}

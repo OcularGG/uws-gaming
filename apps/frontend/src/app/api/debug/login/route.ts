@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 export async function POST(request: NextRequest) {
   try {
     const { emailOrUsername, password } = await request.json()
-    
+
     console.log('🔍 Debug Login API called...')
     console.log('📧 Email/Username:', emailOrUsername)
     console.log('🔐 Password length:', password?.length)
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the primary role
-    const primaryRole = user.userRoles.find((ur: any) => ur.role.name === 'admin')?.role.name || 
+    const primaryRole = user.userRoles.find((ur: any) => ur.role.name === 'admin')?.role.name ||
                        user.userRoles[0]?.role.name || 'user'
 
     console.log('✅ Login successful, role:', primaryRole)

@@ -15,9 +15,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        console.log('🔍 NextAuth authorize called with:', { 
-          emailOrUsername: credentials?.emailOrUsername, 
-          hasPassword: !!credentials?.password 
+        console.log('🔍 NextAuth authorize called with:', {
+          emailOrUsername: credentials?.emailOrUsername,
+          hasPassword: !!credentials?.password
         })
 
         if (!credentials?.emailOrUsername || !credentials?.password) {
@@ -29,10 +29,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           // Try to find user by email first, then by username
           let user = await prisma.user.findUnique({
             where: { email: credentials.emailOrUsername as string },
-            include: {
+            select: {
+              id: true,
+              email: true,
+              username: true,
+              password: true,
+              discordId: true,
+              isActive: true,
+              isApproved: true,
+              canCreatePortBattles: true,
               userRoles: {
-                include: {
-                  role: true
+                select: {
+                  role: {
+                    select: {
+                      name: true
+                    }
+                  }
                 }
               }
             }
@@ -42,10 +54,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (!user) {
             user = await prisma.user.findUnique({
               where: { username: credentials.emailOrUsername as string },
-              include: {
+              select: {
+                id: true,
+                email: true,
+                username: true,
+                password: true,
+                discordId: true,
+                isActive: true,
+                isApproved: true,
+                canCreatePortBattles: true,
                 userRoles: {
-                  include: {
-                    role: true
+                  select: {
+                    role: {
+                      select: {
+                        name: true
+                      }
+                    }
                   }
                 }
               }
@@ -70,7 +94,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
 
           // Get the primary role (first one, or admin if multiple)
-          const primaryRole = user.userRoles.find((ur: any) => ur.role.name === 'admin')?.role.name || 
+          const primaryRole = user.userRoles.find((ur: any) => ur.role.name === 'admin')?.role.name ||
                              user.userRoles[0]?.role.name || 'user'
 
           console.log('✅ Authentication successful, role:', primaryRole)

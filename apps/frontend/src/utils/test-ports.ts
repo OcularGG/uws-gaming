@@ -4,16 +4,16 @@ import { getPortList, searchPortsSync } from '@/data/ports'
 export const testPortData = async () => {
   try {
     console.log('Testing port data loading...')
-    
+
     // Test loading port data
     const ports = await getPortList()
     console.log(`Loaded ${ports.length} ports`)
     console.log('First 10 ports:', ports.slice(0, 10))
-    
+
     // Test search functionality
     const searchResults = searchPortsSync('hav')
     console.log('Search results for "hav":', searchResults)
-    
+
     return { success: true, portCount: ports.length }
   } catch (error) {
     console.error('Error loading port data:', error)

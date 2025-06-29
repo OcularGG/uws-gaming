@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from '@/hooks/useAuth'
 import { useParams, useRouter } from 'next/navigation'
+import { isAdmin } from '@/lib/adminUtils'
 import Link from 'next/link'
 
 interface PortBattle {
@@ -260,6 +261,15 @@ export default function PortBattleDetailPage() {
           >
             Sign Up
           </Link>
+          {/* Show approval queue link for admins */}
+          {isAdmin(session?.user) && (
+            <Link
+              href={`/port-battles/${portBattle.id}/approve`}
+              className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700"
+            >
+              Approval Queue
+            </Link>
+          )}
           <Link
             href={`/port-battles/${portBattle.id}/edit`}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
@@ -335,12 +345,12 @@ export default function PortBattleDetailPage() {
         </div>
       </div>
 
-      {/* Fleet Setups */}
+      {/* Fleets */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h3 className="text-xl font-bold mb-4">Fleet Setups</h3>
+        <h3 className="text-xl font-bold mb-4">Fleets</h3>
 
         {portBattle.fleetSetups.length === 0 ? (
-          <p className="text-gray-600">No fleet setups configured.</p>
+          <p className="text-gray-600">No fleets configured.</p>
         ) : (
           <div className="space-y-6">
             {portBattle.fleetSetups

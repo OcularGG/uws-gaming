@@ -57,7 +57,7 @@ export default function HomePage() {
             {/* Kraken Gaming Logo */}
             <div className="mb-8 flex justify-center">
               <div className="w-48 h-48 md:w-80 md:h-80 drop-shadow-2xl logo-floating">
-                <img 
+                <img
                   src="/uws-logo.png"
                   alt="UWS Logo"
                   className="w-full h-full object-contain filter drop-shadow-lg"
@@ -88,9 +88,32 @@ export default function HomePage() {
               </div>
             </div>
 
-            <h1 className="hero-title-gradient text-5xl md:text-8xl mb-6 font-bold tracking-wider">
+            <h1 className="hero-title-gradient text-5xl md:text-8xl mb-8 font-bold tracking-wider">
               {settings.siteName}
             </h1>
+
+            {/* Apply Now Button */}
+            <div className="mb-12">
+              <a
+                href="/apply"
+                className="hero-apply-button inline-block px-8 py-4 text-xl md:text-2xl font-bold transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+                style={{
+                  background: 'linear-gradient(90deg, #201810 0%, #714920 20%, #9c642c 40%, #b2905f 60%, #805224 80%, #201810 100%)',
+                  backgroundSize: '300% 100%',
+                  animation: 'hero-gradient-flow 8s ease-in-out infinite alternate',
+                  border: '2px solid rgba(255,255,255,0.2)',
+                  borderRadius: '0.5rem',
+                  color: 'white',
+                  textDecoration: 'none',
+                  fontFamily: 'Cinzel, serif',
+                  textTransform: 'uppercase',
+                  letterSpacing: '2px',
+                  boxShadow: '0 8px 25px rgba(0,0,0,0.3)'
+                }}
+              >
+                Apply Now
+              </a>
+            </div>
 
             <div className="hero-subtitle text-xl md:text-3xl mb-12 max-w-3xl mx-auto"
                style={{

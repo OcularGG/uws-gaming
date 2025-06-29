@@ -11,7 +11,7 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        
+
         // New color palette
         'primary': "var(--primary)",
         'primary-hover': "var(--primary-hover)",
@@ -20,7 +20,7 @@ const config: Config = {
         'secondary': "var(--secondary)",
         'secondary-hover': "var(--secondary-hover)",
         'secondary-light': "var(--secondary-light)",
-        
+
         // Accent colors
         'accent-primary': "var(--accent-primary)",
         'accent-light': "var(--accent-light)",
@@ -29,13 +29,13 @@ const config: Config = {
         'accent-tan': "var(--accent-tan)",
         'accent-beige': "var(--accent-beige)",
         'accent-cream': "var(--accent-cream)",
-        
+
         // Muted colors
         'muted-primary': "var(--muted-primary)",
         'muted-dark': "var(--muted-dark)",
         'muted-brown': "var(--muted-brown)",
         'muted-charcoal': "var(--muted-charcoal)",
-        
+
         // Light colors
         'light-white': "var(--light-white)",
         'light-cream': "var(--light-cream)",
@@ -48,7 +48,7 @@ const config: Config = {
         'light-rust': "var(--light-rust)",
         'light-earth': "var(--light-earth)",
         'light-sienna': "var(--light-sienna)",
-        
+
         // Dark colors
         'dark-black': "var(--dark-black)",
         'dark-charcoal': "var(--dark-charcoal)",
@@ -61,7 +61,7 @@ const config: Config = {
         'dark-sienna': "var(--dark-sienna)",
         'dark-gold': "var(--dark-gold)",
         'dark-tan': "var(--dark-tan)",
-        
+
         // Legacy mappings (updated)
         'navy-dark': "var(--navy-dark)",
         'navy-blue': "var(--navy-blue)",

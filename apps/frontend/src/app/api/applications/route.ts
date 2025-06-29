@@ -11,12 +11,12 @@ const applicationSchema = z.object({
   // User Registration
   email: z.string().email('Valid email is required'),
   captainName: z.string().min(1, 'Captain name is required'),
-  
+
   // Personal Particulars
   preferredNickname: z.string().min(1, 'Preferred nickname is required'),
   currentNation: z.string().min(1, 'Current nation is required'),
   timeZone: z.string().min(1, 'Timezone is required'),
-  
+
   // Naval Experience
   hoursInNavalAction: z.string().min(1, 'Hours in Naval Action is required'),
   currentRank: z.string().min(1, 'Current rank is required'),
@@ -24,41 +24,65 @@ const applicationSchema = z.object({
   preferredRole: z.string().min(1, 'Preferred role is required'),
   isPortBattleCommander: z.boolean(),
   commanderExperience: z.string().optional(),
-  
+
   // Crafting
   isCrafter: z.boolean(),
-  
+
   // Availability
   weeklyPlayTime: z.string().min(1, 'Weekly play time is required'),
   portBattleAvailability: z.array(z.string()),
   typicalSchedule: z.string().min(1, 'Typical schedule is required'),
-  
+
   // Declarations
   declarationAccuracy: z.literal(true, { errorMap: () => ({ message: 'You must accept the accuracy declaration' }) }),
   declarationHonor: z.literal(true, { errorMap: () => ({ message: 'You must accept the honor declaration' }) }),
   declarationRules: z.literal(true, { errorMap: () => ({ message: 'You must accept the rules declaration' }) }),
-  
+
   // Signature
   signature: z.string().min(1, 'Signature is required'),
 })
 
 export async function POST(request: Request) {
   try {
+    console.log('🔍 Application API called...')
+
     // @ts-ignore - Type issues with Prisma schema mismatch
     const session = await auth()
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    const body = await request.json()
+    console.log('📝 Application data received for userId:', body.userId)
+
+    // If there's no session but a userId is provided (new registration case)
+    let userId = session?.user?.id
+    if (!userId && body.userId) {
+      console.log('📋 Using provided userId from registration:', body.userId)
+      userId = body.userId
+
+      // Verify the userId exists in the database
+      const user = await prisma.user.findUnique({
+        where: { id: body.userId }
+      })
+
+      if (!user) {
+        console.log('❌ Invalid userId provided')
+        return NextResponse.json({ error: 'Invalid user ID' }, { status: 400 })
+      }
     }
 
-    const body = await request.json()
+    if (!userId) {
+      console.log('❌ No authentication and no valid userId')
+      return NextResponse.json({ error: 'Not authenticated and no valid user ID provided' }, { status: 401 })
+    }
+
     const validatedData = applicationSchema.parse(body)
+    console.log('✅ Application data validated')
 
     // Check for existing application
     const existingApplication = await prisma.application.findFirst({
       where: {
         OR: [
-          { userId: session.user.id },
+          // @ts-ignore - Schema mismatch
+          { userId: userId },
           // @ts-ignore - Schema mismatch
           { applicantEmail: validatedData.email }
         ]
@@ -66,28 +90,34 @@ export async function POST(request: Request) {
     })
 
     if (existingApplication) {
+      console.log('❌ Application already exists')
       return NextResponse.json({
         error: 'An application has already been submitted for this account or email address'
       }, { status: 400 })
     }
 
     // Check cooldown period
+    // @ts-ignore - Schema mismatch
     const cooldownPeriod = await prisma.applicationCooldown.findUnique({
-      where: { userId: session.user.id }
+      where: { userId: userId }
     })
 
     if (cooldownPeriod && new Date() < cooldownPeriod.canReapplyAt) {
       const canReapplyAt = cooldownPeriod.canReapplyAt.toISOString()
+      console.log('❌ User is in cooldown period')
       return NextResponse.json({
         error: `You can reapply after ${canReapplyAt}`
       }, { status: 400 })
     }
 
+    console.log('📝 Creating application...')
     // Create the application
     // @ts-ignore - Prisma client types need to be regenerated
     const application = await prisma.application.create({
       data: {
         // Map frontend form fields to new schema
+        // @ts-ignore - Schema mismatch
+        userId: userId, // Add the userId field
         email: validatedData.email,
         applicantName: validatedData.captainName,
         captainName: validatedData.captainName,
@@ -113,6 +143,7 @@ export async function POST(request: Request) {
       }
     })
 
+    console.log('✅ Application created successfully with ID:', application.id)
     return NextResponse.json({
       success: true,
       message: 'Application submitted successfully',
@@ -123,6 +154,7 @@ export async function POST(request: Request) {
     console.error('Application submission error:', error)
 
     if (error instanceof z.ZodError) {
+      console.log('❌ Validation error:', error.errors)
       return NextResponse.json({
         error: 'Validation failed',
         details: error.errors

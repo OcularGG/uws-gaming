@@ -3,7 +3,7 @@
 
 :root {
   /* New Color Palette - Warm Earth Tones */
-  
+
   /* Accent colors - Bright colors for highlights and important details */
   --accent-primary: #9c642c; /* Primary accent */
   --accent-light: #e6e3dd; /* Light accent */
@@ -12,13 +12,13 @@
   --accent-tan: #ba9773; /* Tan accent */
   --accent-beige: #c8b096; /* Beige accent */
   --accent-cream: #d7caba; /* Cream accent */
-  
+
   /* Muted colors - For notifications, cards, and blocks */
   --muted-primary: #8d847c; /* Primary muted */
   --muted-dark: #201810; /* Dark muted */
   --muted-brown: #5b5445; /* Brown muted */
   --muted-charcoal: #564c44; /* Charcoal muted */
-  
+
   /* Light colors - For backgrounds and substrates */
   --light-white: #ffffff; /* Pure white */
   --light-cream: #f6f1ec; /* Light cream */
@@ -31,7 +31,7 @@
   --light-rust: #b78e66; /* Light rust */
   --light-earth: #ae8052; /* Light earth */
   --light-sienna: #a5723f; /* Light sienna */
-  
+
   /* Dark colors - For text and headings */
   --dark-black: #000000; /* Pure black */
   --dark-charcoal: #0e0904; /* Dark charcoal */
@@ -44,7 +44,7 @@
   --dark-sienna: #714920; /* Dark sienna */
   --dark-gold: #805224; /* Dark gold */
   --dark-tan: #8e5b28; /* Dark tan */
-  
+
   /* Invert colors - Contrast colors */
   --invert-blue: #639bd3; /* Blue invert */
   --invert-dark: #191c22; /* Dark invert */
@@ -60,35 +60,35 @@
   /* Semantic color mappings */
   --background: #f6f1ec; /* Light cream background */
   --foreground: #201810; /* Dark muted text */
-  
+
   /* Primary brand colors */
   --primary: #9c642c; /* Primary accent */
   --primary-hover: #8e5b28; /* Dark tan hover */
   --primary-light: #b2905f; /* Warm accent light */
   --primary-dark: #714920; /* Dark sienna */
-  
+
   /* Secondary colors */
   --secondary: #8d847c; /* Muted primary */
   --secondary-hover: #564c44; /* Charcoal muted */
   --secondary-light: #e6e3dd; /* Light accent */
-  
+
   /* Text colors */
   --text-primary: #201810; /* Dark muted */
   --text-secondary: #564c44; /* Charcoal muted */
   --text-light: #ffffff; /* White */
   --text-accent: #9c642c; /* Primary accent */
-  
+
   /* Background variants */
   --bg-primary: #f6f1ec; /* Light cream */
   --bg-secondary: #ede3d9; /* Light beige */
   --bg-dark: #201810; /* Dark muted */
   --bg-card: #ffffff; /* White */
-  
+
   /* Border colors */
   --border-primary: #8d847c; /* Muted primary */
   --border-light: #e6e3dd; /* Light accent */
   --border-dark: #564c44; /* Charcoal muted */
-  
+
   /* Legacy mappings for backward compatibility */
   --navy-dark: #201810; /* Dark muted */
   --navy-blue: #564c44; /* Charcoal muted */
@@ -462,6 +462,81 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 3px 3px 0 var(--sail-white);
 }
 
+/* Hero Apply Button with gradient background */
+.hero-apply-button {
+  background: linear-gradient(
+    90deg,
+    #201810 0%,
+    #714920 20%,
+    #9c642c 40%,
+    #b2905f 60%,
+    #805224 80%,
+    #201810 100%
+  ) !important;
+  background-color: #9c642c !important; /* Fallback solid color */
+  background-size: 300% 100% !important;
+  animation: hero-gradient-flow 8s ease-in-out infinite alternate !important;
+  border: 2px solid rgba(255,255,255,0.2) !important;
+  border-radius: 0.5rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+  font-family: 'Cinzel', serif !important;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important;
+  color: white !important;
+  text-decoration: none !important;
+  display: inline-block !important;
+  padding: 1rem 2rem !important;
+}
+
+a.hero-apply-button:hover,
+.hero-apply-button:hover {
+  background-size: 400% 100% !important;
+  background-color: #714920 !important; /* Fallback solid color for hover */
+  border-color: rgba(255,255,255,0.4) !important;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.4) !important;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
+  text-decoration: none !important;
+  color: white !important;
+}
+
+/* Force the Apply Now button background - highest specificity */
+a.hero-apply-button,
+.hero-apply-button {
+  background: linear-gradient(
+    90deg,
+    #201810 0%,
+    #714920 20%,
+    #9c642c 40%,
+    #b2905f 60%,
+    #805224 80%,
+    #201810 100%
+  ) !important;
+  background-color: #9c642c !important; /* Fallback solid color */
+  background-size: 300% 100% !important;
+  animation: hero-gradient-flow 8s ease-in-out infinite alternate !important;
+  border: 2px solid rgba(255,255,255,0.2) !important;
+  border-radius: 0.5rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+  font-family: 'Cinzel', serif !important;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important;
+  color: white !important;
+  text-decoration: none !important;
+  display: inline-block !important;
+  padding: 1rem 2rem !important;
+}
+
+a.hero-apply-button:hover,
+.hero-apply-button:hover {
+  background-size: 400% 100% !important;
+  background-color: #714920 !important; /* Fallback solid color for hover */
+  border-color: rgba(255,255,255,0.4) !important;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.4) !important;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
+  text-decoration: none !important;
+  color: white !important;
+}
+
 /* Consistent Button Styles */
 .nav-button {
   box-shadow: 4px 4px 0px var(--accent-black);
@@ -688,6 +763,14 @@ h1, h2, h3, h4, h5, h6 {
 
 .logo-floating {
   animation: float 3s ease-in-out infinite;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.logo-floating:hover {
+  animation-play-state: paused;
+  transform: translateY(-15px) scale(1.05);
+  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.4)) brightness(1.1);
 }
 
 /* Letter Container Styles */

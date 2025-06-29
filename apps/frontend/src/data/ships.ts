@@ -81,7 +81,7 @@ export const NAVAL_ACTION_SHIPS: Ship[] = [
   { name: 'Santa Ana', rate: 1, br: 225 },
   { name: 'Victory 1765 (i)', rate: 1, br: 224 },
   { name: 'Victory', rate: 1, br: 216 },
-  
+
   // 2nd Rate Ships
   { name: 'San Pedro', rate: 2, br: 164 },
   { name: 'Christian', rate: 2, br: 164 },
@@ -89,7 +89,7 @@ export const NAVAL_ACTION_SHIPS: Ship[] = [
   { name: 'Le Bucentaure', rate: 2, br: 161 },
   { name: 'St. Pavel', rate: 2, br: 150 },
   { name: 'Redoutable (i)', rate: 2, br: 149 },
-  
+
   // 3rd Rate Ships
   { name: 'Admiraal de Ruyter', rate: 3, br: 143 },
   { name: 'Bellona', rate: 3, br: 133 },
@@ -99,12 +99,12 @@ export const NAVAL_ACTION_SHIPS: Ship[] = [
   { name: 'Agamemnon', rate: 3, br: 114 },
   { name: 'Ingermanland', rate: 3, br: 110 },
   { name: 'Rättvisan (i)', rate: 3, br: 107 },
-  
-  // 4th Rate Ships  
+
+  // 4th Rate Ships
   { name: 'USS United States', rate: 4, br: 96 },
   { name: 'Constitution', rate: 4, br: 96 },
   { name: 'Leopard (i)', rate: 4, br: 95 },
-  
+
   // 5th Rate Ships
   { name: 'Trincomalee', rate: 5, br: 87 },
   { name: 'Endymion', rate: 5, br: 85 },
@@ -126,7 +126,7 @@ export const NAVAL_ACTION_SHIPS: Ship[] = [
   { name: 'Cerberus', rate: 5, br: 33 },
   { name: 'Rattlesnake Heavy', rate: 5, br: 32 },
   { name: 'Le Requin (i)', rate: 5, br: 30 },
-  
+
   // 6th Rate Ships
   { name: 'Snow', rate: 6, br: 27 },
   { name: 'Trader Snow', rate: 6, br: 27 },
@@ -138,7 +138,7 @@ export const NAVAL_ACTION_SHIPS: Ship[] = [
   { name: 'Navy Brig', rate: 6, br: 22 },
   { name: 'Brig', rate: 6, br: 20 },
   { name: 'Trader Brig', rate: 6, br: 19 },
-  
+
   // Small Ships
   { name: 'Mortar Brig', rate: 7, br: 15 },
   { name: 'Pickle', rate: 7, br: 15 },
@@ -158,9 +158,9 @@ export const getShipByName = (name: string): Ship | undefined => {
 // Search ships by name
 export const searchShips = (query: string): Ship[] => {
   if (!query || query.length < 2) return [];
-  
+
   const searchTerm = query.toLowerCase();
-  return NAVAL_ACTION_SHIPS.filter(ship => 
+  return NAVAL_ACTION_SHIPS.filter(ship =>
     ship.name.toLowerCase().includes(searchTerm)
   ).slice(0, 10);
 };

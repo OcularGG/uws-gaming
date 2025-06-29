@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from '@/hooks/useAuth'
 import { getAuthHeaders } from '@/hooks/useAuthenticatedFetch'
+import { isAdmin as checkIsAdmin } from '@/lib/adminUtils'
 import Link from 'next/link'
 
 interface User {
@@ -142,7 +143,7 @@ export default function CombinedAdminPanel() {
   const [selectedUserForRole, setSelectedUserForRole] = useState<Record<string, string>>({}) // Changed to object keyed by roleId
 
   // Check if user is admin
-  const isAdmin = session?.user?.discordId === '1207434980855259206' || session?.user?.isAdmin
+  const isAdmin = checkIsAdmin(session?.user)
 
   useEffect(() => {
     if (session && isAdmin) {

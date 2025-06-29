@@ -1,22 +1,28 @@
-// Development schema for SQLite - simplified version
-// This is a temporary development schema that avoids SQLite limitations
-// Production will use the full PostgreSQL schema
+// Development schema for PostgreSQL - local development version
+// This matches production schema for consistent development experience
 
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// User management - simplified for SQLite
+// User management - includes email-based authentication
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
   username  String   @unique
-  discordId String?  @unique
+  password  String   // Hashed password
+  discordId String?  @unique // Keep for migration purposes, make optional
+  role      String   @default("user") // user, admin, moderator
+  emailVerified Boolean @default(false)
+  emailVerificationToken String?
+  passwordResetToken String?
+  passwordResetExpires DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -24,6 +30,7 @@ model User {
   sessions   Session[]
   applications Application[]
   applicationVouches ApplicationVouch[]
+  applicationCooldown ApplicationCooldown?
   bugReports BugReport[]
 
   @@map("users")
@@ -43,17 +50,15 @@ model Session {
   @@map("sessions")
 }
 
-// Applications - updated to match API expectations
+// Applications - updated to use email-based auth
 model Application {
   id        String   @id @default(cuid())
   userId    String
   status    String   @default("PENDING") // ApplicationStatus as string
 
-  // User info
-  discordId       String
-  discordUsername String
+  // User info (no longer Discord-specific)
   applicantName   String   // captainName from form
-  email          String?
+  email          String
 
   // Application form data
   captainName              String
@@ -76,9 +81,8 @@ model Application {
   declarationRules         Boolean
   signature                String
 
-  // Discord integration
-  discordChannelId String?
-  applicationEmbed String? // JSON as string
+  // Remove Discord-specific fields
+  // discordChannelId and applicationEmbed removed
 
   // Timestamps
   submittedAt DateTime @default(now())
@@ -109,15 +113,18 @@ model ApplicationVouch {
   @@map("application_vouches")
 }
 
-// Application cooldowns
+// Application cooldowns - updated to use user IDs
 model ApplicationCooldown {
   id             String    @id @default(cuid())
-  discordId      String    @unique
+  userId         String    @unique // Changed from discordId to userId
   canReapplyAt   DateTime
   reason         String
   overriddenBy   String?
   overriddenAt   DateTime?
   createdAt      DateTime  @default(now())
+
+  // Relationship
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("application_cooldowns")
 }

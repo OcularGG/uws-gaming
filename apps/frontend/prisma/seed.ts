@@ -55,18 +55,58 @@ async function main() {
     });
   }
 
-  // Create a test user with port battle creation permissions
-  console.log('Creating test user...');
-  const testUser = await prisma.user.upsert({
+  // Create admin users
+  console.log('Creating admin users...');
+
+  // Hash the default admin password
+  const bcrypt = require('bcryptjs');
+  const defaultAdminPassword = 'KrakenAdmin2025!'; // Default admin password
+  const hashedPassword = await bcrypt.hash(defaultAdminPassword, 12);
+
+  // Main admin user with Discord ID and email
+  const discordAdmin = await prisma.user.upsert({
     where: { discordId: '1207434980855259206' },
-    update: { canCreatePortBattles: true },
+    update: {
+      canCreatePortBattles: true,
+      email: 'admin@krakengaming.org',
+      password: hashedPassword
+    },
     create: {
       email: 'admin@krakengaming.org',
       username: 'KrakenAdmin',
       discordId: '1207434980855259206',
+      password: hashedPassword,
       canCreatePortBattles: true
     }
   });
+
+  // Email-based admin user (create separate if needed)
+  let emailAdmin = discordAdmin;
+
+  // Check if we need a separate email-only admin
+  const existingEmailAdmin = await prisma.user.findUnique({
+    where: { email: 'admin@krakengaming.org' }
+  });
+
+  if (!existingEmailAdmin && discordAdmin.email !== 'admin@krakengaming.org') {
+    emailAdmin = await prisma.user.create({
+      data: {
+        email: 'admin@krakengaming.org',
+        username: 'AdminUser',
+        password: hashedPassword,
+        canCreatePortBattles: true
+      }
+    });
+  }
+
+  // Use the admin user for port battle creation
+  const testUser = emailAdmin;
+
+  console.log('✅ Admin users created:');
+  console.log(`   Email: admin@krakengaming.org`);
+  console.log(`   Password: ${defaultAdminPassword}`);
+  console.log(`   Discord ID: ${discordAdmin.discordId || 'N/A'}`);
+  console.log(`   Username: ${emailAdmin.username}`);
 
   // Create a sample port battle
   console.log('Creating sample port battle...');
@@ -171,18 +211,23 @@ async function main() {
   ];
 
   for (const role of commandRoles) {
-    await prisma.commandStructureRole.upsert({
-      where: { title: role.title },
-      update: {},
-      create: {
-        title: role.title,
-        description: role.description,
-        level: role.level,
-        permissions: JSON.stringify(role.permissions),
-        flagCountry: role.flagCountry,
-        isActive: true
-      }
+    // Check if role already exists
+    const existingRole = await prisma.commandStructureRole.findFirst({
+      where: { title: role.title }
     });
+
+    if (!existingRole) {
+      await prisma.commandStructureRole.create({
+        data: {
+          title: role.title,
+          description: role.description,
+          level: role.level,
+          permissions: JSON.stringify(role.permissions),
+          flagCountry: role.flagCountry,
+          isActive: true
+        }
+      });
+    }
   }
 
   console.log('Seeding completed!');

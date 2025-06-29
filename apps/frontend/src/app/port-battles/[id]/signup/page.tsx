@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from '@/hooks/useAuth'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ships, defaultClans, shipBRValues } from '@/lib/portBattleData'
+import { defaultClans } from '@/lib/portBattleData'
 
 interface PortBattle {
   id: string
@@ -58,14 +58,12 @@ interface ScreeningSignup {
 interface SignupFormData {
   captainName: string
   clanName: string
-  shipName: string
-  books: number
-  alternateShip: string
-  alternateBooks: number
   willingToScreen: boolean
   comments: string
   fleetRoleId: string
   captainsCode?: string
+  contactInfo?: string // Discord username for external signups
+  isExternalSignup: boolean
 }
 
 export default function PortBattleSignupPage() {
@@ -77,34 +75,50 @@ export default function PortBattleSignupPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showCodeField, setShowCodeField] = useState(false)
+  const [isValidCode, setIsValidCode] = useState(false)
+  const [codeValidated, setCodeValidated] = useState(false)
+  const [expandedRoles, setExpandedRoles] = useState<Set<string>>(new Set())
 
   const [formData, setFormData] = useState<SignupFormData>({
     captainName: '',
     clanName: '',
-    shipName: '',
-    books: 0,
-    alternateShip: '',
-    alternateBooks: 0,
     willingToScreen: false,
     comments: '',
     fleetRoleId: '',
-    captainsCode: ''
+    captainsCode: '',
+    contactInfo: '',
+    isExternalSignup: false
   })
 
   useEffect(() => {
     if (params.id) {
       fetchPortBattle()
     }
+
+    // Check for Captain's Code in URL parameters
+    const urlParams = new URLSearchParams(window.location.search)
+    const code = urlParams.get('code')
+    if (code) {
+      setFormData(prev => ({
+        ...prev,
+        captainsCode: code,
+        isExternalSignup: true
+      }))
+      setShowCodeField(true)
+      validateCaptainsCode(code)
+    }
   }, [params.id])
 
   useEffect(() => {
-    if (session?.user?.name) {
+    if (session?.user && !formData.isExternalSignup) {
       setFormData(prev => ({
         ...prev,
-        captainName: session.user.name || ''
+        captainName: session.user.name || session.user.username || '',
+        // TODO: Get clan name from user profile when implemented
+        clanName: 'UWS' // Default for now
       }))
     }
-  }, [session])
+  }, [session, formData.isExternalSignup])
 
   const fetchPortBattle = async () => {
     try {
@@ -116,6 +130,8 @@ export default function PortBattleSignupPage() {
       }
 
       const data = await response.json()
+      console.log('Port battle data received:', data.portBattle)
+      console.log('Fleet setups:', data.portBattle?.fleetSetups)
       setPortBattle(data.portBattle)
     } catch (err) {
       console.error('Error fetching port battle:', err)
@@ -125,100 +141,165 @@ export default function PortBattleSignupPage() {
     }
   }
 
+  const validateCaptainsCode = async (code: string) => {
+    if (!code || !portBattle) return
+
+    try {
+      const response = await fetch(`/api/port-battles?action=validateCode&id=${params.id}&code=${code}`)
+      const data = await response.json()
+
+      if (response.ok && data.valid) {
+        setIsValidCode(true)
+        setCodeValidated(true)
+        setError(null)
+      } else {
+        setIsValidCode(false)
+        setCodeValidated(true)
+        setError('Invalid Captain\'s Code. Please check the code and try again.')
+      }
+    } catch (err) {
+      console.error('Error validating code:', err)
+      setIsValidCode(false)
+      setCodeValidated(true)
+      setError('Error validating Captain\'s Code.')
+    }
+  }
+
   const handleInputChange = (field: keyof SignupFormData, value: any) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }))
-
-    // Auto-populate books when ship is selected
-    if (field === 'shipName' && value) {
-      // For now, default to 5 books - this should be customizable
-      setFormData(prev => ({
-        ...prev,
-        books: 5
-      }))
-    }
-
-    // Auto-populate alternate books when alternate ship is selected
-    if (field === 'alternateShip' && value) {
-      // For now, default to 5 books - this should be customizable
-      setFormData(prev => ({
-        ...prev,
-        alternateBooks: 5
-      }))
-    }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const toggleRoleExpansion = (roleId: string) => {
+    setExpandedRoles(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(roleId)) {
+        newSet.delete(roleId)
+      } else {
+        newSet.add(roleId)
+      }
+      return newSet
+    })
+  }
+
+  const handleRoleRequest = async (fleetRoleId: string) => {
+    if (!formData.captainName || !formData.clanName) {
+      setError('Please fill in your captain name and clan before requesting a role.')
+      return
+    }
+
+    // For external signups, require contact info
+    if (formData.isExternalSignup && !formData.contactInfo) {
+      setError('Please provide your Discord username.')
+      return
+    }
+
     setSubmitting(true)
     setError(null)
 
     try {
-      if (!formData.fleetRoleId) {
-        throw new Error('Please select a fleet role to sign up for')
-      }
-
-      const response = await fetch('/api/port-battles', {
+      const response = await fetch('/api/port-battles/requests', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          action: 'signup',
           portBattleId: params.id,
-          ...formData
+          fleetRoleId,
+          captainName: formData.captainName,
+          clanName: formData.clanName,
+          willingToScreen: formData.willingToScreen,
+          comments: formData.comments,
+          captainsCode: formData.captainsCode,
+          contactInfo: formData.contactInfo,
+          isExternalSignup: formData.isExternalSignup
         }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit signup')
+        throw new Error(data.error || 'Failed to submit role request')
       }
 
-      // Redirect to port battle detail page
-      router.push(`/port-battles/${params.id}`)
+      // Refresh the port battle data to show the new signup
+      await fetchPortBattle()
+
+      // Show success message
+      const commentInfo = formData.comments ?
+        ` Your comments and information have been included in the request.` :
+        ` You can add comments next time to provide more information to battle commanders.`
+      alert(`Role request submitted successfully! Battle commanders will review your request.${commentInfo}`)
     } catch (err) {
-      console.error('Error submitting signup:', err)
-      setError(err instanceof Error ? err.message : 'Failed to submit signup')
+      console.error('Error submitting role request:', err)
+      setError(err instanceof Error ? err.message : 'Failed to submit role request')
     } finally {
       setSubmitting(false)
     }
-  }
-
-  const getAvailableShips = () => {
-    if (!portBattle) return []
-
-    // For now, return all ships - in the future we might filter by deep/shallow water
-    return ships.map(shipName => ({
-      name: shipName,
-      br: shipBRValues[shipName] || 0
-    }))
-  }
-
-  const isRoleFull = (role: FleetRole) => {
-    return role.signups.filter(s => s.status === 'APPROVED').length >= 1
-  }
-
-  const isAlreadySignedUp = (role: FleetRole) => {
-    return role.signups.some(s => s.captainName === formData.captainName)
   }
 
   const formatDateTime = (dateString: string) => {
     return new Date(dateString).toLocaleString()
   }
 
-  if (!session) {
+  // Check if user is logged in OR has a valid external signup code
+  const hasValidAccess = session || (formData.isExternalSignup && isValidCode && codeValidated)
+
+  if (!hasValidAccess && !showCodeField) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold mb-4">Port Battle Signup</h1>
-          <p className="text-gray-600 mb-4">Please sign in to sign up for port battles.</p>
-          <Link href="/api/auth/signin" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            Sign In
-          </Link>
+          <div className="space-y-4">
+            <p className="text-gray-600">Please sign in to sign up for port battles, or enter a Captain's Code if you have one.</p>
+
+            <div className="space-x-4">
+              <Link href="/api/auth/signin" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Sign In
+              </Link>
+              <button
+                onClick={() => setShowCodeField(true)}
+                className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700"
+              >
+                I have a Captain's Code
+              </button>
+            </div>
+
+            {showCodeField && (
+              <div className="mt-6 max-w-md mx-auto">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Captain's Code
+                </label>
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    value={formData.captainsCode || ''}
+                    onChange={(e) => {
+                      const code = e.target.value
+                      setFormData(prev => ({
+                        ...prev,
+                        captainsCode: code,
+                        isExternalSignup: !!code
+                      }))
+                      if (code) {
+                        validateCaptainsCode(code)
+                      }
+                    }}
+                    placeholder="Enter Captain's Code"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                {codeValidated && !isValidCode && (
+                  <p className="text-red-600 text-sm mt-1">Invalid code. Please check and try again.</p>
+                )}
+                {codeValidated && isValidCode && (
+                  <p className="text-green-600 text-sm mt-1">Valid code! You can now sign up for this battle.</p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     )
@@ -259,13 +340,25 @@ export default function PortBattleSignupPage() {
     )
   }
 
-  if (portBattle.status !== 'ACTIVE') {
+  // Check if the battle has already started (no signups after battle start time)
+  const battleStartTime = new Date(portBattle.battleStartTime)
+  const now = new Date()
+  const hasStarted = battleStartTime <= now
+
+  if (hasStarted || portBattle.status === 'COMPLETED' || portBattle.status === 'CANCELLED') {
+    const getMessage = () => {
+      if (hasStarted) return 'This port battle has already started and is no longer accepting signups.'
+      if (portBattle.status === 'COMPLETED') return 'This port battle has been completed.'
+      if (portBattle.status === 'CANCELLED') return 'This port battle has been cancelled.'
+      return `This port battle is not accepting signups (Status: ${portBattle.status})`
+    }
+
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold mb-4">Port Battle Signup</h1>
           <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
-            This port battle is not accepting signups (Status: {portBattle.status})
+            {getMessage()}
           </div>
           <div className="mt-4">
             <Link href={`/port-battles/${portBattle.id}`} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
@@ -276,8 +369,6 @@ export default function PortBattleSignupPage() {
       </div>
     )
   }
-
-  const availableShips = getAvailableShips()
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -317,7 +408,7 @@ export default function PortBattleSignupPage() {
 
         {/* Signup Form */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold mb-4">Signup Form</h2>
+          <h2 className="text-xl font-bold mb-4">Captain Information</h2>
 
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -325,7 +416,7 @@ export default function PortBattleSignupPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-6">
             {/* Captain Information */}
             <div className="grid md:grid-cols-2 gap-4">
               <div>
@@ -360,127 +451,227 @@ export default function PortBattleSignupPage() {
               </div>
             </div>
 
-            {/* Fleet Role Selection */}
+            {/* Available Fleet Roles */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Fleet Role *
+                Available Fleet Roles
               </label>
-              <div className="space-y-3">
+              <p className="text-sm text-gray-600 mb-4">
+                Click on a role name to expand and view detailed requirements including perks, consumables, and ship specifications.
+                Then click "Request Role" to submit your application for that position. Battle commanders will review and approve requests.
+              </p>
+              <div className="space-y-4">
                 {portBattle.fleetSetups
                   .filter(setup => setup.isActive)
                   .sort((a, b) => a.setupOrder - b.setupOrder)
                   .map((setup) => (
                     <div key={setup.id} className="border border-gray-200 rounded-lg p-4">
-                      <h3 className="font-semibold mb-2">{setup.setupName}</h3>
-                      <div className="grid gap-2">
+                      <h3 className="font-semibold mb-3 text-lg">{setup.setupName}</h3>
+                      <div className="grid gap-3">
                         {setup.roles
                           .sort((a, b) => a.roleOrder - b.roleOrder)
                           .map((role) => {
-                            const isFull = isRoleFull(role)
-                            const alreadySignedUp = isAlreadySignedUp(role)
-                            const disabled = isFull || alreadySignedUp
+                            const currentSignups = role.signups || []
+                            const approvedSignups = currentSignups.filter(s => s.status === 'APPROVED')
+                            const pendingSignups = currentSignups.filter(s => s.status === 'PENDING')
+                            const userSignup = currentSignups.find(s => s.captainName === formData.captainName)
+                            const hasAvailableSlot = approvedSignups.length === 0 // Assuming 1 slot per role for now
 
                             return (
-                              <label
+                              <div
                                 key={role.id}
-                                className={`flex items-center p-2 border rounded cursor-pointer ${
-                                  formData.fleetRoleId === role.id ? 'border-blue-500 bg-blue-50' :
-                                  disabled ? 'border-gray-200 bg-gray-50 cursor-not-allowed' :
-                                  'border-gray-200 hover:bg-gray-50'
-                                }`}
+                                className="border rounded-lg bg-white"
                               >
-                                <input
-                                  type="radio"
-                                  name="fleetRoleId"
-                                  value={role.id}
-                                  checked={formData.fleetRoleId === role.id}
-                                  onChange={(e) => handleInputChange('fleetRoleId', e.target.value)}
-                                  disabled={disabled}
-                                  className="mr-3"
-                                />
-                                <div className="flex-1">
-                                  <span className="font-medium">{role.shipName}</span>
-                                  <span className="text-gray-600 ml-2">(BR: {role.brValue})</span>
-                                  {isFull && <span className="text-red-600 ml-2">(FULL)</span>}
-                                  {alreadySignedUp && <span className="text-orange-600 ml-2">(Already signed up)</span>}
+                                {/* Role Header */}
+                                <div className="flex items-center justify-between p-3 hover:bg-gray-50">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-3">
+                                      <button
+                                        type="button"
+                                        onClick={() => toggleRoleExpansion(role.id)}
+                                        className="flex items-center gap-2 text-left"
+                                      >
+                                        <span className="text-lg font-medium">{role.shipName}</span>
+                                        <svg
+                                          className={`w-5 h-5 transition-transform ${
+                                            expandedRoles.has(role.id) ? 'rotate-90' : ''
+                                          }`}
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                        </svg>
+                                      </button>
+                                      <div className="flex gap-2">
+                                        {approvedSignups.length > 0 && (
+                                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
+                                            ✓ Filled
+                                          </span>
+                                        )}
+                                        {pendingSignups.length > 0 && (
+                                          <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
+                                            {pendingSignups.length} Pending
+                                          </span>
+                                        )}
+                                        {hasAvailableSlot && (
+                                          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                                            Available
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                    {approvedSignups.length > 0 && (
+                                      <div className="mt-1 text-sm text-gray-600">
+                                        Assigned: {approvedSignups.map(s => `${s.captainName} [${s.clanName}]`).join(', ')}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="ml-4">
+                                    {userSignup ? (
+                                      <div className="flex items-center gap-2">
+                                        <span className={`px-3 py-1 rounded-full text-sm ${
+                                          userSignup.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
+                                          userSignup.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                          'bg-red-100 text-red-800'
+                                        }`}>
+                                          {userSignup.status === 'APPROVED' ? '✓ Approved' :
+                                           userSignup.status === 'PENDING' ? '⏳ Pending' :
+                                           '✗ Denied'}
+                                        </span>
+                                      </div>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRoleRequest(role.id)}
+                                        disabled={!formData.captainName || !formData.clanName}
+                                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+                                      >
+                                        Request Role
+                                      </button>
+                                    )}
+                                  </div>
                                 </div>
-                              </label>
+
+                                {/* Expanded Role Details */}
+                                {expandedRoles.has(role.id) && (
+                                  <div className="border-t bg-gray-50 p-4">
+                                    <div className="grid md:grid-cols-2 gap-4">
+                                      {/* Perks Section */}
+                                      <div>
+                                        <h4 className="font-semibold text-sm text-gray-700 mb-2">Required Perks</h4>
+                                        <div className="space-y-1 text-sm">
+                                          <div className="flex items-center gap-2">
+                                            <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                                            <span>Gunnery Level 5</span>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                                            <span>Sailing Level 5</span>
+                                          </div>
+                                          {role.brValue >= 70 && (
+                                            <>
+                                              <div className="flex items-center gap-2">
+                                                <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                                                <span>Leadership Level 3</span>
+                                              </div>
+                                              <div className="flex items-center gap-2">
+                                                <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                                                <span>Master Carpenter Level 2 (recommended)</span>
+                                              </div>
+                                            </>
+                                          )}
+                                          {role.brValue >= 50 && role.brValue < 70 && (
+                                            <div className="flex items-center gap-2">
+                                              <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                                              <span>Leadership Level 2 (recommended)</span>
+                                            </div>
+                                          )}
+                                          {role.brValue >= 80 && (
+                                            <div className="flex items-center gap-2">
+                                              <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                                              <span>Fleet Tactician Level 1 (recommended)</span>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+
+                                      {/* Consumables Section */}
+                                      <div>
+                                        <h4 className="font-semibold text-sm text-gray-700 mb-2">Consumables</h4>
+                                        <div className="space-y-2 text-sm">
+                                          <div>
+                                            <span className="font-medium">Ammunition:</span>
+                                            <div className="ml-2 text-gray-600">
+                                              <div className="font-semibold">• Broadsides: {Math.round(role.brValue * 2)}</div>
+                                              <div>• Chain Balls: {Math.round(role.brValue * 0.7)}</div>
+                                              <div>• Round Balls: {Math.round(role.brValue * 2.5)}</div>
+                                              <div>• Gunpowder: {Math.round(role.brValue * 4)}</div>
+                                            </div>
+                                          </div>
+                                          <div>
+                                            <span className="font-medium">Repairs:</span>
+                                            <div className="ml-2 text-gray-600">
+                                              <div className="font-semibold">• Repair Kits: {Math.round(role.brValue * 0.15)}</div>
+                                              <div>• Hull Repairs: {Math.round(role.brValue * 0.2)}</div>
+                                              <div>• Rig Repairs: {Math.round(role.brValue * 0.15)}</div>
+                                              <div>• Medicine: {Math.round(role.brValue * 0.25)}</div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* Ship Specifications */}
+                                      <div>
+                                        <h4 className="font-semibold text-sm text-gray-700 mb-2">Ship Requirements</h4>
+                                        <div className="space-y-2 text-sm">
+                                          <div>
+                                            <span className="font-medium">Frame & Planking:</span>
+                                            <div className="ml-2 text-gray-600">
+                                              {role.brValue >= 80 ? (
+                                                <>
+                                                  <div>• Live Oak Frame</div>
+                                                  <div>• Teak Planking</div>
+                                                </>
+                                              ) : role.brValue >= 60 ? (
+                                                <>
+                                                  <div>• White Oak Frame</div>
+                                                  <div>• Fir Planking</div>
+                                                </>
+                                              ) : (
+                                                <>
+                                                  <div>• Oak Frame</div>
+                                                  <div>• Fir Planking</div>
+                                                </>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* Role Comments */}
+                                    <div className="mt-4 pt-4 border-t border-gray-200">
+                                      <h4 className="font-semibold text-sm text-gray-700 mb-2">Role Instructions</h4>
+                                      <p className="text-sm text-gray-600">
+                                        {role.brValue >= 80 ?
+                                          `This role requires an experienced captain capable of leading from the front. You will be positioned in the line of battle and expected to engage enemy ships of the line. Coordination with fleet signals is essential. As a flagship-class vessel, you may be called upon to relay commands.` :
+                                          role.brValue >= 60 ?
+                                          `This role requires a skilled captain for line of battle operations. You will support the main fleet and engage enemy vessels as directed. Maintain formation and respond to fleet signals promptly.` :
+                                          role.brValue >= 40 ?
+                                          `This frigate role requires agility and tactical awareness. You will provide screening, scouting, and support for the main battle line. Be prepared for independent action and pursuit missions.` :
+                                          `This role involves reconnaissance, message relay, and support operations. Maintain distance from the main engagement while providing intelligence and supporting smaller actions.`
+                                        }
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             )
                           })}
                       </div>
                     </div>
                   ))}
-              </div>
-            </div>
-
-            {/* Ship Selection */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Primary Ship *
-                </label>
-                <select
-                  value={formData.shipName}
-                  onChange={(e) => handleInputChange('shipName', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                >
-                  <option value="">Select Ship</option>
-                  {availableShips.map((ship: any) => (
-                    <option key={ship.name} value={ship.name}>
-                      {ship.name} (BR: {ship.br})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Books for Primary Ship *
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="5"
-                  value={formData.books}
-                  onChange={(e) => handleInputChange('books', parseInt(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Alternate Ship */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Alternate Ship (Optional)
-                </label>
-                <select
-                  value={formData.alternateShip}
-                  onChange={(e) => handleInputChange('alternateShip', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select Alternate Ship</option>
-                  {availableShips.map((ship: any) => (
-                    <option key={ship.name} value={ship.name}>
-                      {ship.name} (BR: {ship.br})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Books for Alternate Ship
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="5"
-                  value={formData.alternateBooks}
-                  onChange={(e) => handleInputChange('alternateBooks', parseInt(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  disabled={!formData.alternateShip}
-                />
               </div>
             </div>
 
@@ -500,59 +691,68 @@ export default function PortBattleSignupPage() {
             {/* Comments */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Comments (Optional)
+                Comments and Additional Information
               </label>
+              <p className="text-xs text-gray-500 mb-2">
+                Please include details about your experience, ship fittings, availability, and any other relevant information.
+                These comments will be submitted with your role request and reviewed by battle commanders.
+              </p>
               <textarea
                 value={formData.comments}
                 onChange={(e) => handleInputChange('comments', e.target.value)}
-                rows={3}
+                rows={4}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Any additional comments or information..."
+                placeholder="Example: I have 150+ hours in Naval Action, experienced with line ship operations, can be online 30 minutes before battle start, ship is fitted with live oak/teak and purple mods..."
               />
             </div>
 
-            {/* Captains Code */}
-            <div>
-              <div className="flex items-center mb-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Captain's Code (Optional)
+            {/* Contact Info for External Signups */}
+            {formData.isExternalSignup && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Discord Username *
                 </label>
-                <button
-                  type="button"
-                  onClick={() => setShowCodeField(!showCodeField)}
-                  className="ml-2 text-blue-600 hover:text-blue-700 text-sm"
-                >
-                  {showCodeField ? 'Hide' : 'Show'}
-                </button>
-              </div>
-              {showCodeField && (
                 <input
                   type="text"
-                  value={formData.captainsCode}
-                  onChange={(e) => handleInputChange('captainsCode', e.target.value)}
+                  value={formData.contactInfo || ''}
+                  onChange={(e) => handleInputChange('contactInfo', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter captain's code if you have one"
+                  placeholder="YourDiscordUsername"
+                  required
                 />
-              )}
-            </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  This will be used to contact you about the port battle.
+                </p>
+              </div>
+            )}
 
-            {/* Submit Button */}
-            <div className="flex space-x-4">
-              <button
-                type="submit"
-                disabled={submitting}
-                className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-              >
-                {submitting ? 'Submitting...' : 'Submit Signup'}
-              </button>
-              <Link
-                href={`/port-battles/${portBattle.id}`}
-                className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700"
-              >
-                Cancel
-              </Link>
-            </div>
-          </form>
+            {/* Captains Code */}
+            {session && (
+              <div>
+                <div className="flex items-center mb-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Captain's Code (Optional)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowCodeField(!showCodeField)}
+                    className="ml-2 text-blue-600 hover:text-blue-700 text-sm"
+                  >
+                    {showCodeField ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+                {showCodeField && (
+                  <input
+                    type="text"
+                    value={formData.captainsCode || ''}
+                    onChange={(e) => handleInputChange('captainsCode', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter captain's code if you have one"
+                  />
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

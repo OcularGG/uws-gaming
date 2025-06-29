@@ -31,7 +31,7 @@ steps:
       - '--set-env-vars'
       - 'NEXT_PUBLIC_ENVIRONMENT=production'
       - '--set-secrets'
-      - 'AUTH_DISCORD_ID=auth-discord-id:latest,AUTH_DISCORD_SECRET=auth-discord-secret:latest,AUTH_SECRET=auth-secret:latest,AUTH_URL=auth-url:latest,DATABASE_URL=database-url:latest'
+      - 'AUTH_SECRET=auth-secret:latest,DATABASE_URL=database-url-prod:latest,SMTP_HOST=smtp-host:latest,SMTP_PORT=smtp-port:latest,SMTP_USER=smtp-user:latest,SMTP_PASS=smtp-pass:latest'
 
 images:
   - 'gcr.io/$PROJECT_ID/frontend-prod'

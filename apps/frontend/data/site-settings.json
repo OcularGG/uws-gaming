@@ -1,0 +1,23 @@
+{
+  "siteName": "UWS",
+  "tagline": "the Pirates Life",
+  "description": "Join the most prestigious naval command in the Caribbean. Elite captains, strategic warfare, and maritime dominance await.",
+  "commandStructure": [
+    {
+      "role": "Fleet Admiral",
+      "name": "Supreme Commander"
+    },
+    {
+      "role": "Admiral",
+      "name": "Fleet Operations"
+    },
+    {
+      "role": "Commodore",
+      "name": "Squadron Leader"
+    },
+    {
+      "role": "Captain",
+      "name": "Ship Commander"
+    }
+  ]
+}

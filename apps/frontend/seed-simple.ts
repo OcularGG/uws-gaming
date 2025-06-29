@@ -65,7 +65,7 @@ async function seed() {
 
     // Assign roles to users
     await prisma.userRole.upsert({
-      where: { 
+      where: {
         userId_roleId: {
           userId: adminUser.id,
           roleId: adminRole.id
@@ -79,7 +79,7 @@ async function seed() {
     })
 
     await prisma.userRole.upsert({
-      where: { 
+      where: {
         userId_roleId: {
           userId: testUser.id,
           roleId: userRole.id

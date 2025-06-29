@@ -28,7 +28,7 @@ export const WOOD_DATA: Wood[] = [
   },
   {
     name: 'Oak',
-    type: 'frame', 
+    type: 'frame',
     family: 'regular',
     properties: [
       { modifier: 'Max speed', amount: 0, isPercentage: true },
@@ -39,7 +39,7 @@ export const WOOD_DATA: Wood[] = [
   {
     name: 'Live Oak',
     type: 'frame',
-    family: 'regular', 
+    family: 'regular',
     properties: [
       { modifier: 'Max speed', amount: -2, isPercentage: true },
       { modifier: 'Hold weight', amount: 10, isPercentage: true },
@@ -96,7 +96,7 @@ export const WOOD_DATA: Wood[] = [
       { modifier: 'Armour hit points', amount: -2, isPercentage: true },
     ]
   },
-  
+
   // Planking/Trim Woods
   {
     name: 'Crew Space',
@@ -111,7 +111,7 @@ export const WOOD_DATA: Wood[] = [
   {
     name: 'Oak',
     type: 'planking',
-    family: 'regular', 
+    family: 'regular',
     properties: [
       { modifier: 'Max speed', amount: 0, isPercentage: true },
       { modifier: 'Hold weight', amount: 3, isPercentage: true },

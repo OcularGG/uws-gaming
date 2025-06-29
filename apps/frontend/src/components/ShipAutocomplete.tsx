@@ -104,7 +104,7 @@ export default function ShipAutocomplete({
           {label} {required && '*'}
         </label>
       )}
-      
+
       <div className="relative">
         <input
           ref={inputRef}
@@ -153,7 +153,7 @@ export default function ShipAutocomplete({
           ))}
         </div>
       )}
-      
+
       {showSuggestions && suggestions.length === 0 && value.length >= 2 && (
         <div
           ref={suggestionsRef}

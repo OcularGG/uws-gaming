@@ -26,19 +26,19 @@ const loadPortData = async (): Promise<string[]> => {
   try {
     // Try to load from the main PVP server first (most comprehensive data)
     const response = await fetch('https://storage.googleapis.com/nacleanopenworldprodshards/Ports_live.json');
-    
+
     if (!response.ok) {
       throw new Error('Failed to load live server data');
     }
-    
+
     const ports: Port[] = await response.json();
     cachedPorts = ports.map(port => port.Name).sort();
     dataLoaded = true;
-    
+
     return cachedPorts;
   } catch (error) {
     console.warn('Failed to load live port data, falling back to official static list:', error);
-    
+
     // Fallback to official static list (207 ports as of June 2025)
     cachedPorts = [...OFFICIAL_NAVAL_ACTION_PORTS];
     dataLoaded = true;
@@ -60,26 +60,26 @@ export const getPortList = async (): Promise<string[]> => {
 export const searchPortsSync = (query: string): string[] => {
   // Use cached data or fallback to official list
   const allPorts = cachedPorts.length > 0 ? cachedPorts : OFFICIAL_NAVAL_ACTION_PORTS;
-  
+
   if (!query || query.trim() === '') {
     return allPorts.slice(0, 10); // Return first 10 for empty query
   }
-  
+
   const searchTerm = query.toLowerCase().trim();
-  
-  return allPorts.filter(port => 
+
+  return allPorts.filter(port =>
     port.toLowerCase().includes(searchTerm)
   ).sort((a, b) => {
     // Prioritize exact matches and starts-with matches
     const aLower = a.toLowerCase();
     const bLower = b.toLowerCase();
-    
+
     if (aLower === searchTerm) return -1;
     if (bLower === searchTerm) return 1;
-    
+
     if (aLower.startsWith(searchTerm) && !bLower.startsWith(searchTerm)) return -1;
     if (bLower.startsWith(searchTerm) && !aLower.startsWith(searchTerm)) return 1;
-    
+
     return a.localeCompare(b);
   }).slice(0, 20); // Limit to 20 results
 };
@@ -87,26 +87,26 @@ export const searchPortsSync = (query: string): string[] => {
 // Function to search ports by name (case insensitive)
 export const searchPorts = async (query: string): Promise<string[]> => {
   const allPorts = await loadPortData();
-  
+
   if (!query || query.trim() === '') {
     return allPorts;
   }
-  
+
   const searchTerm = query.toLowerCase().trim();
-  
-  return allPorts.filter(port => 
+
+  return allPorts.filter(port =>
     port.toLowerCase().includes(searchTerm)
   ).sort((a, b) => {
     // Prioritize exact matches and starts-with matches
     const aLower = a.toLowerCase();
     const bLower = b.toLowerCase();
-    
+
     if (aLower === searchTerm) return -1;
     if (bLower === searchTerm) return 1;
-    
+
     if (aLower.startsWith(searchTerm) && !bLower.startsWith(searchTerm)) return -1;
     if (bLower.startsWith(searchTerm) && !aLower.startsWith(searchTerm)) return 1;
-    
+
     return a.localeCompare(b);
   });
 };
@@ -130,7 +130,7 @@ export { OFFICIAL_NAVAL_ACTION_PORTS };
 export const PORT_CATEGORIES = {
   SPANISH_MAIN: [
     'Cartagena de Indias',
-    'Santa Marta', 
+    'Santa Marta',
     'Maracaibo',
     'Coro',
     'Puerto Cabello',

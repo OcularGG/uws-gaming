@@ -118,7 +118,7 @@ export default function PortAutocomplete({
           {label} {required && '*'}
         </label>
       )}
-      
+
       <div className="relative">
         <input
           ref={inputRef}
@@ -138,7 +138,7 @@ export default function PortAutocomplete({
           autoComplete="off"
           disabled={isLoading}
         />
-        
+
         {isLoading && (
           <div className="absolute right-3 top-3">
             <div className="animate-spin h-4 w-4 border-2 border-brass border-t-transparent rounded-full"></div>
@@ -166,7 +166,7 @@ export default function PortAutocomplete({
           ))}
         </div>
       )}
-      
+
       {showSuggestions && suggestions.length === 0 && value.length >= 2 && !isLoading && (
         <div
           ref={suggestionsRef}

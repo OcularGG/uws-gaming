@@ -55,5 +55,16 @@ export function isAdmin(userId?: string | null): boolean {
  * Check if a user is admin from a session
  */
 export function isAdminSession(session: UnifiedSession | null): boolean {
-  return isAdmin(session?.user?.discordId) || session?.user?.isAdmin === true;
+  if (!session?.user) return false;
+
+  // Check Discord ID
+  if (isAdmin(session.user.discordId)) return true;
+
+  // Check email
+  if (session.user.email === 'admin@krakengaming.org') return true;
+
+  // Check explicit admin flag
+  if (session.user.isAdmin === true) return true;
+
+  return false;
 }

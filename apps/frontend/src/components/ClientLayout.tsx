@@ -10,10 +10,10 @@ export default function ClientLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
-  
+
   // Hide navigation and footer on auth pages
   const isAuthPage = pathname?.startsWith('/auth/')
-  
+
   if (isAuthPage) {
     return (
       <main className="min-h-screen">
@@ -21,7 +21,7 @@ export default function ClientLayout({
       </main>
     )
   }
-  
+
   return (
     <>
       <Navigation />

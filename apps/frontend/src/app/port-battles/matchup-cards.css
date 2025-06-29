@@ -1,0 +1,290 @@
+
+/* Force reload - 2025-06-28-20:52 */
+
+/* Override hero title gradient for this page */
+.hero-title-gradient {
+  background: linear-gradient(
+    90deg,
+    #201810 0%,
+    #714920 20%,
+    #9c642c 40%,
+    #b2905f 60%,
+    #805224 80%,
+    #201810 100%
+  ) !important;
+  background-size: 300% 100% !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: hero-gradient-flow 8s ease-in-out infinite alternate !important;
+  color: transparent !important;
+}
+
+/* Disable all hover effects on matchup card */
+.matchup-card:hover {
+  transform: none !important;
+  animation: none !important;
+}
+
+/* Sports-Style Matchup Cards */
+.matchup-card {
+  position: relative;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+/* Removed hover animations for clean look */
+
+/* Team color pulses for background gradients */
+.team-bg-pulse {
+  animation: teamPulse 3s ease-in-out infinite;
+}
+
+@keyframes teamPulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+/* Animated center divider */
+.center-divider {
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 20%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0.3) 80%,
+    transparent 100%
+  );
+  animation: dividerPulse 2s ease-in-out infinite;
+}
+
+@keyframes dividerPulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: translateX(-50%) scaleY(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scaleY(1.1);
+  }
+}
+
+/* VS circle animations */
+.vs-circle {
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.vs-circle::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #ef4444, #8b5cf6, #3b82f6, #ef4444);
+  animation: rotate 4s linear infinite;
+  z-index: -1;
+  opacity: 0.3;
+}
+
+/* Removed hover effects for clean look */
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Flag glow effects */
+.flag-glow {
+  position: relative;
+}
+
+.flag-glow::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  background: linear-gradient(45deg,
+    rgba(255, 215, 0, 0.3),
+    rgba(255, 140, 0, 0.3),
+    rgba(255, 69, 0, 0.3)
+  );
+  border-radius: inherit;
+  filter: blur(8px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+/* Removed hover glow effects */
+
+/* Enhanced role badges */
+.role-badge {
+  position: relative;
+  overflow: hidden;
+}
+
+.role-badge::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: rotate(45deg);
+  transition: transform 0.6s ease;
+}
+
+/* Removed role badge hover effects */
+
+/* Particle effects */
+.particle-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.8), transparent);
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
+
+.particle:nth-child(1) {
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.particle:nth-child(2) {
+  left: 30%;
+  animation-delay: 1s;
+}
+
+.particle:nth-child(3) {
+  left: 50%;
+  animation-delay: 2s;
+}
+
+.particle:nth-child(4) {
+  left: 70%;
+  animation-delay: 3s;
+}
+
+.particle:nth-child(5) {
+  left: 90%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(100vh) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(90vh) scale(1);
+  }
+  90% {
+    opacity: 1;
+    transform: translateY(10vh) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0) scale(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .matchup-card {
+    margin: 0 -1rem;
+  }
+
+  .matchup-card .text-4xl {
+    font-size: 2rem;
+  }
+
+  .matchup-card .text-2xl {
+    font-size: 1.5rem;
+  }
+
+  .vs-circle .text-3xl {
+    font-size: 1.5rem;
+  }
+}
+
+/* Enhanced team color schemes */
+.team-pirates {
+  --primary: #D4AF37;
+  --secondary: #8B4513;
+  --accent: #FF6B35;
+}
+
+.team-britain {
+  --primary: #003366;
+  --secondary: #DC143C;
+  --accent: #FFFFFF;
+}
+
+.team-france {
+  --primary: #002868;
+  --secondary: #ED2939;
+  --accent: #FFFFFF;
+}
+
+.team-usa {
+  --primary: #002868;
+  --secondary: #BF0A30;
+  --accent: #FFFFFF;
+}
+
+/* Glass morphism effects */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
+
+/* Disabled glass panel hover effects */
+
+/* Custom gradient button styling for action buttons */
+.action-button {
+  background: linear-gradient(
+    90deg,
+    #201810 0%,
+    #714920 20%,
+    #9c642c 40%,
+    #b2905f 60%,
+    #805224 80%,
+    #201810 100%
+  );
+  background-size: 300% 100%;
+  animation: hero-gradient-flow 8s ease-in-out infinite alternate;
+  color: white;
+  border-radius: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+@keyframes hero-gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}

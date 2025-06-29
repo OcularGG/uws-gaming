@@ -3,7 +3,7 @@
 
 export const OFFICIAL_NAVAL_ACTION_PORTS = [
   "Aguadilla",
-  "Almirante", 
+  "Almirante",
   "Amalienborg",
   "Arthur's Town",
   "Aves",

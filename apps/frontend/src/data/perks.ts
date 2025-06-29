@@ -117,6 +117,7 @@ export const ALL_PERKS: Perk[] = [
 export interface PerkSelection {
   perkName: string;
   level: number;
+  minimumLevel?: number; // Minimum level requirement if the preferred level cannot be met
 }
 
 // Constants
@@ -129,9 +130,11 @@ export const getPerkByName = (name: string): Perk | undefined => {
 };
 
 export const calculatePerkCost = (perkName: string, level: number): number => {
+  if (perkName === "FREE_CHOICE") return 0; // Free choice perks cost nothing
+
   const perk = getPerkByName(perkName);
   if (!perk) return 0;
-  
+
   const perkLevel = perk.levels.find(l => l.level === level);
   return perkLevel ? perkLevel.cost : 0;
 };
@@ -157,6 +160,6 @@ export const canAffordPerk = (selections: PerkSelection[], perkName: string, lev
 };
 
 export const getAvailablePerks = (selections: PerkSelection[]): string[] => {
-  const selectedPerkNames = selections.map(s => s.perkName).filter(Boolean);
+  const selectedPerkNames = selections.map(s => s.perkName).filter(Boolean).filter(name => name !== "FREE_CHOICE");
   return ALL_PERKS.map(p => p.name).filter(name => !selectedPerkNames.includes(name));
 };

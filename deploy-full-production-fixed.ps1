@@ -101,4 +101,4 @@ Write-Host "  Preview: https://preview.krakengaming.org" -ForegroundColor White
 Write-Host "  Bug Reports: https://bugs.krakengaming.org" -ForegroundColor White
 Write-Host ""
 Write-Host "⚠️  Note: DNS propagation may take up to 24 hours for custom domains" -ForegroundColor Yellow
-Write-Host "🔍 Monitor deployment: https://console.cloud.google.com/run?project=$PROJECT_ID" -ForegroundColor Cyan
+Write-Host "Monitor deployment: https://console.cloud.google.com/run?project=$PROJECT_ID" -ForegroundColor Cyan

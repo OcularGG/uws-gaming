@@ -47,7 +47,7 @@ export default function CreatePortBattlePage() {
   const [error, setError] = useState<string | null>(null)
   const [ports, setPorts] = useState<Port[]>([])
   const [clans, setClans] = useState<Clan[]>([])
-  
+
   // State for collapsible sections
   const [expandedPerks, setExpandedPerks] = useState<{[key: string]: boolean}>({})
   const [expandedComments, setExpandedComments] = useState<{[key: string]: boolean}>({})
@@ -57,6 +57,9 @@ export default function CreatePortBattlePage() {
     meetupTime: '',
     battleStartTime: '',
     battleType: 'offensive' as 'offensive' | 'defensive' | 'screening' | 'flag-plant',
+    ourRole: 'attackers' as 'attackers' | 'defenders',
+    enemyNation: 'France' as 'France' | 'Great Britain' | 'USA',
+    enemyClanTag: '',
     isDeepWater: true,
     meetupLocation: '',
     brLimit: 2500,
@@ -75,6 +78,13 @@ export default function CreatePortBattlePage() {
         { shipName: 'Bellona', brValue: 133, frame: '', planking: '', perks: [], broadsides: 1, repairSets: 1, comments: '' },
         { shipName: 'Endymion', brValue: 85, frame: '', planking: '', perks: [], broadsides: 1, repairSets: 1, comments: '' },
         { shipName: 'Trincomalee', brValue: 87, frame: '', planking: '', perks: [], broadsides: 1, repairSets: 1, comments: '' }
+      ]
+    },
+    {
+      setupName: 'Enemy Fleet',
+      fleetCommander: '',
+      roles: [
+        { shipName: '', brValue: 0, frame: '', planking: '', perks: [], broadsides: 1, repairSets: 1, comments: '' }
       ]
     }
   ])
@@ -151,7 +161,7 @@ export default function CreatePortBattlePage() {
       ...newSetups[setupIndex].roles[roleIndex],
       [field]: value
     }
-    
+
     // Auto-update BR when ship name changes
     if (field === 'shipName' && typeof value === 'string') {
       const ship = getShipByName(value)
@@ -159,7 +169,7 @@ export default function CreatePortBattlePage() {
         newSetups[setupIndex].roles[roleIndex].brValue = ship.br
       }
     }
-    
+
     setFleetSetups(newSetups)
   }
 
@@ -196,15 +206,15 @@ export default function CreatePortBattlePage() {
 
   const addRole = (setupIndex: number) => {
     const newSetups = [...fleetSetups]
-    newSetups[setupIndex].roles.push({ 
-      shipName: '', 
-      brValue: 0, 
-      frame: '', 
-      planking: '', 
-      perks: [], 
-      broadsides: 1, 
-      repairSets: 1, 
-      comments: '' 
+    newSetups[setupIndex].roles.push({
+      shipName: '',
+      brValue: 0,
+      frame: '',
+      planking: '',
+      perks: [],
+      broadsides: 1,
+      repairSets: 1,
+      comments: ''
     })
     setFleetSetups(newSetups)
   }
@@ -224,7 +234,7 @@ export default function CreatePortBattlePage() {
 
   const addFleetSetup = () => {
     setFleetSetups([...fleetSetups, {
-      setupName: `Fleet Setup ${fleetSetups.length + 1}`,
+      setupName: `Enemy Fleet ${fleetSetups.length}`,
       fleetCommander: '',
       roles: []
     }])
@@ -278,8 +288,8 @@ export default function CreatePortBattlePage() {
           <p className="text-navy-dark/70 mb-4" style={{fontFamily: 'Crimson Text, serif'}}>
             Please sign in to create a port battle.
           </p>
-          <Link 
-            href="/api/auth/signin" 
+          <Link
+            href="/api/auth/signin"
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
             style={{fontFamily: 'Cinzel, serif'}}
           >
@@ -296,8 +306,8 @@ export default function CreatePortBattlePage() {
         <h1 className="text-3xl font-bold text-navy-dark" style={{fontFamily: 'Cinzel, serif'}}>
           Create Port Battle
         </h1>
-        <Link 
-          href="/port-battles" 
+        <Link
+          href="/port-battles"
           className="bg-navy-dark text-sail-white px-4 py-2 rounded hover:bg-navy-dark/80 transition-colors"
           style={{fontFamily: 'Cinzel, serif'}}
         >
@@ -349,6 +359,61 @@ export default function CreatePortBattlePage() {
                 <option value="screening">Screening</option>
                 <option value="flag-plant">Flag Plant</option>
               </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-navy-dark mb-2" style={{fontFamily: 'Cinzel, serif'}}>
+                Our Role *
+              </label>
+              <select
+                value={formData.ourRole}
+                onChange={(e) => setFormData(prev => ({ ...prev, ourRole: e.target.value as 'attackers' | 'defenders' }))}
+                className="w-full border-2 border-navy-dark rounded px-3 py-2 focus:outline-none focus:border-brass transition-colors"
+                style={{fontFamily: 'Crimson Text, serif'}}
+                required
+              >
+                <option value="attackers">Attackers</option>
+                <option value="defenders">Defenders</option>
+              </select>
+            </div>
+
+            {/* Enemy nation and clan selection */}
+            <div className="bg-red-50 border-2 border-red-200 rounded p-4">
+              <h3 className="text-sm font-medium text-navy-dark mb-3" style={{fontFamily: 'Cinzel, serif'}}>
+                Enemy Fleet ({formData.ourRole === 'attackers' ? 'Defending' : 'Attacking'})
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-navy-dark mb-2" style={{fontFamily: 'Cinzel, serif'}}>
+                    Enemy Nation *
+                  </label>
+                  <select
+                    value={formData.enemyNation}
+                    onChange={(e) => setFormData(prev => ({ ...prev, enemyNation: e.target.value as 'France' | 'Great Britain' | 'USA' }))}
+                    className="w-full border-2 border-navy-dark rounded px-3 py-2 focus:outline-none focus:border-brass transition-colors"
+                    style={{fontFamily: 'Crimson Text, serif'}}
+                    required
+                  >
+                    <option value="France">France</option>
+                    <option value="Great Britain">Great Britain</option>
+                    <option value="USA">USA</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-navy-dark mb-2" style={{fontFamily: 'Cinzel, serif'}}>
+                    Enemy Clan Tag *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.enemyClanTag}
+                    onChange={(e) => setFormData(prev => ({ ...prev, enemyClanTag: e.target.value }))}
+                    className="w-full border-2 border-navy-dark rounded px-3 py-2 focus:outline-none focus:border-brass transition-colors"
+                    style={{fontFamily: 'Crimson Text, serif'}}
+                    placeholder="Enter enemy clan tag..."
+                    required
+                  />
+                </div>
+              </div>
             </div>
 
             <div>
@@ -467,7 +532,7 @@ export default function CreatePortBattlePage() {
         {/* Additional Details */}
         <div className="bg-sail-white rounded-lg shadow-md p-6 border-2 border-navy-dark">
           <h2 className="text-xl font-semibold mb-4 text-navy-dark" style={{fontFamily: 'Cinzel, serif'}}>Additional Details</h2>
-          
+
           <div>
             <label className="block text-sm font-medium text-navy-dark mb-2" style={{fontFamily: 'Cinzel, serif'}}>
               Fleet Instructions & Notes
@@ -483,10 +548,10 @@ export default function CreatePortBattlePage() {
           </div>
         </div>
 
-        {/* Fleet Setups */}
+        {/* Fleets */}
         <div className="bg-sail-white rounded-lg shadow-md p-6 border-2 border-navy-dark">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-navy-dark" style={{fontFamily: 'Cinzel, serif'}}>Fleet Setups</h2>
+            <h2 className="text-xl font-semibold text-navy-dark" style={{fontFamily: 'Cinzel, serif'}}>Fleets</h2>
             <div className="flex items-center gap-4">
               <div className={`text-sm ${isOverBRLimit() ? 'text-red-600 font-bold' : 'text-green-600'}`} style={{fontFamily: 'Crimson Text, serif'}}>
                 Total BR: {getTotalBR()} / {formData.brLimit}
@@ -499,30 +564,32 @@ export default function CreatePortBattlePage() {
               <button
                 type="button"
                 onClick={addFleetSetup}
-                className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors"
+                className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
                 style={{fontFamily: 'Cinzel, serif'}}
               >
-                Add Fleet Setup
+                Add Enemy Fleet
               </button>
             </div>
           </div>
 
-          {fleetSetups.map((setup, setupIndex) => (
-            <div key={setupIndex} className="border-2 border-navy-dark rounded-lg p-4 mb-4 bg-sail-white">
+          {fleetSetups.slice(1).map((setup, setupIndex) => {
+            const actualIndex = setupIndex + 1; // Adjust index since we're slicing
+            return (
+            <div key={actualIndex} className="border-2 border-red-600 rounded-lg p-4 mb-4 bg-red-50">
               <div className="flex justify-between items-center mb-3">
                 <input
                   type="text"
                   value={setup.setupName}
-                  onChange={(e) => updateFleetSetupName(setupIndex, e.target.value)}
-                  className="text-lg font-medium border-2 border-navy-dark rounded px-2 py-1 bg-sail-white text-navy-dark focus:outline-none focus:border-brass transition-colors"
+                  onChange={(e) => updateFleetSetupName(actualIndex, e.target.value)}
+                  className="text-lg font-medium border-2 border-red-600 rounded px-2 py-1 bg-red-50 text-red-900 focus:outline-none focus:border-red-800 transition-colors"
                   style={{fontFamily: 'Cinzel, serif'}}
-                  placeholder="Fleet Setup Name"
+                  placeholder="Enemy Fleet Name"
                 />
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    onClick={() => addRole(setupIndex)}
-                    className="bg-blue-600 text-white px-2 py-1 rounded text-sm hover:bg-blue-700 transition-colors"
+                    onClick={() => addRole(actualIndex)}
+                    className="bg-red-600 text-white px-2 py-1 rounded text-sm hover:bg-red-700 transition-colors"
                     style={{fontFamily: 'Cinzel, serif'}}
                   >
                     Add Role
@@ -530,8 +597,8 @@ export default function CreatePortBattlePage() {
                   {fleetSetups.length > 1 && (
                     <button
                       type="button"
-                      onClick={() => removeFleetSetup(setupIndex)}
-                      className="bg-red-600 text-white px-2 py-1 rounded text-sm hover:bg-red-700 transition-colors"
+                      onClick={() => removeFleetSetup(actualIndex)}
+                      className="bg-red-700 text-white px-2 py-1 rounded text-sm hover:bg-red-800 transition-colors"
                       style={{fontFamily: 'Cinzel, serif'}}
                     >
                       Remove Setup
@@ -541,34 +608,34 @@ export default function CreatePortBattlePage() {
               </div>
 
               {/* Fleet Commander for this setup */}
-              <div className="mb-4 border-b border-navy-dark/20 pb-3">
-                <label className="block text-sm font-medium text-navy-dark mb-2" style={{fontFamily: 'Cinzel, serif'}}>
-                  Fleet Commander
+              <div className="mb-4 border-b border-red-600/20 pb-3">
+                <label className="block text-sm font-medium text-red-900 mb-2" style={{fontFamily: 'Cinzel, serif'}}>
+                  Enemy Fleet Commander
                 </label>
                 <input
                   type="text"
                   value={setup.fleetCommander || ''}
-                  onChange={(e) => updateFleetCommander(setupIndex, e.target.value)}
-                  className="w-full border-2 border-navy-dark rounded px-3 py-2 focus:outline-none focus:border-brass transition-colors"
+                  onChange={(e) => updateFleetCommander(actualIndex, e.target.value)}
+                  className="w-full border-2 border-red-600 rounded px-3 py-2 focus:outline-none focus:border-red-800 transition-colors bg-red-50 text-red-900"
                   style={{fontFamily: 'Cinzel, serif'}}
-                  placeholder={setupIndex === 0 ? "Auto-filled from main commander" : "Fleet commander name"}
+                  placeholder="Enemy fleet commander name"
                 />
               </div>
 
               <div className="space-y-4">
                 {setup.roles.map((role, roleIndex) => {
-                  const shipCounts = getShipCountByName(setupIndex)
+                  const shipCounts = getShipCountByName(actualIndex)
                   const currentShipCount = role.shipName ? shipCounts[role.shipName] : 0
-                  const perksKey = `${setupIndex}-${roleIndex}-perks`
-                  const commentsKey = `${setupIndex}-${roleIndex}-comments`
-                  
+                  const perksKey = `${actualIndex}-${roleIndex}-perks`
+                  const commentsKey = `${actualIndex}-${roleIndex}-comments`
+
                   return (
-                    <div key={roleIndex} className="border border-navy-dark/30 rounded-lg p-3 bg-sail-white/50">
+                    <div key={roleIndex} className="border border-red-600/30 rounded-lg p-3 bg-red-50/70">
                       <div className="flex justify-between items-start mb-3">
-                        <span className="text-sm font-medium text-navy-dark" style={{fontFamily: 'Cinzel, serif'}}>
-                          Ship #{roleIndex + 1}
+                        <span className="text-sm font-medium text-red-900" style={{fontFamily: 'Cinzel, serif'}}>
+                          Enemy Ship #{roleIndex + 1}
                           {role.shipName && currentShipCount > 1 && (
-                            <span className="ml-2 text-xs bg-brass/20 text-brass-dark px-2 py-1 rounded">
+                            <span className="ml-2 text-xs bg-red-200 text-red-800 px-2 py-1 rounded">
                               {role.shipName} x{currentShipCount}
                             </span>
                           )}
@@ -576,7 +643,7 @@ export default function CreatePortBattlePage() {
                         <div className="flex gap-2">
                           <button
                             type="button"
-                            onClick={() => duplicateRole(setupIndex, roleIndex)}
+                            onClick={() => duplicateRole(actualIndex, roleIndex)}
                             className="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700 transition-colors"
                             style={{fontFamily: 'Cinzel, serif'}}
                           >
@@ -584,40 +651,40 @@ export default function CreatePortBattlePage() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => removeRole(setupIndex, roleIndex)}
-                            className="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700 transition-colors"
+                            onClick={() => removeRole(actualIndex, roleIndex)}
+                            className="bg-red-700 text-white px-2 py-1 rounded text-xs hover:bg-red-800 transition-colors"
                             style={{fontFamily: 'Cinzel, serif'}}
                           >
                             Remove
                           </button>
                         </div>
                       </div>
-                      
+
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                         {/* Ship Name */}
                         <div>
-                          <label className="block text-xs font-medium text-navy-dark mb-1" style={{fontFamily: 'Cinzel, serif'}}>
-                            Ship Name *
+                          <label className="block text-xs font-medium text-red-900 mb-1" style={{fontFamily: 'Cinzel, serif'}}>
+                            Enemy Ship Name *
                           </label>
                           <ShipAutocomplete
                             value={role.shipName}
-                            onChange={(value) => updateRole(setupIndex, roleIndex, 'shipName', value)}
-                            placeholder="Enter ship name..."
-                            className="border-navy-dark"
+                            onChange={(value) => updateRole(actualIndex, roleIndex, 'shipName', value)}
+                            placeholder="Enter enemy ship name..."
+                            className="border-red-600"
                             required
                             showBR={false}
                           />
                         </div>
-                        
+
                         {/* Frame */}
                         <div>
-                          <label className="block text-xs font-medium text-navy-dark mb-1" style={{fontFamily: 'Cinzel, serif'}}>
+                          <label className="block text-xs font-medium text-red-900 mb-1" style={{fontFamily: 'Cinzel, serif'}}>
                             Frame
                           </label>
                           <select
                             value={role.frame || ''}
-                            onChange={(e) => updateRole(setupIndex, roleIndex, 'frame', e.target.value)}
-                            className="w-full border-2 border-navy-dark rounded px-2 py-1 focus:outline-none focus:border-brass transition-colors"
+                            onChange={(e) => updateRole(actualIndex, roleIndex, 'frame', e.target.value)}
+                            className="w-full border-2 border-red-600 rounded px-2 py-1 focus:outline-none focus:border-red-800 transition-colors bg-red-50 text-red-900"
                             style={{fontFamily: 'Crimson Text, serif'}}
                           >
                             <option value="">Select Frame...</option>
@@ -626,16 +693,16 @@ export default function CreatePortBattlePage() {
                             ))}
                           </select>
                         </div>
-                        
+
                         {/* Planking */}
                         <div>
-                          <label className="block text-xs font-medium text-navy-dark mb-1" style={{fontFamily: 'Cinzel, serif'}}>
+                          <label className="block text-xs font-medium text-red-900 mb-1" style={{fontFamily: 'Cinzel, serif'}}>
                             Planking
                           </label>
                           <select
                             value={role.planking || ''}
-                            onChange={(e) => updateRole(setupIndex, roleIndex, 'planking', e.target.value)}
-                            className="w-full border-2 border-navy-dark rounded px-2 py-1 focus:outline-none focus:border-brass transition-colors"
+                            onChange={(e) => updateRole(actualIndex, roleIndex, 'planking', e.target.value)}
+                            className="w-full border-2 border-red-600 rounded px-2 py-1 focus:outline-none focus:border-red-800 transition-colors bg-red-50 text-red-900"
                             style={{fontFamily: 'Crimson Text, serif'}}
                           >
                             <option value="">Select Planking...</option>
@@ -645,16 +712,16 @@ export default function CreatePortBattlePage() {
                           </select>
                         </div>
                       </div>
-                      
+
                       {/* Captain Perks Section */}
-                      <div className="mt-4 border-t border-navy-dark/20 pt-4">
+                      <div className="mt-4 border-t border-red-600/20 pt-4">
                         <button
                           type="button"
-                          onClick={() => togglePerks(setupIndex, roleIndex)}
-                          className="flex items-center justify-between w-full text-sm font-medium text-navy-dark mb-2 hover:text-brass transition-colors"
+                          onClick={() => togglePerks(actualIndex, roleIndex)}
+                          className="flex items-center justify-between w-full text-sm font-medium text-red-900 mb-2 hover:text-red-700 transition-colors"
                           style={{fontFamily: 'Cinzel, serif'}}
                         >
-                          <span>Captain Perks</span>
+                          <span>Enemy Captain Perks</span>
                           <span className="text-xs">
                             {expandedPerks[perksKey] ? '▼' : '▶'}
                           </span>
@@ -662,19 +729,19 @@ export default function CreatePortBattlePage() {
                         {expandedPerks[perksKey] && (
                           <PerkSelector
                             perks={role.perks}
-                            onChange={(perks) => updateRolePerks(setupIndex, roleIndex, perks)}
-                            className="bg-sail-white/20 rounded p-3"
+                            onChange={(perks) => updateRolePerks(actualIndex, roleIndex, perks)}
+                            className="bg-red-50/50 rounded p-3"
                           />
                         )}
                       </div>
 
                       {/* Load Calculator Section */}
-                      <div className="mt-4 border-t border-navy-dark/20 pt-4">
+                      <div className="mt-4 border-t border-red-600/20 pt-4">
                         <LoadCalculator
                           shipName={role.shipName}
                           broadsides={role.broadsides}
                           repairSets={role.repairSets}
-                          onChange={(broadsides: number, repairSets: number) => updateRoleLoad(setupIndex, roleIndex, broadsides, repairSets)}
+                          onChange={(broadsides: number, repairSets: number) => updateRoleLoad(actualIndex, roleIndex, broadsides, repairSets)}
                           frame={role.frame}
                           planking={role.planking}
                           alwaysExpanded={true}
@@ -682,14 +749,14 @@ export default function CreatePortBattlePage() {
                       </div>
 
                       {/* Comments Section */}
-                      <div className="mt-4 border-t border-navy-dark/20 pt-4">
+                      <div className="mt-4 border-t border-red-600/20 pt-4">
                         <button
                           type="button"
-                          onClick={() => toggleComments(setupIndex, roleIndex)}
-                          className="flex items-center justify-between w-full text-sm font-medium text-navy-dark mb-2 hover:text-brass transition-colors"
+                          onClick={() => toggleComments(actualIndex, roleIndex)}
+                          className="flex items-center justify-between w-full text-sm font-medium text-red-900 mb-2 hover:text-red-700 transition-colors"
                           style={{fontFamily: 'Cinzel, serif'}}
                         >
-                          <span>Role Comments</span>
+                          <span>Enemy Role Comments</span>
                           <span className="text-xs">
                             {expandedComments[commentsKey] ? '▼' : '▶'}
                           </span>
@@ -697,10 +764,10 @@ export default function CreatePortBattlePage() {
                         {expandedComments[commentsKey] && (
                           <textarea
                             value={role.comments || ''}
-                            onChange={(e) => updateRole(setupIndex, roleIndex, 'comments', e.target.value)}
-                            className="w-full border-2 border-navy-dark rounded px-3 py-2 focus:outline-none focus:border-brass transition-colors min-h-[80px]"
+                            onChange={(e) => updateRole(actualIndex, roleIndex, 'comments', e.target.value)}
+                            className="w-full border-2 border-red-600 rounded px-3 py-2 focus:outline-none focus:border-red-800 transition-colors min-h-[80px] bg-red-50 text-red-900"
                             style={{fontFamily: 'Crimson Text, serif'}}
-                            placeholder="Special instructions or requirements for this role..."
+                            placeholder="Special instructions or requirements for this enemy role..."
                             rows={3}
                           />
                         )}
@@ -710,13 +777,13 @@ export default function CreatePortBattlePage() {
                 })}
 
                 {setup.roles.length === 0 && (
-                  <p className="text-navy-dark/60 text-sm" style={{fontFamily: 'Crimson Text, serif'}}>
-                    No roles defined. Click "Add Role" to add ship requirements.
+                  <p className="text-red-800/60 text-sm" style={{fontFamily: 'Crimson Text, serif'}}>
+                    No enemy roles defined. Click "Add Role" to add enemy ship requirements.
                   </p>
                 )}
               </div>
             </div>
-          ))}
+          )})}
         </div>
 
         {/* Submit */}

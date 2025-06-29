@@ -68,7 +68,7 @@ const PORT_BATTLE_AVAILABILITY = [
 export default function ApplicationPage() {
   const { data: session } = useSession();
   const [currentStep, setCurrentStep] = useState(session ? 1 : 0); // Start with registration if not logged in
-  
+
   // Password strength function
   const getPasswordStrength = (password: string) => {
     let score = 0;
@@ -78,7 +78,7 @@ export default function ApplicationPage() {
     if (/[A-Z]/.test(password)) score++;
     if (/[0-9]/.test(password)) score++;
     if (/[^A-Za-z0-9]/.test(password)) score++;
-    
+
     if (score <= 2) return { strength: 'Weak', color: 'bg-red-500', width: '33%' };
     if (score <= 4) return { strength: 'Medium', color: 'bg-yellow-500', width: '66%' };
     return { strength: 'Strong', color: 'bg-green-500', width: '100%' };
@@ -172,16 +172,23 @@ export default function ApplicationPage() {
   };
 
   const handleSubmit = async () => {
+    console.log('Submit button clicked'); // Debug
+    console.log('Step 6 validation:', validateStep(6)); // Debug
+    console.log('Form data:', formData); // Debug
+
     if (!validateStep(6)) {
       setSubmitError('Please complete all required fields and sign the application.');
       return;
     }
+
+    setSubmitError(''); // Clear any existing errors
 
     try {
       let userId = session?.user?.id;
 
       // If user is not logged in, register them first
       if (!session) {
+        console.log('Registering new user...'); // Debug
         const registrationResponse = await fetch('/api/auth/register', {
           method: 'POST',
           headers: {
@@ -196,14 +203,17 @@ export default function ApplicationPage() {
 
         if (!registrationResponse.ok) {
           const errorData = await registrationResponse.json();
+          console.error('Registration failed:', errorData); // Debug
           setSubmitError(errorData.error || 'Failed to register user');
           return;
         }
 
         const registrationData = await registrationResponse.json();
         userId = registrationData.user.id;
+        console.log('User registered with ID:', userId); // Debug
       }
 
+      console.log('Submitting application...'); // Debug
       const applicationData = {
         ...formData,
         submittedAt: new Date().toISOString(),
@@ -218,16 +228,20 @@ export default function ApplicationPage() {
         body: JSON.stringify(applicationData),
       });
 
+      console.log('Application response status:', response.status); // Debug
+
       if (response.ok) {
+        console.log('Application submitted successfully'); // Debug
         setSubmitSuccess(true);
         setSubmitError('');
       } else {
         const errorData = await response.json();
+        console.error('Application submission failed:', errorData); // Debug
         setSubmitError(errorData.error || 'Failed to submit application');
       }
     } catch (error) {
+      console.error('Application submission error:', error); // Debug
       setSubmitError('Failed to submit application. Please try again.');
-      console.error('Application submission error:', error);
     }
   };
 
@@ -354,7 +368,7 @@ export default function ApplicationPage() {
               </h2>
               <p className="text-navy-dark/80 mb-6" style={{fontFamily: 'Crimson Text, serif'}}>
                 To apply for a{' '}
-                <span 
+                <span
                   className="text-brass hover:text-brass-bright font-semibold cursor-help relative group"
                 >
                   Letter of Marque
@@ -392,8 +406,8 @@ export default function ApplicationPage() {
                     value={formData.confirmEmail}
                     onChange={(e) => handleInputChange('confirmEmail', e.target.value)}
                     className={`w-full p-3 border-2 rounded ${
-                      formData.confirmEmail && formData.email !== formData.confirmEmail 
-                        ? 'border-red-500' 
+                      formData.confirmEmail && formData.email !== formData.confirmEmail
+                        ? 'border-red-500'
                         : 'border-navy-dark'
                     }`}
                     placeholder="captain@example.com"
@@ -444,7 +458,7 @@ export default function ApplicationPage() {
                         </span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
+                        <div
                           className={`h-2 rounded-full transition-all ${getPasswordStrength(formData.password).color}`}
                           style={{width: getPasswordStrength(formData.password).width}}
                         ></div>
@@ -465,8 +479,8 @@ export default function ApplicationPage() {
                     value={formData.confirmPassword}
                     onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                     className={`w-full p-3 border-2 rounded ${
-                      formData.confirmPassword && formData.password !== formData.confirmPassword 
-                        ? 'border-red-500' 
+                      formData.confirmPassword && formData.password !== formData.confirmPassword
+                        ? 'border-red-500'
                         : 'border-navy-dark'
                     }`}
                     placeholder="••••••••"
@@ -839,7 +853,7 @@ export default function ApplicationPage() {
               <button
                 onClick={prevStep}
                 className="neo-brutal-button px-6 py-3 font-semibold bg-cannon-smoke text-sail-white"
-                style={{fontFamily: 'Cinzel, serif'}}
+                style={{fontFamily: 'Cinzel, serif', color: '#f8f9fa !important'}}
               >
                 ← Previous
               </button>
@@ -856,7 +870,7 @@ export default function ApplicationPage() {
                     ? 'bg-brass text-white'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
-                style={{fontFamily: 'Cinzel, serif'}}
+                style={{fontFamily: 'Cinzel, serif', color: validateStep(currentStep) ? '#ffffff !important' : '#6b7280 !important'}}
               >
                 Next →
               </button>
@@ -869,9 +883,9 @@ export default function ApplicationPage() {
                     ? 'bg-green-600 text-white'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
-                style={{fontFamily: 'Cinzel, serif'}}
+                style={{fontFamily: 'Cinzel, serif', color: validateStep(6) ? '#ffffff !important' : '#6b7280 !important'}}
               >
-                ⚓ Submit Application
+                Submit Application
               </button>
             )}
           </div>

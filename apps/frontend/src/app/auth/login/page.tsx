@@ -73,23 +73,23 @@ export default function LoginPage() {
     <div className="min-h-screen flex">
       {/* Left Side - Hero Section Mimic */}
       <div className="hidden lg:flex lg:w-1/2 relative">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: 'url("https://greydogtales.com/blog/wp-content/uploads/2016/03/ghost_ship_approaching_by_matchack-deviantart.jpg")'
           }}
         />
-        
+
         {/* Hero Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-navy-dark/80 via-navy-dark/60 to-navy-dark/90"></div>
-        
+
         {/* Hero Content - Centered */}
         <div className="relative z-10 flex items-center justify-center h-full w-full">
           <div className="text-center px-4 max-w-2xl">
             {/* Pirate Flag Logo */}
             <div className="mb-8 flex justify-center">
               <div className="w-32 h-32 md:w-48 md:h-48 drop-shadow-2xl logo-floating">
-                <img 
+                <img
                   src="/uws-logo.png"
                   alt="UWS Logo"
                   className="w-full h-full object-contain filter drop-shadow-lg"
@@ -120,9 +120,9 @@ export default function LoginPage() {
             </div>
 
             <h1 className="hero-title-gradient text-4xl md:text-6xl mb-6">
-              KRAKEN GAMING
+              UWS
             </h1>
-            
+
             <div className="hero-subtitle text-lg md:text-2xl mb-8 max-w-lg mx-auto"
                style={{
                  color: 'var(--sail-white)',
@@ -153,7 +153,7 @@ export default function LoginPage() {
 
           <div className="lg:hidden text-center mb-8">
             <h1 className="hero-title-gradient text-4xl font-bold mb-2">
-              KRAKEN GAMING
+              UWS
             </h1>
             <div className="text-lg" style={{
               color: 'var(--sail-white)',
