@@ -19,8 +19,7 @@ const mockPortBattles = [
     allowExternalSignups: true,
     creator: {
       id: 'admin-user',
-      username: 'Admiral_Nelson',
-      discordId: '1207434980855259206'
+      username: 'Admiral_Nelson'
     },
     location: 'Cartagena Port',
     duration: 90,
@@ -65,8 +64,7 @@ const mockPortBattles = [
     allowExternalSignups: true,
     creator: {
       id: 'admin-user',
-      username: 'Captain_Blackbeard',
-      discordId: '1207434980855259206'
+      username: 'Captain_Blackbeard'
     },
     location: 'La Tortue Deep Water',
     duration: 120,
@@ -119,8 +117,7 @@ const mockPortBattles = [
     allowExternalSignups: false, // No external signups for this one
     creator: {
       id: 'admin-user',
-      username: 'Commodore_Jones',
-      discordId: '1207434980855259206'
+      username: 'Commodore_Jones'
     },
     location: 'Charleston Harbor',
     duration: 75,
@@ -156,8 +153,7 @@ const mockPortBattles = [
     battleType: 'SCREENING',
     creator: {
       id: 'admin-user',
-      username: 'Swedish_Admiral',
-      discordId: '1207434980855259206'
+      username: 'Swedish_Admiral'
     },
     location: 'Gustavia Deep Water',
     duration: 100,
@@ -200,8 +196,7 @@ const mockPortBattles = [
     battleType: 'OFFENSIVE',
     creator: {
       id: 'admin-user',
-      username: 'El_Capitan_Hernandez',
-      discordId: '1207434980855259206'
+      username: 'El_Capitan_Hernandez'
     },
     location: 'Vera Cruz Port',
     duration: 85,
@@ -239,7 +234,7 @@ export async function GET(request: NextRequest) {
           const portBattles = await prisma.portBattle.findMany({
             include: {
               creator: {
-                select: { id: true, username: true, discordId: true }
+                select: { id: true, username: true }
               }
             },
             orderBy: { createdAt: 'asc' }
@@ -419,7 +414,7 @@ export async function POST(request: NextRequest) {
             },
             include: {
               creator: {
-                select: { id: true, username: true, discordId: true }
+                select: { id: true, username: true }
               }
             }
           });

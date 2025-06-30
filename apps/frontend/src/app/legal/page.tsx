@@ -29,7 +29,7 @@ export default function LegalPage() {
             </p>
             <Link
               href="/legal/terms"
-              className="text-brass hover:text-brass-bright font-medium" style={{fontFamily: 'Cinzel, serif'}}
+              className="static-red-gradient hover:text-red-700 font-medium" style={{fontFamily: 'Cinzel, serif'}}
             >
               Read Terms of Service →
             </Link>
@@ -44,7 +44,7 @@ export default function LegalPage() {
             </p>
             <Link
               href="/legal/privacy"
-              className="text-brass hover:text-brass-bright font-medium" style={{fontFamily: 'Cinzel, serif'}}
+              className="static-red-gradient hover:text-red-700 font-medium" style={{fontFamily: 'Cinzel, serif'}}
             >
               Read Privacy Policy →
             </Link>
@@ -59,7 +59,7 @@ export default function LegalPage() {
             </p>
             <Link
               href="/legal/cookies"
-              className="text-brass hover:text-brass-bright font-medium" style={{fontFamily: 'Cinzel, serif'}}
+              className="static-red-gradient hover:text-red-700 font-medium" style={{fontFamily: 'Cinzel, serif'}}
             >
               Read Cookie Policy →
             </Link>
@@ -74,7 +74,7 @@ export default function LegalPage() {
             </p>
             <Link
               href="/legal/community"
-              className="text-brass hover:text-brass-bright font-medium" style={{fontFamily: 'Cinzel, serif'}}
+              className="static-red-gradient hover:text-red-700 font-medium" style={{fontFamily: 'Cinzel, serif'}}
             >
               Read Community Guidelines →
             </Link>

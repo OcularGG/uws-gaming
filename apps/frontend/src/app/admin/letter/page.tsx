@@ -167,9 +167,12 @@ export default function AdminAdmiraltyPage() {
           <h2 className="text-2xl font-bold mb-4">Preview</h2>
           <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
             {letter.isActive ? (
-              <div className="letter-container bg-white border-4 border-gray-800 p-8 shadow-2xl transform rotate-1">
+              <div className="letter-container bg-white border-4 border-gray-800 p-8 shadow-2xl transform rotate-1 relative">
+                {/* Wax Seal */}
+                <div className="wax-seal"></div>
+
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl md:text-3xl font-bold text-gray-800" style={{fontFamily: 'serif'}}>
+                  <h3 className="letter-title-gradient text-2xl md:text-3xl font-bold" style={{fontFamily: 'serif'}}>
                     {letter.title || 'Letter Title'}
                   </h3>
                 </div>
@@ -179,7 +182,7 @@ export default function AdminAdmiraltyPage() {
                     <p key={index} className="text-lg leading-relaxed">
                       {index === 0 && paragraph ? (
                         <>
-                          <span className="text-2xl font-bold float-left mr-2 leading-none" style={{fontFamily: 'serif'}}>
+                          <span className="letter-first-letter">
                             {paragraph.charAt(0)}
                           </span>
                           {paragraph.slice(1)}
@@ -195,13 +198,15 @@ export default function AdminAdmiraltyPage() {
                       With deepest respect and fair winds,
                     </p>
                     <div className="signature-line">
-                      <div className="w-48 h-12 mx-auto bg-gray-200 flex items-center justify-center text-gray-600 text-sm mb-2">
-                        [Signature Image]
-                      </div>
+                      <img
+                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/George_III_Signature.svg/251px-George_III_Signature.svg.png?20100201022028"
+                        alt="Signature"
+                        className="w-48 h-12 mx-auto object-contain mb-2"
+                      />
                       <p className="text-lg font-bold mt-2" style={{fontFamily: 'serif'}}>
                         {letter.signature || 'Signature Name'}
                       </p>
-                      <p className="text-sm text-yellow-600">
+                      <p className="author-role-gradient text-sm">
                         {(letter.date || 'Title/Position').split('\n').map((line, index) => (
                           <span key={index}>
                             {line}

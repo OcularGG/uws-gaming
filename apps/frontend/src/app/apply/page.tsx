@@ -286,7 +286,7 @@ export default function ApplicationPage() {
             <div className="flex gap-4 justify-center">
               <a
                 href="/"
-                className="neo-brutal-button bg-brass text-white px-8 py-3 font-semibold"
+                className="neo-brutal-button bg-red-700 text-white px-8 py-3 font-semibold"
                 style={{fontFamily: 'Cinzel, serif'}}
               >
                 Return to Port
@@ -317,7 +317,7 @@ export default function ApplicationPage() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-green-800 mb-4" style={{fontFamily: 'Cinzel, serif'}}>
+          <h1 className="text-5xl font-bold mb-4 static-red-gradient" style={{fontFamily: 'Cinzel, serif'}}>
             Apply for a Letter of Marque
           </h1>
           <p className="text-sail-white/80 text-xl" style={{fontFamily: 'Crimson Text, serif'}}>
@@ -331,7 +331,7 @@ export default function ApplicationPage() {
             {[1, 2, 3, 4, 5, 6].map(step => (
               <div key={step} className="flex items-center">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                  step === currentStep ? 'bg-brass text-white' :
+                  step === currentStep ? 'bg-red-700 text-white' :
                   step < currentStep ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
                 }`}>
                   {step < currentStep ? '✓' : step}
@@ -369,7 +369,7 @@ export default function ApplicationPage() {
               <p className="text-navy-dark/80 mb-6" style={{fontFamily: 'Crimson Text, serif'}}>
                 To apply for a{' '}
                 <span
-                  className="text-brass hover:text-brass-bright font-semibold cursor-help relative group"
+                  className="text-red-600 hover:text-red-700 font-semibold cursor-help relative group"
                 >
                   Letter of Marque
                   <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-sail-white border-4 border-navy-dark text-navy-dark text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 shadow-2xl max-w-xs w-max neo-brutal-box" style={{fontFamily: 'Crimson Text, serif'}}>
@@ -377,7 +377,7 @@ export default function ApplicationPage() {
                   </span>
                 </span>
                 {' '}from His Majesty's Royal Navy, you'll need to create an account. If you already have an account,{' '}
-                <a href="/auth/login" className="text-brass hover:text-brass-bright font-semibold">
+                <a href="/auth/login" className="text-red-600 hover:text-red-700 font-semibold">
                   login here
                 </a>.
               </p>
@@ -492,7 +492,7 @@ export default function ApplicationPage() {
                 </div>
               </div>
 
-              <div className="mt-6 p-4 bg-brass/10 border border-brass/30 rounded">
+              <div className="mt-6 p-4 bg-red-700/10 border border-red-700/30 rounded">
                 <p className="text-sm text-navy-dark" style={{fontFamily: 'Crimson Text, serif'}}>
                   <strong>Note:</strong> Your account will be created when you submit your application.
                   This allows you to apply and creates your login credentials simultaneously.
@@ -867,7 +867,7 @@ export default function ApplicationPage() {
                 disabled={!validateStep(currentStep)}
                 className={`neo-brutal-button px-6 py-3 font-semibold ${
                   validateStep(currentStep)
-                    ? 'bg-brass text-white'
+                    ? 'bg-red-700 text-white'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
                 style={{fontFamily: 'Cinzel, serif', color: validateStep(currentStep) ? '#ffffff !important' : '#6b7280 !important'}}

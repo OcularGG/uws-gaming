@@ -190,7 +190,7 @@ export default function PortBattleSignupPage() {
       return
     }
 
-    // For external signups, require contact info
+    // For external signups, require Discord username
     if (formData.isExternalSignup && !formData.contactInfo) {
       setError('Please provide your Discord username.')
       return

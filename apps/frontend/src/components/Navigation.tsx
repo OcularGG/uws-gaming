@@ -78,11 +78,14 @@ export default function Navigation() {
                       >
                         <Link
                           href={item.href}
-                          className={`nav-item px-4 py-2 text-sm font-medium ${
+                          className={`nav-item px-4 py-2 text-sm font-bold ${
                             isActive ? 'active' : ''
-                          } ${isHomepage ? 'hero-title-gradient' : ''}`}
+                          } ${isHomepage ? 'static-red-gradient' : ''}`}
                           style={{
                             fontFamily: 'Cinzel, serif',
+                            fontWeight: 700,
+                            textTransform: 'uppercase',
+                            letterSpacing: '2px',
                             color: isHomepage ? 'transparent' : 'var(--navy-dark)',
                             textShadow: isHomepage ? 'none' : 'none'
                           }}
@@ -95,8 +98,13 @@ export default function Navigation() {
                             <Link
                               key={subItem.name}
                               href={subItem.href}
-                              className="nav-submenu-item block px-4 py-3 text-sm font-medium text-navy-dark transition-all duration-200"
-                              style={{fontFamily: 'Cinzel, serif'}}
+                              className="nav-submenu-item block px-4 py-3 text-sm font-bold text-navy-dark transition-all duration-200"
+                              style={{
+                                fontFamily: 'Cinzel, serif',
+                                fontWeight: 700,
+                                textTransform: 'uppercase',
+                                letterSpacing: '2px'
+                              }}
                             >
                               {subItem.name}
                             </Link>
@@ -110,11 +118,14 @@ export default function Navigation() {
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`nav-item px-4 py-2 text-sm font-medium ${
+                      className={`nav-item px-4 py-2 text-sm font-bold ${
                         isActive ? 'active' : ''
-                      } ${isHomepage ? 'hero-title-gradient' : ''}`}
+                      } ${isHomepage ? 'static-red-gradient' : ''}`}
                       style={{
                         fontFamily: 'Cinzel, serif',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '2px',
                         color: isHomepage ? 'transparent' : 'var(--navy-dark)',
                         textShadow: isHomepage ? 'none' : 'none'
                       }}
@@ -155,10 +166,16 @@ export default function Navigation() {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`nav-item block px-4 py-2 text-base font-medium ${
+                    className={`nav-item block px-4 py-2 text-base font-bold ${
                       isActive ? 'active' : ''
                     }`}
-                    style={{fontFamily: 'Cinzel, serif', color: 'var(--navy-dark)'}}
+                    style={{
+                      fontFamily: 'Cinzel, serif',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '2px',
+                      color: 'var(--navy-dark)'
+                    }}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {item.name}
@@ -224,7 +241,7 @@ export default function Navigation() {
                 alt={session.user?.name || 'Profile'}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  // Fallback to placeholder if Discord image fails
+                  // Fallback to placeholder if image fails
                   e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjNkI3Mjg2Ii8+CjxwYXRoIGQ9Ik0yMCAyOEM0IDI4IDQgMjQgNCAyMEM0IDE2IDggMTIgMjAgMTJDMzIgMTIgMzYgMTYgMzYgMjBDMzYgMjQgMzYgMjggMjAgMjhaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K';
                 }}
               />
@@ -236,7 +253,7 @@ export default function Navigation() {
                   {session.user?.name}
                 </div>
                 <div className="text-xs text-navy-dark/70">
-                  Kraken Captain
+                  UWS Captain
                 </div>
               </div>
               <div className="py-2">

@@ -21,8 +21,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./apps/frontend/src/*"],
-      "@krakengaming/database": ["./packages/database/src"],
-      "@krakengaming/types": ["./packages/types/src"]
+      "@uwsgaming/database": ["./packages/database/src"],
+      "@uwsgaming/types": ["./packages/types/src"]
     },
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true

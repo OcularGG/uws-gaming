@@ -290,7 +290,7 @@ export default function BugReportPage() {
                   type="url"
                   value={formData.url}
                   onChange={(e) => handleInputChange('url', e.target.value)}
-                  placeholder="https://krakengaming.org/..."
+                  placeholder="https://uwsgaming.org/..."
                   className="w-full p-3 border-2 border-navy-dark text-navy-dark"
                 />
               </div>

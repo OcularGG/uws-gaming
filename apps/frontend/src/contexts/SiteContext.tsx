@@ -57,24 +57,45 @@ const defaultSettings: SiteSettings = {
 const defaultFeatureCards: FeatureCard[] = [
   {
     id: '1',
-    title: 'Elite Naval Command',
-    description: 'Lead legendary fleets across the Caribbean with tactical precision and strategic mastery.',
-    icon: '⚓',
+    title: 'Brotherhood of the Sea',
+    description: 'Join a community of dedicated Privateers working throughout the Caribbean',
+    icon: '🤝',
     order: 1
   },
   {
     id: '2',
-    title: 'Strategic Port Battles',
-    description: 'Engage in massive coordinated naval warfare with up to 50 ships per battle.',
-    icon: '🏴‍☠️',
+    title: 'Strategic RvR',
+    description: 'We engage in daily RvR focused on the best combat experience in an Age of Sail game',
+    icon: '⚔️',
     order: 2
   },
   {
     id: '3',
-    title: 'Brotherhood of the Sea',
-    description: 'Join a community of dedicated captains united under the Kraken banner.',
-    icon: '🦑',
+    title: 'Daily Ganking and PvP',
+    description: 'We take every fight that comes along and engage in piracy on the high seas in the name of King George III',
+    icon: '🏴‍☠️',
     order: 3
+  },
+  {
+    id: '4',
+    title: 'At-Cost Resources',
+    description: 'We offer resources and crafting materials through dedicated suppliers at or slightly above cost',
+    icon: '💰',
+    order: 4
+  },
+  {
+    id: '5',
+    title: 'Active Shipyard',
+    description: 'Our Shipyards turn out fresh hulls daily at low costs',
+    icon: '🚢',
+    order: 5
+  },
+  {
+    id: '6',
+    title: 'Active Crafters',
+    description: 'Our crafters keep the fleet supplied and ready to fight at a moments notice',
+    icon: '🔨',
+    order: 6
   }
 ]
 

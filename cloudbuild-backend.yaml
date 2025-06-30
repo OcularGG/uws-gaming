@@ -6,31 +6,35 @@ steps:
       - '-f'
       - 'apps/backend/Dockerfile'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/backend-prod'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/krakengaming/backend:latest'
       - '.'
 
-  # Push the image to Container Registry
+  # Push the image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'gcr.io/$PROJECT_ID/backend-prod'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/krakengaming/backend:latest'
 
   # Deploy to Cloud Run
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
       - 'run'
       - 'deploy'
-      - 'krakengaming-backend'
+      - 'uwsgaming-backend'
       - '--image'
-      - 'gcr.io/$PROJECT_ID/backend-prod'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/krakengaming/backend:latest'
       - '--region'
       - 'us-central1'
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
       - '--port=4000'
-      - '--set-secrets'
-      - 'DATABASE_URL=database-url:latest'
+      - '--memory=2Gi'
+      - '--cpu=1'
+      - '--max-instances=10'
+      - '--timeout=300'
+      - '--set-env-vars'
+      - 'NODE_ENV=production,PORT=4000,DATABASE_URL=postgresql://uwsgaming:Adm1nP@ss2024!@34.63.231.8:5432/uwsgaming,JWT_SECRET=uws-gaming-production-jwt-secret-2024,CORS_ORIGIN=https://uwsgaming.org'
 
 images:
-  - 'gcr.io/$PROJECT_ID/backend-prod'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/krakengaming/backend:latest'

@@ -34,19 +34,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               email: true,
               username: true,
               password: true,
-              discordId: true,
-              isActive: true,
-              isApproved: true,
-              canCreatePortBattles: true,
-              userRoles: {
-                select: {
-                  role: {
-                    select: {
-                      name: true
-                    }
-                  }
-                }
-              }
+              role: true,
+              discordId: true
             }
           }) as any
 
@@ -59,19 +48,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 email: true,
                 username: true,
                 password: true,
-                discordId: true,
-                isActive: true,
-                isApproved: true,
-                canCreatePortBattles: true,
-                userRoles: {
-                  select: {
-                    role: {
-                      select: {
-                        name: true
-                      }
-                    }
-                  }
-                }
+                role: true,
+                discordId: true
               }
             }) as any
           }
@@ -93,9 +71,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return null
           }
 
-          // Get the primary role (first one, or admin if multiple)
-          const primaryRole = user.userRoles.find((ur: any) => ur.role.name === 'admin')?.role.name ||
-                             user.userRoles[0]?.role.name || 'user'
+          // Use the simple role field
+          const primaryRole = user.role || 'user'
 
           console.log('✅ Authentication successful, role:', primaryRole)
 

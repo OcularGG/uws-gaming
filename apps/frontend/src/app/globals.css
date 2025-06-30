@@ -368,12 +368,16 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
 }
 
-/* Enhanced Navigation Hover Effects - Underline Style */
+/* Enhanced Navigation Hover Effects - Unified Style */
 .nav-item {
   background: transparent;
   transition: all 0.3s ease;
   position: relative;
   border-bottom: 2px solid transparent;
+  font-family: 'Cinzel', serif !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
 }
 
 .nav-item:hover {
@@ -387,18 +391,23 @@ h1, h2, h3, h4, h5, h6 {
   border-bottom: 2px solid var(--brass-bright);
 }
 
-/* Navigation Submenu Items */
+/* Navigation Submenu Items - Same styling as main nav */
 .nav-submenu-item {
   background: transparent;
   transition: all 0.3s ease;
   position: relative;
   border-bottom: 2px solid transparent;
   margin-bottom: 2px;
+  font-family: 'Cinzel', serif !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
 }
 
 .nav-submenu-item:hover {
   background: transparent !important;
   border-bottom: 2px solid var(--brass-bright);
+  transform: translateY(-1px);
   padding-left: 1.25rem; /* Slight indent on hover for visual feedback */
 }
 
@@ -466,14 +475,13 @@ h1, h2, h3, h4, h5, h6 {
 .hero-apply-button {
   background: linear-gradient(
     90deg,
-    #201810 0%,
-    #714920 20%,
-    #9c642c 40%,
-    #b2905f 60%,
-    #805224 80%,
-    #201810 100%
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
   ) !important;
-  background-color: #9c642c !important; /* Fallback solid color */
+  background-color: #B82E1F !important; /* Fallback solid color */
   background-size: 300% 100% !important;
   animation: hero-gradient-flow 8s ease-in-out infinite alternate !important;
   border: 2px solid rgba(255,255,255,0.2) !important;
@@ -491,7 +499,7 @@ h1, h2, h3, h4, h5, h6 {
 a.hero-apply-button:hover,
 .hero-apply-button:hover {
   background-size: 400% 100% !important;
-  background-color: #714920 !important; /* Fallback solid color for hover */
+  background-color: #8B1E0F !important; /* Fallback solid color for hover */
   border-color: rgba(255,255,255,0.4) !important;
   box-shadow: 0 12px 35px rgba(0,0,0,0.4) !important;
   text-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
@@ -504,14 +512,13 @@ a.hero-apply-button,
 .hero-apply-button {
   background: linear-gradient(
     90deg,
-    #201810 0%,
-    #714920 20%,
-    #9c642c 40%,
-    #b2905f 60%,
-    #805224 80%,
-    #201810 100%
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
   ) !important;
-  background-color: #9c642c !important; /* Fallback solid color */
+  background-color: #B82E1F !important; /* Fallback solid color */
   background-size: 300% 100% !important;
   animation: hero-gradient-flow 8s ease-in-out infinite alternate !important;
   border: 2px solid rgba(255,255,255,0.2) !important;
@@ -780,21 +787,121 @@ a.hero-apply-button:hover,
   box-shadow: 8px 8px 0px rgba(15, 20, 25, 0.3);
 }
 
+/* Letter of Marque Title with static red gradient */
+.letter-title-gradient {
+  background: linear-gradient(
+    90deg,
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
+  ) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: 700 !important;
+  font-family: 'Cinzel', serif !important;
+}
+
+/* Letter first letter (G) styling with red gradient */
+.letter-first-letter {
+  background: linear-gradient(
+    90deg,
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
+  ) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-size: 3rem !important;
+  line-height: 1 !important;
+  margin-right: 0.5rem !important;
+  font-weight: bold !important;
+  font-family: 'Cinzel', serif !important;
+  float: left !important;
+}
+
+/* Wax Seal Styling - Bottom left, rotated */
+.wax-seal {
+  position: absolute;
+  bottom: 2rem;
+  left: 2rem;
+  width: 80px;
+  height: 80px;
+  background: url('https://i.imgur.com/qN4AbaU.png') no-repeat center center;
+  background-size: contain;
+  z-index: 10;
+  transform: rotate(-15deg);
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+}
+
+.wax-seal:hover {
+  transform: rotate(-15deg) scale(1.1);
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.4));
+}
+
+/* Responsive wax seal adjustments */
+@media (max-width: 768px) {
+  .wax-seal {
+    width: 60px;
+    height: 60px;
+    bottom: 1rem;
+    left: 1rem;
+  }
+}
+
 /* Signature Styles */
 .signature-line {
-  border-left: 4px solid var(--brass);
+  border-left: 4px solid;
+  border-image: linear-gradient(
+    180deg,
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
+  ) 1;
   padding-left: 1rem;
   margin-left: auto;
   width: fit-content;
 }
 
-/* Letter first letter styling */
-.letter-container p:first-of-type .text-2xl {
-  font-size: 3rem;
-  line-height: 1;
-  margin-right: 0.5rem;
-  font-weight: bold;
-  color: var(--brass);
+/* Letter issued text with red gradient */
+.letter-issued-text {
+  background: linear-gradient(
+    90deg,
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
+  ) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: 700 !important;
+  font-style: italic !important;
+}
+
+/* Letter bar line for "issued to" text */
+.letter-bar-line {
+  width: 3px;
+  height: 20px;
+  background: linear-gradient(
+    180deg,
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
+  );
+  border-radius: 2px;
+  flex-shrink: 0;
 }
 
 /* Letter hover effect */
@@ -940,14 +1047,14 @@ a:focus-visible {
   outline-offset: 2px;
 }
 
-/* Footer border gradient - matches Tommy Templeman's gold effect */
+/* Footer border gradient - red gradient */
 .footer-border-gradient {
-  border-image: linear-gradient(45deg,
-    var(--brass),
-    var(--brass-bright),
-    #ffd700,
-    var(--brass-bright),
-    var(--brass)
+  border-image: linear-gradient(90deg,
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
   ) 1;
   position: relative;
 }
@@ -959,12 +1066,12 @@ a:focus-visible {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(45deg,
-    var(--brass),
-    var(--brass-bright),
-    #ffd700,
-    var(--brass-bright),
-    var(--brass)
+  background: linear-gradient(90deg,
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
   );
   background-size: 300% 300%;
   animation: footer-gradient-pulse 3s ease-in-out infinite;
@@ -1013,16 +1120,15 @@ a:focus-visible {
   }
 }
 
-/* Hero Title Gradient Effect - Warm Earth Tones Animated */
+/* Hero Title Gradient Effect - Red to Black Gradient */
 .hero-title-gradient {
   background: linear-gradient(
     90deg,
-    #201810 0%,
-    #714920 20%,
-    #9c642c 40%,
-    #b2905f 60%,
-    #805224 80%,
-    #201810 100%
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
   );
   background-size: 300% 100%;
   background-clip: text;
@@ -1051,12 +1157,11 @@ a:focus-visible {
 .uws-gradient {
   background: linear-gradient(
     90deg,
-    #201810 0%,
-    #714920 20%,
-    #9c642c 40%,
-    #b2905f 60%,
-    #805224 80%,
-    #201810 100%
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
   );
   background-size: 300% 100%;
   background-clip: text;
@@ -1066,28 +1171,274 @@ a:focus-visible {
   font-weight: 700;
 }
 
+/* Navigation gradient hover fix - Static gradient for navigation items */
+.nav-item.hero-title-gradient,
+.nav-item.static-red-gradient {
+  background: linear-gradient(
+    90deg,
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
+  ) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: 700 !important;
+  /* Remove animation for static effect */
+}
+
+.nav-item.hero-title-gradient:hover,
+.nav-item.static-red-gradient:hover {
+  background: linear-gradient(
+    90deg,
+    #D63527 0%,
+    #A02211 25%,
+    #6E160C 50%,
+    #3A0C06 75%,
+    #0D0D0D 100%
+  ) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  transform: translateY(-2px) !important;
+  border-bottom: 2px solid #B82E1F !important;
+}
+
+.nav-item.hero-title-gradient.active,
+.nav-item.static-red-gradient.active {
+  background: linear-gradient(
+    90deg,
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
+  ) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  border-bottom: 2px solid #B82E1F !important;
+}
+
+/* Navigation Submenu Items - Static gradient hover */
+.nav-submenu-item:hover {
+  background: transparent !important;
+  border-bottom: 2px solid #B82E1F !important;
+  padding-left: 1.25rem !important;
+  color: #B82E1F !important;
+}
+
+/* Static Red-Black Gradient Classes (no animation) - Updated for consistency */
+.static-red-gradient,
+.typewriter-gradient,
+.captain-gradient,
+.uws-gradient {
+  background: linear-gradient(
+    90deg,
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
+  ) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: 700 !important;
+  /* No animation - static gradient */
+}
+
+.static-red-gradient-reverse {
+  background: linear-gradient(
+    90deg,
+    #000000 0%,
+    #2E0A05 25%,
+    #5C130A 50%,
+    #8B1E0F 75%,
+    #B82E1F 100%
+  ) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: 700 !important;
+}
+
 /* Fallback for browsers that don't support background-clip: text */
-@supports not (background-clip: text) or not (-webkit-background-clip: text) {
-  .captain-gradient,
+@supports not (background-clip: text) {
+  .static-red-gradient,
   .typewriter-gradient,
+  .captain-gradient,
   .uws-gradient {
-    background: none;
-    -webkit-text-fill-color: initial;
-    color: #9c642c; /* Fallback to primary accent */
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    background: none !important;
+    -webkit-text-fill-color: initial !important;
+    color: #B82E1F !important; /* Fallback to red accent */
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
   }
 }
 
-/* Navigation gradient hover fix */
-.nav-item.hero-title-gradient:hover {
+/* Neo-Brutalist Login Button Styling - Border only, fills on hover */
+.login-floating {
   background: transparent !important;
-  transform: translateY(-2px);
-  border-bottom: 2px solid var(--primary);
-  color: transparent !important; /* Ensure gradient shows through */
+  background-image: linear-gradient(
+    135deg,
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
+  ) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  border: 4px solid;
+  border-image: linear-gradient(
+    135deg,
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
+  ) 1 !important;
+  border-radius: 0 !important;
+  box-shadow: 6px 6px 0px #000000 !important;
+  font-family: 'Cinzel', serif !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+  padding: 0.75rem 1.5rem !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
 
-.nav-item.hero-title-gradient.active {
-  background: transparent !important;
-  border-bottom: 2px solid var(--primary);
-  color: transparent !important; /* Ensure gradient shows through */
+.login-floating:hover {
+  background: linear-gradient(
+    135deg,
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
+  ) !important;
+  background-clip: initial !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: white !important;
+  color: white !important;
+  transform: translate(3px, 3px) !important;
+  box-shadow: 3px 3px 0px #000000 !important;
+  border-color: #000000 !important;
 }
+
+.login-floating:active {
+  transform: translate(6px, 6px) !important;
+  box-shadow: 0px 0px 0px #000000 !important;
+}
+
+/* Neo-Brutalist Apply Button - Border only with gradient text, fills on hover */
+.hero-apply-button,
+a.hero-apply-button,
+.hero-apply-button-enhanced {
+  background: transparent !important;
+  background-image: linear-gradient(
+    135deg,
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
+  ) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  border: 4px solid;
+  border-image: linear-gradient(
+    135deg,
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
+  ) 1 !important;
+  border-radius: 0 !important;
+  box-shadow: 8px 8px 0px #000000 !important;
+  color: #B82E1F !important;
+  text-decoration: none !important;
+  display: inline-block !important;
+  padding: 1rem 2rem !important;
+  font-family: 'Cinzel', serif !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: all 0.2s ease !important;
+}
+
+.hero-apply-button:hover,
+a.hero-apply-button:hover,
+.hero-apply-button-enhanced:hover {
+  background: linear-gradient(
+    135deg,
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
+  ) !important;
+  background-clip: initial !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: white !important;
+  color: white !important;
+  transform: translate(4px, 4px) !important;
+  box-shadow: 4px 4px 0px #000000 !important;
+  border-color: #000000 !important;
+  text-decoration: none !important;
+}
+
+.hero-apply-button:active,
+a.hero-apply-button:active,
+.hero-apply-button-enhanced:active {
+  transform: translate(8px, 8px) !important;
+  box-shadow: 0px 0px 0px #000000 !important;
+}
+
+/* Author role text with red gradient */
+.author-role-gradient {
+  background: linear-gradient(
+    90deg,
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
+  ) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: 600 !important;
+}
+
+/* Red gradient border for command cards */
+.officer-card-red-border {
+  border: 4px solid;
+  border-image: linear-gradient(
+    135deg,
+    #B82E1F 0%,
+    #8B1E0F 25%,
+    #5C130A 50%,
+    #2E0A05 75%,
+    #000000 100%
+  ) 1;
+  padding: 0.75rem;
+  box-shadow: 4px 4px 0px var(--accent-black);
+  transition: all 0.2s ease;
+}
+
+.officer-card-red-border:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px var(--accent-black);
+}
+
+

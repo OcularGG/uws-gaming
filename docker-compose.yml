@@ -1,38 +1,19 @@
 version: '3.8'
 
-services:
-  # PostgreSQL Database for local development
-  database:
-    image: postgres:15-alpine
-    container_name: krakengaming-db
-    environment:
-      POSTGRES_DB: krakengaming_dev
-      POSTGRES_USER: krakengaming
-      POSTGRES_PASSWORD: password
-      POSTGRES_HOST_AUTH_METHOD: trust
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./infrastructure/database/init:/docker-entrypoint-initdb.d
-    networks:
-      - krakengaming-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U krakengaming -d krakengaming_dev"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+# Note: Database is now Cloud SQL - no local PostgreSQL container needed
+# This compose file is kept for potential Redis and other services
 
-  # Redis for caching and sessions
+services:
+  # Redis for caching and sessions (optional)
   redis:
     image: redis:7-alpine
-    container_name: krakengaming-redis
+    container_name: uwsgaming-redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
-      - krakengaming-network
+      - uwsgaming-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -44,7 +25,7 @@ services:
     build:
       context: ./apps/frontend
       dockerfile: Dockerfile.dev
-    container_name: krakengaming-frontend
+    container_name: uwsgaming-frontend
     ports:
       - "3000:3000"
     volumes:
@@ -57,13 +38,12 @@ services:
       - NEXT_PUBLIC_DOMAIN=localhost:3000
       - NEXT_PUBLIC_API_URL=http://localhost:4000
       - NEXT_PUBLIC_BOT_URL=http://localhost:3001
+      - DATABASE_URL=postgresql://uwsgaming:Adm1nP@ss2024!@34.135.241.34:5432/uwsgaming_prod
     depends_on:
-      database:
-        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
-      - krakengaming-network
+      - uwsgaming-network
     develop:
       watch:
         - action: sync
@@ -77,7 +57,7 @@ services:
     build:
       context: ./apps/backend
       dockerfile: Dockerfile.dev
-    container_name: krakengaming-backend
+    container_name: uwsgaming-backend
     ports:
       - "4000:4000"
     volumes:
@@ -87,17 +67,15 @@ services:
       - NODE_ENV=development
       - API_PORT=4000
       - API_HOST=0.0.0.0
-      - DATABASE_URL=postgresql://krakengaming:password@database:5432/krakengaming_dev
+      - DATABASE_URL=postgresql://uwsgaming:Adm1nP@ss2024!@34.135.241.34:5432/uwsgaming_prod
       - REDIS_URL=redis://redis:6379
       - JWT_SECRET=your-super-secret-jwt-key-for-local-development
       - API_CORS_ORIGIN=http://localhost:3000
     depends_on:
-      database:
-        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
-      - krakengaming-network
+      - uwsgaming-network
     develop:
       watch:
         - action: sync
@@ -106,50 +84,10 @@ services:
         - action: rebuild
           path: ./apps/backend/package.json
 
-  # Discord Bot
-  discord-bot:
-    build:
-      context: ./apps/discord-bot
-      dockerfile: Dockerfile.dev
-    container_name: krakengaming-bot
-    ports:
-      - "3001:3001"
-    volumes:
-      - ./apps/discord-bot:/app
-      - /app/node_modules
-    environment:
-      - NODE_ENV=development
-      - DISCORD_BOT_PORT=3001
-      - DATABASE_URL=postgresql://krakengaming:password@database:5432/krakengaming_dev
-      - REDIS_URL=redis://redis:6379
-      - API_URL=http://backend:4000
-      # Add your Discord bot token here
-      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
-      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
-      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
-    depends_on:
-      database:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      backend:
-        condition: service_started
-    networks:
-      - krakengaming-network
-    develop:
-      watch:
-        - action: sync
-          path: ./apps/discord-bot/src
-          target: /app/src
-        - action: rebuild
-          path: ./apps/discord-bot/package.json
-
 volumes:
-  postgres_data:
-    driver: local
   redis_data:
     driver: local
 
 networks:
-  krakengaming-network:
+  uwsgaming-network:
     driver: bridge

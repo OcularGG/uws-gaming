@@ -1,5 +1,5 @@
 {
-  "name": "krakengaming",
+  "name": "uwsgaming",
   "version": "0.1.0",
   "private": true,
   "workspaces": [
@@ -7,19 +7,16 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\" \"npm run dev:bot\"",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "cd apps/frontend && npm run dev",
     "dev:backend": "cd apps/backend && npm run dev",
-    "dev:bot": "cd apps/discord-bot && npm run dev",
-    "build": "npm run build:packages && npm run build:frontend && npm run build:backend && npm run build:bot",
+    "build": "npm run build:packages && npm run build:frontend && npm run build:backend",
     "build:packages": "npm run build --workspaces --if-present",
     "build:frontend": "cd apps/frontend && npm run build",
     "build:backend": "cd apps/backend && npm run build",
-    "build:bot": "cd apps/discord-bot && npm run build",
-    "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\" \"npm run start:bot\"",
+    "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
     "start:frontend": "cd apps/frontend && npm run start",
     "start:backend": "cd apps/backend && npm run start",
-    "start:bot": "cd apps/discord-bot && npm run start",
     "lint": "npm run lint --workspaces --if-present",
     "lint:fix": "npm run lint:fix --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
@@ -27,7 +24,7 @@
     "test:coverage": "npm run test:coverage --workspaces --if-present",
     "test:e2e": "cd apps/frontend && npm run e2e",
     "test:integration": "cd apps/backend && npm run test:integration",
-    "clean": "npm run clean --workspaces --if-present && rm -rf node_modules",
+    "clean": "npm run clean --workspaces --if-present && rimraf node_modules",
     "docker:build": "docker-compose build",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
@@ -46,16 +43,16 @@
   },
   "dependencies": {
     "concurrently": "^8.2.2",
-    "next": "15.0.0",
-    "react": "19.0.0-rc-65a56d0e-20241020",
-    "react-dom": "19.0.0-rc-65a56d0e-20241020"
+    "next": "^14.2.30",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
     "@vitest/ui": "^3.2.4",
     "eslint": "^9",
     "eslint-config-next": "15.0.0",
@@ -63,6 +60,7 @@
     "jsdom": "^26.1.0",
     "lint-staged": "^15.2.9",
     "prettier": "^3.3.3",
+    "rimraf": "^6.0.1",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^3.2.4",

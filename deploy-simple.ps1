@@ -1,104 +1,101 @@
-#!/usr/bin/env pwsh
+# UWS Gaming Direct Deployment Script
+# Uses Cloud Build to deploy frontend and backend to Google Cloud Run
 
-# KrakenGaming Simple Production Deployment Script
-# This script deploys frontend, backend, and Discord bot to Google Cloud
+param(
+    [string]$Component = "all"
+)
 
-Write-Host "Starting KrakenGaming Full Production Deployment..." -ForegroundColor Green
-
-# Set project and region
-$PROJECT_ID = "kraken-gaming"
+# Configuration
+$PROJECT_ID = "uws-gaming"
 $REGION = "us-central1"
 
-# Function to test if command succeeded
-function Test-LastCommand {
-    param($Message)
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Failed: $Message" -ForegroundColor Red
-        exit 1
+# Colors for output
+$Green = "`e[32m"
+$Red = "`e[31m"
+$Yellow = "`e[33m"
+$Blue = "`e[34m"
+$Reset = "`e[0m"
+
+function Write-ColorOutput {
+    param([string]$Message, [string]$Color = $Reset)
+    Write-Host "${Color}${Message}${Reset}"
+}
+
+# Check authentication
+Write-ColorOutput "Checking Google Cloud authentication..." $Blue
+$currentProject = gcloud config get-value project 2>$null
+if ($currentProject -ne $PROJECT_ID) {
+    Write-ColorOutput "Setting project to $PROJECT_ID..." $Yellow
+    gcloud config set project $PROJECT_ID
+}
+
+Write-ColorOutput "Prerequisites validated" $Green
+
+# Deploy Backend
+function Start-BackendDeploy {
+    Write-ColorOutput "Deploying Backend using Cloud Build..." $Blue
+
+    Write-ColorOutput "Submitting backend build to Cloud Build..." $Yellow
+
+    $result = gcloud builds submit . --config=cloudbuild-backend.yaml
+
+    if ($LASTEXITCODE -eq 0) {
+        Write-ColorOutput "Backend deployed successfully" $Green
+        return $true
     } else {
-        Write-Host "Success: $Message" -ForegroundColor Green
+        Write-ColorOutput "Backend deployment failed" $Red
+        return $false
     }
 }
 
-# Set the project
-Write-Host "Setting Google Cloud project..." -ForegroundColor Yellow
-gcloud config set project $PROJECT_ID
-Test-LastCommand "Set project to $PROJECT_ID"
+# Deploy Frontend
+function Start-FrontendDeploy {
+    Write-ColorOutput "Deploying Frontend using Cloud Build..." $Blue
 
-# Enable required APIs
-Write-Host "Enabling required Google Cloud APIs..." -ForegroundColor Yellow
-gcloud services enable cloudbuild.googleapis.com
-gcloud services enable run.googleapis.com
-gcloud services enable containerregistry.googleapis.com
-gcloud services enable secretmanager.googleapis.com
-gcloud services enable sqladmin.googleapis.com
-Test-LastCommand "Enable APIs"
+    Write-ColorOutput "Submitting frontend build to Cloud Build..." $Yellow
 
-# Deploy Backend (Production)
-Write-Host "Deploying Backend (Production)..." -ForegroundColor Yellow
-gcloud builds submit --config=cloudbuild-backend.yaml .
-Test-LastCommand "Backend Production Deployment"
+    $result = gcloud builds submit . --config=cloudbuild-frontend.yaml
 
-# Deploy Backend (Preview)
-Write-Host "Deploying Backend (Preview)..." -ForegroundColor Yellow
-gcloud builds submit --config=cloudbuild-backend-preview.yaml .
-Test-LastCommand "Backend Preview Deployment"
+    if ($LASTEXITCODE -eq 0) {
+        Write-ColorOutput "Frontend deployed successfully" $Green
+        return $true
+    } else {
+        Write-ColorOutput "Frontend deployment failed" $Red
+        return $false
+    }
+}
 
-# Deploy Frontend (Production)
-Write-Host "Deploying Frontend (Production)..." -ForegroundColor Yellow
-gcloud builds submit --config=cloudbuild-frontend.yaml .
-Test-LastCommand "Frontend Production Deployment"
+# Main deployment logic
+Write-ColorOutput "UWS Gaming Direct Deployment" $Blue
+Write-ColorOutput "Using Cloud Build for deployment" $Yellow
 
-# Deploy Frontend (Preview)
-Write-Host "Deploying Frontend (Preview)..." -ForegroundColor Yellow
-gcloud builds submit --config=cloudbuild-frontend-preview.yaml .
-Test-LastCommand "Frontend Preview Deployment"
+$success = $true
 
-# Deploy Discord Bot
-Write-Host "Deploying Discord Bot..." -ForegroundColor Yellow
-gcloud builds submit --config=cloudbuild-discord-bot.yaml .
-Test-LastCommand "Discord Bot Deployment"
+switch ($Component.ToLower()) {
+    "frontend" {
+        $success = Start-FrontendDeploy
+    }
+    "backend" {
+        $success = Start-BackendDeploy
+    }
+    "all" {
+        $success = Start-BackendDeploy
+        if ($success) {
+            $success = Start-FrontendDeploy
+        }
+    }
+    default {
+        Write-ColorOutput "Invalid component: $Component. Use 'frontend', 'backend', or 'all'" $Red
+        exit 1
+    }
+}
 
-# Set up domain mappings
-Write-Host "Setting up domain mappings..." -ForegroundColor Yellow
-
-# Map production domain
-gcloud run domain-mappings create --service=krakengaming-frontend --domain=krakengaming.org --region=$REGION --platform=managed
-Test-LastCommand "Map krakengaming.org domain"
-
-# Map preview domain
-gcloud run domain-mappings create --service=krakengaming-frontend-preview --domain=preview.krakengaming.org --region=$REGION --platform=managed
-Test-LastCommand "Map preview.krakengaming.org domain"
-
-# Map bugs subdomain
-gcloud run domain-mappings create --service=krakengaming-frontend --domain=bugs.krakengaming.org --region=$REGION --platform=managed
-Test-LastCommand "Map bugs.krakengaming.org domain"
-
-# Register Discord commands
-Write-Host "Registering Discord bot commands..." -ForegroundColor Yellow
-powershell -ExecutionPolicy Bypass -File ".\register-discord-commands.ps1"
-Test-LastCommand "Register Discord commands"
-
-# Get service URLs
-Write-Host "Getting service URLs..." -ForegroundColor Yellow
-$FRONTEND_URL = gcloud run services describe krakengaming-frontend --region=$REGION --format="value(status.url)"
-$PREVIEW_URL = gcloud run services describe krakengaming-frontend-preview --region=$REGION --format="value(status.url)"
-$BACKEND_URL = gcloud run services describe krakengaming-backend --region=$REGION --format="value(status.url)"
-$BACKEND_PREVIEW_URL = gcloud run services describe krakengaming-backend-preview --region=$REGION --format="value(status.url)"
-$BOT_URL = gcloud run services describe discord-bot-prod --region=$REGION --format="value(status.url)"
-
-Write-Host "Deployment Complete!" -ForegroundColor Green
-Write-Host "Service URLs:" -ForegroundColor Cyan
-Write-Host "  Frontend (Production): $FRONTEND_URL" -ForegroundColor White
-Write-Host "  Frontend (Preview): $PREVIEW_URL" -ForegroundColor White
-Write-Host "  Backend (Production): $BACKEND_URL" -ForegroundColor White
-Write-Host "  Backend (Preview): $BACKEND_PREVIEW_URL" -ForegroundColor White
-Write-Host "  Discord Bot: $BOT_URL" -ForegroundColor White
-Write-Host ""
-Write-Host "Custom Domains:" -ForegroundColor Cyan
-Write-Host "  Production: https://krakengaming.org" -ForegroundColor White
-Write-Host "  Preview: https://preview.krakengaming.org" -ForegroundColor White
-Write-Host "  Bug Reports: https://bugs.krakengaming.org" -ForegroundColor White
-Write-Host ""
-Write-Host "Note: DNS propagation may take up to 24 hours for custom domains" -ForegroundColor Yellow
-Write-Host "Monitor deployment: https://console.cloud.google.com/run?project=$PROJECT_ID" -ForegroundColor Cyan
+if ($success) {
+    Write-ColorOutput "Deployment completed successfully!" $Green
+    Write-ColorOutput "Check your services:" $Blue
+    Write-ColorOutput "Console: https://console.cloud.google.com/run?project=$PROJECT_ID" $Blue
+    Write-ColorOutput "Ready for production!" $Green
+} else {
+    Write-ColorOutput "Deployment failed!" $Red
+    exit 1
+}

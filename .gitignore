@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+**/node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -15,10 +16,16 @@
 
 # next.js
 /.next/
+**/.next/
 /out/
 
 # production
 /build
+**/build/
+**/dist/
+
+# Prisma generated files
+**/.prisma/
 
 # misc
 .DS_Store
@@ -39,3 +46,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Service account keys (never commit these!)
+*-key.json
+github-actions-key.json
+service-account*.json
+
+# Credential backups (never commit these!)
+credential-backups/

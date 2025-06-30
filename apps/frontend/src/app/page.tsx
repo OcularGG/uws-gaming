@@ -4,7 +4,7 @@ import { useTypewriter } from '@/hooks/useTypewriter';
 import { useSiteContext } from '@/contexts/SiteContext';
 
 export default function HomePage() {
-  const { settings, featureCards, admiraltyLetter, welcomeContent, loading } = useSiteContext();
+  const { admiraltyLetter, welcomeContent, loading } = useSiteContext();
 
   const ships = [
     'Duke of Kent',
@@ -28,7 +28,12 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-sandstone-light flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center relative" style={{
+        backgroundImage: 'url(https://i.imgur.com/zsk0kH3.jpeg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}>
         <div className="text-center">
           <div className="text-6xl mb-4 animate-pulse">⚓</div>
           <div className="text-navy-dark text-xl" style={{fontFamily: 'Cinzel, serif'}}>Setting Sail...</div>
@@ -88,28 +93,11 @@ export default function HomePage() {
               </div>
             </div>
 
-            <h1 className="hero-title-gradient text-5xl md:text-8xl mb-8 font-bold tracking-wider">
-              {settings.siteName}
-            </h1>
-
             {/* Apply Now Button */}
             <div className="mb-12">
               <a
                 href="/apply"
-                className="hero-apply-button inline-block px-8 py-4 text-xl md:text-2xl font-bold transition-all duration-300 hover:scale-105 hover:shadow-2xl"
-                style={{
-                  background: 'linear-gradient(90deg, #201810 0%, #714920 20%, #9c642c 40%, #b2905f 60%, #805224 80%, #201810 100%)',
-                  backgroundSize: '300% 100%',
-                  animation: 'hero-gradient-flow 8s ease-in-out infinite alternate',
-                  border: '2px solid rgba(255,255,255,0.2)',
-                  borderRadius: '0.5rem',
-                  color: 'white',
-                  textDecoration: 'none',
-                  fontFamily: 'Cinzel, serif',
-                  textTransform: 'uppercase',
-                  letterSpacing: '2px',
-                  boxShadow: '0 8px 25px rgba(0,0,0,0.3)'
-                }}
+                className="hero-apply-button-enhanced inline-block px-8 py-4 text-xl md:text-2xl font-bold transition-all duration-300"
               >
                 Apply Now
               </a>
@@ -121,7 +109,7 @@ export default function HomePage() {
                  textShadow: '2px 2px 4px rgba(0,0,0,0.7), 0 0 10px rgba(22, 101, 52, 0.3)'
                }}>
               <p>
-                Set sail with us in your <span id="typewriter-ship" className="typewriter-gradient font-bold"></span>
+                Set sail with us in your <span id="typewriter-ship" className="static-red-gradient font-bold"></span>
               </p>
             </div>
           </div>
@@ -129,27 +117,25 @@ export default function HomePage() {
       </section>
 
       {/* Content section with naval theme */}
-      <section className="py-24 bg-sandstone-light relative">
+      <section className="py-16 relative bg-sandstone-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-5xl md:text-6xl font-bold text-navy-dark mb-12" style={{fontFamily: 'Cinzel, serif'}}>
-              {welcomeContent.title.replace('{{siteName}}', settings.siteName).split('Captain').map((part, index, array) => (
-                <span key={index}>
-                  {part}
-                  {index < array.length - 1 && <span className="captain-gradient">Captain</span>}
-                </span>
-              ))}
+            <h2 className="text-5xl md:text-6xl font-bold text-navy-dark mb-8" style={{fontFamily: 'Cinzel, serif'}}>
+              Welcome Aboard, <span className="static-red-gradient">Captain</span>
             </h2>
           </div>
         </div>
       </section>
 
       {/* Tommy Templeman's Welcome Letter */}
-      <section className="py-16 bg-sandstone-light relative">
+      <section className="py-8 relative bg-sandstone-light">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="letter-container bg-sail-white border-4 border-navy-dark p-8 md:p-12 shadow-2xl transform rotate-1">
+          <div className="letter-container bg-sail-white border-4 border-navy-dark p-8 md:p-12 shadow-2xl transform rotate-1 relative">
+            {/* Wax Seal */}
+            <div className="wax-seal"></div>
+
             <div className="text-center mb-8">
-              <h3 className="text-2xl md:text-3xl font-bold text-navy-dark" style={{fontFamily: 'Cinzel, serif'}}>
+              <h3 className="letter-title-gradient text-2xl md:text-3xl font-bold" style={{fontFamily: 'Cinzel, serif'}}>
                 {admiraltyLetter.title}
               </h3>
             </div>
@@ -161,14 +147,14 @@ export default function HomePage() {
                   const restOfParagraph = paragraph.slice(1);
                   return (
                     <p key={index} className="text-lg leading-relaxed">
-                      <span className="text-2xl font-bold float-left mr-2 leading-none" style={{fontFamily: 'Cinzel, serif'}}>{firstLetter}</span>
-                      {restOfParagraph.replace(/\{\{siteName\}\}/g, settings.siteName)}
+                      <span className="letter-first-letter">{firstLetter}</span>
+                      {restOfParagraph.replace(/\{\{siteName\}\}/g, 'UWS')}
                     </p>
                   );
                 }
                 return (
                   <p key={index} className="text-lg leading-relaxed">
-                    {paragraph.replace(/\{\{siteName\}\}/g, settings.siteName)}
+                    {paragraph.replace(/\{\{siteName\}\}/g, 'UWS')}
                   </p>
                 );
               })}
@@ -179,15 +165,15 @@ export default function HomePage() {
                 </p>
                 <div className="signature-line">
                   <img
-                    src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjUwIiB2aWV3Qm94PSIwIDAgMjAwIDUwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0xMCAzMEM0MCAyMCA3MCAzNSA5MCAyNUMxMTAgMTUgMTMwIDI1IDE1MCAyMEMxNzAgMTUgMTkwIDI1IDE5MCAyNSIgc3Ryb2tlPSIjMTk0MTY4IiBzdHJva2Utd2lkdGg9IjIiIGZpbGw9Im5vbmUiLz48L3N2Zz4="
+                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/George_III_Signature.svg/251px-George_III_Signature.svg.png?20100201022028"
                     alt="Signature"
-                    className="w-48 h-12 mx-auto"
+                    className="w-48 h-12 mx-auto object-contain"
                   />
                   <p className="text-lg font-bold mt-2" style={{fontFamily: 'Cinzel, serif'}}>
                     {admiraltyLetter.author}
                   </p>
                   {admiraltyLetter.role && (
-                    <p className="text-sm text-brass">
+                    <p className="author-role-gradient text-sm">
                       {admiraltyLetter.role}
                     </p>
                   )}
@@ -199,63 +185,203 @@ export default function HomePage() {
       </section>
 
       {/* Naval Action Benefits Section */}
-      <section className="py-24 bg-sandstone-light relative">
+      <section className="py-24 relative bg-sandstone-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-5xl md:text-6xl font-bold text-navy-dark mb-8" style={{fontFamily: 'Cinzel, serif'}}>
-              Why Sail with <span className="uws-gradient">{settings.siteName}</span>?
+              Why Sail with <span className="static-red-gradient">UWS</span>?
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featureCards
-              .sort((a, b) => a.order - b.order)
-              .map((card) => (
-                <div key={card.id} className="neo-brutal-box p-6 text-center">
-                  <div className="text-4xl mb-4">{card.icon}</div>
-                  <h3 className="text-xl font-bold text-navy-dark mb-4" style={{fontFamily: 'Cinzel, serif'}}>
-                    {card.title}
-                  </h3>
-                  <p className="text-navy-dark leading-relaxed">
-                    {card.description}
-                  </p>
-                </div>
-              ))}
+            <div className="neo-brutal-box p-6 text-center">
+              <div className="text-4xl mb-4">🤝</div>
+              <h3 className="text-xl font-bold text-navy-dark mb-4" style={{fontFamily: 'Cinzel, serif'}}>
+                Brotherhood of the Sea
+              </h3>
+              <p className="text-navy-dark leading-relaxed">
+                Join a community of dedicated Privateers working throughout the Caribbean
+              </p>
+            </div>
+
+            <div className="neo-brutal-box p-6 text-center">
+              <div className="text-4xl mb-4">⚔️</div>
+              <h3 className="text-xl font-bold text-navy-dark mb-4" style={{fontFamily: 'Cinzel, serif'}}>
+                Strategic RvR
+              </h3>
+              <p className="text-navy-dark leading-relaxed">
+                We engage in daily RvR focused on the best combat experience in an Age of Sail game
+              </p>
+            </div>
+
+            <div className="neo-brutal-box p-6 text-center">
+              <div className="text-4xl mb-4">🏴‍☠️</div>
+              <h3 className="text-xl font-bold text-navy-dark mb-4" style={{fontFamily: 'Cinzel, serif'}}>
+                Daily Ganking and PvP
+              </h3>
+              <p className="text-navy-dark leading-relaxed">
+                We take every fight that comes along and engage in piracy on the high seas in the name of King George III
+              </p>
+            </div>
+
+            <div className="neo-brutal-box p-6 text-center">
+              <div className="text-4xl mb-4">💰</div>
+              <h3 className="text-xl font-bold text-navy-dark mb-4" style={{fontFamily: 'Cinzel, serif'}}>
+                At-Cost Resources
+              </h3>
+              <p className="text-navy-dark leading-relaxed">
+                We offer resources and crafting materials through dedicated suppliers at or slightly above cost
+              </p>
+            </div>
+
+            <div className="neo-brutal-box p-6 text-center">
+              <div className="text-4xl mb-4">🚢</div>
+              <h3 className="text-xl font-bold text-navy-dark mb-4" style={{fontFamily: 'Cinzel, serif'}}>
+                Active Shipyard
+              </h3>
+              <p className="text-navy-dark leading-relaxed">
+                Our Shipyards turn out fresh hulls daily at low costs
+              </p>
+            </div>
+
+            <div className="neo-brutal-box p-6 text-center">
+              <div className="text-4xl mb-4">🔨</div>
+              <h3 className="text-xl font-bold text-navy-dark mb-4" style={{fontFamily: 'Cinzel, serif'}}>
+                Active Crafters
+              </h3>
+              <p className="text-navy-dark leading-relaxed">
+                Our crafters keep the fleet supplied and ready to fight at a moments notice
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Kraken Naval Command Section */}
-      <section className="py-24 bg-sandstone-light relative">
+      {/* UWS Command Section */}
+      <section className="py-24 relative bg-sandstone-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-5xl md:text-6xl font-bold text-navy-dark mb-8" style={{fontFamily: 'Cinzel, serif'}}>
-              {settings.siteName} <span className="text-brass-bright">Naval Command</span>
+              <span className="static-red-gradient">UWS</span> Command
             </h2>
-            <p className="text-xl text-navy-dark/80 max-w-3xl mx-auto">
-              The highest echelons of naval command, leading our fleet through strategic waters
+            <p className="text-xl text-navy-dark/80 max-w-3xl mx-auto italic" style={{fontFamily: 'Crimson Text, serif'}}>
+              You may fire when ready Gridley.
             </p>
           </div>
 
-          <div className="grid gap-6 max-w-4xl mx-auto">
-            {settings.commandStructure.map((role, index) => (
-              <div key={index} className="officer-card bg-sandstone-light border-4 border-brass relative">
-                <div className="flex">
-                  <div className="w-20 h-20 bg-gray-300 border-2 border-brass mr-4 flex-shrink-0">
-                    <div className="w-full h-full bg-gray-400 flex items-center justify-center text-xs text-gray-600">
-                      Photo
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-lg font-bold text-navy-dark" style={{fontFamily: 'Cinzel, serif'}}>
-                      {role.name}
-                    </h4>
-                    <p className="text-sm text-navy-dark font-medium">
-                      {role.role}
-                    </p>
-                  </div>
+          {/* Raxius - Admiral of the Fleet - Centered at top */}
+          <div className="flex justify-center mb-8">
+            <div className="officer-card-red-border bg-sandstone-light relative max-w-md">
+              {/* American Flag */}
+              <div className="absolute top-2 right-2 text-xl">🇺🇸</div>
+              <div className="flex p-3">
+                <div className="w-16 h-16 border-2 border-brass mr-3 flex-shrink-0 rounded-lg overflow-hidden">
+                  <img
+                    src="https://cdn.discordapp.com/avatars/335787284857356289/d428da46c5c0d149965ff150d680a338.png?size=1024"
+                    alt="Raxius Profile"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-base font-bold text-navy-dark" style={{fontFamily: 'Cinzel, serif'}}>
+                    Raxius
+                  </h4>
+                  <p className="text-sm text-navy-dark font-medium">
+                    Admiral of the Fleet
+                  </p>
                 </div>
               </div>
-            ))}
+            </div>
+          </div>
+
+          {/* Other Admirals - Grid layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
+            {/* BLOODSHED */}
+            <div className="officer-card-red-border bg-sandstone-light relative">
+              <div className="absolute top-1 right-1 text-lg">🇺🇸</div>
+              <div className="flex p-2">
+                <div className="w-12 h-12 border-2 border-brass mr-2 flex-shrink-0 rounded-lg overflow-hidden">
+                  <img
+                    src="https://cdn.discordapp.com/avatars/293764570932183040/6f8a7331eb4f2d5ce481772ae74000db.png?size=1024"
+                    alt="BLOODSHED Profile"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-bold text-navy-dark" style={{fontFamily: 'Cinzel, serif'}}>
+                    BLOODSHED
+                  </h4>
+                  <p className="text-xs text-navy-dark font-medium">
+                    Admiral
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Masaven */}
+            <div className="officer-card-red-border bg-sandstone-light relative">
+              <div className="absolute top-1 right-1 text-lg">🇺🇸</div>
+              <div className="flex p-2">
+                <div className="w-12 h-12 border-2 border-brass mr-2 flex-shrink-0 rounded-lg overflow-hidden">
+                  <img
+                    src="https://cdn.discordapp.com/avatars/161496754636849153/14bba520ff56dc676c890487081142bb.png?size=1024"
+                    alt="Masaven Profile"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-bold text-navy-dark" style={{fontFamily: 'Cinzel, serif'}}>
+                    Masaven
+                  </h4>
+                  <p className="text-xs text-navy-dark font-medium">
+                    Admiral
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Psycho */}
+            <div className="officer-card-red-border bg-sandstone-light relative">
+              <div className="absolute top-1 right-1 text-lg">🇺🇸</div>
+              <div className="flex p-2">
+                <div className="w-12 h-12 border-2 border-brass mr-2 flex-shrink-0 rounded-lg overflow-hidden">
+                  <img
+                    src="https://cdn.discordapp.com/avatars/277711923049660426/eca756c7fa96bbcb3c816c7447808277.png?size=1024"
+                    alt="Psycho Profile"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-bold text-navy-dark" style={{fontFamily: 'Cinzel, serif'}}>
+                    Psycho
+                  </h4>
+                  <p className="text-xs text-navy-dark font-medium">
+                    Admiral
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Slippery - This will be centered in the second row */}
+            <div className="md:col-start-2 lg:col-start-2 officer-card-red-border bg-sandstone-light relative">
+              <div className="absolute top-1 right-1 text-lg">🇺🇸</div>
+              <div className="flex p-2">
+                <div className="w-12 h-12 border-2 border-brass mr-2 flex-shrink-0 rounded-lg overflow-hidden">
+                  <img
+                    src="https://cdn.discordapp.com/avatars/616705218545057819/a87c13dbac00cbeeafd93f6010171f1a.png?size=1024"
+                    alt="Slippery Profile"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-bold text-navy-dark" style={{fontFamily: 'Cinzel, serif'}}>
+                    Slippery
+                  </h4>
+                  <p className="text-xs text-navy-dark font-medium">
+                    Admiral
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

@@ -7,14 +7,15 @@ async function seed() {
   console.log('🌱 Starting database seed...');
 
   try {
-    // Create admin user
-    const adminPassword = await bcrypt.hash('admin123', 12);
+    // Create admin user with secure generated password
+    const secureAdminPassword = 'KG_Admin_2025_de3e3b4e87c10f6e775b6bdcad274ced';
+    const adminPassword = await bcrypt.hash(secureAdminPassword, 12);
     const adminUser = await prisma.user.upsert({
-      where: { email: 'admin@krakengaming.org' },
+      where: { email: 'admin@uwsgaming.org' },
       update: {},
       create: {
-        email: 'admin@krakengaming.org',
-        username: 'Admiral_Kraken',
+        email: 'admin@uwsgaming.org',
+        username: 'Admiral_UWS',
         password: adminPassword,
         role: 'admin',
         emailVerified: true,
@@ -24,10 +25,10 @@ async function seed() {
     // Create regular user
     const userPassword = await bcrypt.hash('user123', 12);
     const testUser = await prisma.user.upsert({
-      where: { email: 'user@krakengaming.org' },
+      where: { email: 'user@uwsgaming.org' },
       update: {},
       create: {
-        email: 'user@krakengaming.org',
+        email: 'user@uwsgaming.org',
         username: 'Captain_Test',
         password: userPassword,
         role: 'user',
@@ -42,7 +43,7 @@ async function seed() {
           id: adminUser.id,
           email: adminUser.email,
           username: adminUser.username,
-          password: 'admin123',
+          password: 'KG_Admin_2025_de3e3b4e87c10f6e775b6bdcad274ced',
         },
         user: {
           id: testUser.id,
@@ -56,11 +57,11 @@ async function seed() {
     console.log('\n🏴‍☠️ Login Credentials for Testing:');
     console.log('=====================================');
     console.log('Admin Login:');
-    console.log('  Email: admin@krakengaming.org');
-    console.log('  Password: admin123');
+    console.log('  Email: admin@uwsgaming.org');
+    console.log('  Password: KG_Admin_2025_de3e3b4e87c10f6e775b6bdcad274ced');
     console.log('');
     console.log('User Login:');
-    console.log('  Email: user@krakengaming.org');
+    console.log('  Email: user@uwsgaming.org');
     console.log('  Password: user123');
   } catch (error) {
     console.error('❌ Error seeding database:', error);

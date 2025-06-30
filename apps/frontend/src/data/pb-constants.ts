@@ -64,7 +64,7 @@ export const SHIP_NAMES = Object.keys(SHIP_NAMES_WITH_BR);
 
 export const CLAN_NAMES = [
   "[CLAN1]",
-  "[CLAN2]", 
+  "[CLAN2]",
   "[CLAN3]",
   "[CLAN4]",
   "[CLAN5]",
@@ -74,7 +74,7 @@ export const CLAN_NAMES = [
 export const NATIONS = [
   "Great Britain",
   "United States of America (USA)",
-  "France", 
+  "France",
   "the Pirates",
   "Russia",
   "Sweden"
@@ -86,16 +86,12 @@ export const SCREENING_TYPES = ["Offensive", "Defensive"] as const;
 
 export const RATE_CATEGORIES = [
   "1st Rate",
-  "2nd Rate", 
+  "2nd Rate",
   "3rd Rate",
   "4th Rate",
   "5th Rate",
   "6th Rate",
   "7th Rate"
-] as const;
-
-export const ADMIN_DISCORD_IDS = [
-  "1207434980855259206" // Your Discord ID
 ] as const;
 
 // Helper function to get ship BR

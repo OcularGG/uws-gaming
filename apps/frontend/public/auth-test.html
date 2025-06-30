@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auth Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .credentials { background: #f5f5f5; padding: 10px; margin: 10px 0; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        textarea { width: 100%; height: 200px; }
+    </style>
+</head>
+<body>
+    <h1>UWS Gaming - Authentication Test</h1>
+
+    <div class="test-section">
+        <h3>Test Credentials</h3>
+        <div class="credentials">
+            <strong>User Account:</strong><br>
+            Email: user@uwsgaming.org<br>
+            Password: user123
+        </div>
+        <div class="credentials">
+            <strong>Admin Account:</strong><br>
+            Email: admin@uwsgaming.org<br>
+            Password: KG_Admin_2025_de3e3b4e87c10f6e775b6bdcad274ced
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>Login Test</h3>
+        <form id="loginForm">
+            <div>
+                <label>Email/Username:</label><br>
+                <input type="text" id="emailOrUsername" value="user@uwsgaming.org" style="width: 300px; padding: 5px;">
+            </div>
+            <div style="margin-top: 10px;">
+                <label>Password:</label><br>
+                <input type="password" id="password" value="user123" style="width: 300px; padding: 5px;">
+            </div>
+            <div style="margin-top: 10px;">
+                <button type="submit">Test Login</button>
+                <button type="button" onclick="useAdminCredentials()">Use Admin Credentials</button>
+            </div>
+        </form>
+        <div id="loginResult" style="margin-top: 10px;"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Session Status</h3>
+        <button onclick="checkSession()">Check Current Session</button>
+        <div id="sessionResult" style="margin-top: 10px;"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Response Log</h3>
+        <textarea id="responseLog" readonly></textarea>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script>
+        function log(message) {
+            const logArea = document.getElementById('responseLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logArea.value += `[${timestamp}] ${message}\n`;
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        function useAdminCredentials() {
+            document.getElementById('emailOrUsername').value = 'admin@uwsgaming.org';
+            document.getElementById('password').value = 'KG_Admin_2025_de3e3b4e87c10f6e775b6bdcad274ced';
+        }
+
+        function clearLog() {
+            document.getElementById('responseLog').value = '';
+        }
+
+        async function checkSession() {
+            try {
+                log('Checking session...');
+                const response = await fetch('/api/auth/session');
+                const data = await response.json();
+
+                const resultDiv = document.getElementById('sessionResult');
+                if (data && data.user) {
+                    resultDiv.innerHTML = `<div class="success">✅ Logged in as: ${data.user.email} (${data.user.role})</div>`;
+                    log(`Session active: ${data.user.email}`);
+                } else {
+                    resultDiv.innerHTML = `<div class="info">ℹ️ No active session</div>`;
+                    log('No active session');
+                }
+            } catch (error) {
+                log(`Session check error: ${error.message}`);
+                document.getElementById('sessionResult').innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const emailOrUsername = document.getElementById('emailOrUsername').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('loginResult');
+
+            try {
+                log(`Attempting login for: ${emailOrUsername}`);
+                resultDiv.innerHTML = '<div class="info">🔄 Logging in...</div>';
+
+                // First get CSRF token
+                const csrfResponse = await fetch('/api/auth/csrf');
+                const { csrfToken } = await csrfResponse.json();
+                log(`Got CSRF token: ${csrfToken.substring(0, 10)}...`);
+
+                // Attempt login
+                const response = await fetch('/api/auth/callback/credentials', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        csrfToken,
+                        emailOrUsername,
+                        password,
+                        callbackUrl: '/auth/test'
+                    })
+                });
+
+                log(`Login response status: ${response.status}`);
+                log(`Login response headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()))}`);
+
+                if (response.ok) {
+                    // Check if we got redirected (successful login)
+                    if (response.url.includes('/auth/test') || response.redirected) {
+                        resultDiv.innerHTML = '<div class="success">✅ Login successful! Checking session...</div>';
+                        log('Login appears successful, checking session...');
+
+                        // Wait a moment then check session
+                        setTimeout(checkSession, 1000);
+                    } else {
+                        const text = await response.text();
+                        resultDiv.innerHTML = '<div class="error">❌ Login may have failed</div>';
+                        log(`Response body: ${text.substring(0, 200)}...`);
+                    }
+                } else {
+                    const text = await response.text();
+                    resultDiv.innerHTML = `<div class="error">❌ Login failed (${response.status})</div>`;
+                    log(`Login failed: ${response.status} - ${text.substring(0, 200)}`);
+                }
+
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+                log(`Login error: ${error.message}`);
+            }
+        });
+
+        // Check session on page load
+        window.addEventListener('load', checkSession);
+    </script>
+</body>
+</html>

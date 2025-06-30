@@ -8,6 +8,7 @@ import * as Sentry from '@sentry/node';
 import { config } from './config/environment';
 import { healthRoutes } from './routes/health';
 import { maintenanceRoutes } from './routes/maintenance';
+import adminRoutes from './routes/admin';
 import { errorHandler } from './utils/errorHandler';
 import { logger } from './utils/logger';
 
@@ -84,6 +85,7 @@ const build = async (opts?: { logger?: boolean }) => {
       tags: [
         { name: 'Health', description: 'Health check endpoints' },
         { name: 'Maintenance', description: 'Maintenance mode endpoints' },
+        { name: 'Admin', description: 'Administrative endpoints' },
       ],
     },
   });
@@ -101,6 +103,7 @@ const build = async (opts?: { logger?: boolean }) => {
   // Register routes
   await fastify.register(healthRoutes, { prefix: '/api/v1' });
   await fastify.register(maintenanceRoutes, { prefix: '/api/v1' });
+  await fastify.register(adminRoutes, { prefix: '/api/v1/admin' });
 
   // Error handler
   fastify.setErrorHandler(errorHandler);

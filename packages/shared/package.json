@@ -1,7 +1,7 @@
 {
-  "name": "@krakengaming/shared",
+  "name": "@uwsgaming/shared",
   "version": "1.0.0",
-  "description": "Shared utilities and types for KrakenGaming",
+  "description": "Shared utilities and types for UWS Gaming",
   "main": "index.js",
   "scripts": {
     "build": "echo 'No build needed'"

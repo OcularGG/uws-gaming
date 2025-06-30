@@ -6,32 +6,41 @@ steps:
       - '-f'
       - 'apps/frontend/Dockerfile'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/frontend-prod'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/krakengaming/frontend:latest'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_ENV=production'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_DOMAIN=uwsgaming.org'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_API_URL=https://uwsgaming-backend-1089166264123.us-central1.run.app'
       - '.'
 
-  # Push the image to Container Registry
+  # Push the image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'gcr.io/$PROJECT_ID/frontend-prod'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/krakengaming/frontend:latest'
 
   # Deploy to Cloud Run
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
       - 'run'
       - 'deploy'
-      - 'krakengaming-frontend'
+      - 'uwsgaming-frontend'
       - '--image'
-      - 'gcr.io/$PROJECT_ID/frontend-prod'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/krakengaming/frontend:latest'
       - '--region'
       - 'us-central1'
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
+      - '--port=3000'
+      - '--memory=2Gi'
+      - '--cpu=1'
+      - '--max-instances=10'
+      - '--timeout=300'
       - '--set-env-vars'
-      - 'NEXT_PUBLIC_ENVIRONMENT=production'
-      - '--set-secrets'
-      - 'AUTH_SECRET=auth-secret:latest,DATABASE_URL=database-url-prod:latest,SMTP_HOST=smtp-host:latest,SMTP_PORT=smtp-port:latest,SMTP_USER=smtp-user:latest,SMTP_PASS=smtp-pass:latest'
+      - 'NODE_ENV=production,NEXT_PUBLIC_ENV=production,NEXT_PUBLIC_DOMAIN=uwsgaming.org,NEXT_PUBLIC_API_URL=https://uwsgaming-backend-1089166264123.us-central1.run.app,NEXT_PUBLIC_APP_NAME=UWS Gaming,DATABASE_URL=postgresql://uwsgaming:Adm1nP@ss2024!@34.63.231.8:5432/uwsgaming,NEXTAUTH_URL=https://uwsgaming.org,NEXTAUTH_SECRET=uws-gaming-production-nextauth-secret-2024'
 
 images:
-  - 'gcr.io/$PROJECT_ID/frontend-prod'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/krakengaming/frontend:latest'

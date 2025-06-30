@@ -42,35 +42,17 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 12)
 
     console.log('👤 Creating user...')
-    // Create user with RBAC system
+    // Create user with role set to 'user' by default
     const user = await prisma.user.create({
       data: {
         email,
         username,
         password: hashedPassword,
+        role: 'user' // Set default role directly
       }
     })
     console.log('✅ User created with ID:', user.id)
-
-    console.log('👑 Getting user role...')
-    // Get the default 'user' role
-    const userRole = await prisma.role.findUnique({
-      where: { name: 'user' }
-    })
-
-    if (userRole) {
-      console.log('🔗 Assigning user role...')
-      // Assign the user role
-      await prisma.userRole.create({
-        data: {
-          userId: user.id,
-          roleId: userRole.id
-        }
-      })
-      console.log('✅ Role assigned successfully')
-    } else {
-      console.log('⚠️ User role not found in database')
-    }
+    console.log('✅ User role set to: user')
 
     // Return user without password
     const { password: _, ...userWithoutPassword } = { ...user, password: hashedPassword }
