@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Application System Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 20px auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .form-group { margin: 15px 0; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 3px;
+        }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #007cba; color: white; border: none; border-radius: 3px; }
+        button:hover { background: #005a87; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        textarea { height: 100px; }
+        .log-area { width: 100%; height: 200px; border: 1px solid #ccc; padding: 10px; background: #f5f5f5; }
+        .checkbox-group { display: flex; align-items: center; }
+        .checkbox-group input { width: auto; margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <h1>UWS Gaming - Application System Test</h1>
+
+    <div class="test-section">
+        <h3>Test New Application (Registration + Application)</h3>
+        <form id="applicationForm">
+            <h4>User Registration</h4>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="email" value="newcaptain@example.com" required>
+            </div>
+            <div class="form-group">
+                <label>Captain Name (Username):</label>
+                <input type="text" id="captainName" value="Captain_NewTest" required>
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="password" value="TestPassword123!" required>
+            </div>
+            <div class="form-group">
+                <label>Confirm Password:</label>
+                <input type="password" id="confirmPassword" value="TestPassword123!" required>
+            </div>
+
+            <h4>Personal Particulars</h4>
+            <div class="form-group">
+                <label>Preferred Nickname:</label>
+                <input type="text" id="preferredNickname" value="NewCaptain" required>
+            </div>
+            <div class="form-group">
+                <label>Current Nation:</label>
+                <select id="currentNation" required>
+                    <option value="">Select Nation</option>
+                    <option value="Great Britain" selected>Great Britain</option>
+                    <option value="USA">USA</option>
+                    <option value="France">France</option>
+                    <option value="The Pirates">The Pirates</option>
+                    <option value="Russia">Russia</option>
+                    <option value="Sweden">Sweden</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Timezone:</label>
+                <select id="timeZone" required>
+                    <option value="">Select Timezone</option>
+                    <option value="EST (UTC-5) - Eastern" selected>EST (UTC-5) - Eastern</option>
+                    <option value="PST (UTC-8) - Pacific">PST (UTC-8) - Pacific</option>
+                    <option value="GMT (UTC+0) - Greenwich Mean Time">GMT (UTC+0) - Greenwich Mean Time</option>
+                </select>
+            </div>
+
+            <h4>Naval Experience</h4>
+            <div class="form-group">
+                <label>Hours in Naval Action:</label>
+                <input type="text" id="hoursInNavalAction" value="500" required>
+            </div>
+            <div class="form-group">
+                <label>Current Rank:</label>
+                <select id="currentRank" required>
+                    <option value="">Select Rank</option>
+                    <option value="Post Captain" selected>Post Captain</option>
+                    <option value="Lieutenant Commander">Lieutenant Commander</option>
+                    <option value="Master and Commander">Master and Commander</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Previous Commands:</label>
+                <textarea id="previousCommands">I have commanded various frigates and ships of the line in multiple port battles.</textarea>
+            </div>
+            <div class="form-group">
+                <label>Preferred Role:</label>
+                <select id="preferredRole" required>
+                    <option value="">Select Role</option>
+                    <option value="Line of Battle" selected>Line of Battle</option>
+                    <option value="Commander">Commander</option>
+                    <option value="Screener">Screener</option>
+                </select>
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="isPortBattleCommander">
+                <label>I am a Port Battle Commander</label>
+            </div>
+            <div class="form-group">
+                <label>Commander Experience:</label>
+                <textarea id="commanderExperience">Limited commanding experience in smaller engagements.</textarea>
+            </div>
+
+            <h4>Crafting</h4>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="isCrafter" checked>
+                <label>I am a Crafter</label>
+            </div>
+
+            <h4>Availability</h4>
+            <div class="form-group">
+                <label>Weekly Play Time:</label>
+                <input type="text" id="weeklyPlayTime" value="20-30 hours" required>
+            </div>
+            <div class="form-group">
+                <label>Port Battle Availability:</label>
+                <select id="portBattleAvailability" multiple>
+                    <option value="Weekdays" selected>Weekdays</option>
+                    <option value="Weekends" selected>Weekends</option>
+                    <option value="Everyday">Everyday</option>
+                </select>
+                <small>Hold Ctrl to select multiple</small>
+            </div>
+            <div class="form-group">
+                <label>Typical Schedule:</label>
+                <textarea id="typicalSchedule" required>Evenings 7-11 PM EST, weekends flexible</textarea>
+            </div>
+
+            <h4>Declarations</h4>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="declarationAccuracy" required>
+                <label>I declare that all information provided is accurate</label>
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="declarationHonor" required>
+                <label>I pledge to uphold the honor of the UWS fleet</label>
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="declarationRules" required>
+                <label>I agree to abide by all UWS rules and regulations</label>
+            </div>
+
+            <h4>Signature</h4>
+            <div class="form-group">
+                <label>Digital Signature:</label>
+                <input type="text" id="signature" value="Captain_NewTest" required>
+            </div>
+
+            <button type="submit">Submit Complete Application</button>
+        </form>
+        <div id="applicationResult" style="margin-top: 10px;"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test Individual Components</h3>
+        <button onclick="testRegistrationOnly()">Test Registration Only</button>
+        <button onclick="testExistingUser()">Test Existing User Application</button>
+        <button onclick="checkApplicationStatus()">Check Application Status</button>
+    </div>
+
+    <div class="test-section">
+        <h3>Response Log</h3>
+        <textarea class="log-area" id="responseLog" readonly></textarea>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script>
+        function log(message) {
+            const logArea = document.getElementById('responseLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logArea.value += `[${timestamp}] ${message}\n`;
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('responseLog').value = '';
+        }
+
+        function getFormData() {
+            const portBattleAvailability = Array.from(document.getElementById('portBattleAvailability').selectedOptions)
+                .map(option => option.value);
+
+            return {
+                email: document.getElementById('email').value,
+                confirmEmail: document.getElementById('email').value,
+                captainName: document.getElementById('captainName').value,
+                password: document.getElementById('password').value,
+                confirmPassword: document.getElementById('confirmPassword').value,
+                preferredNickname: document.getElementById('preferredNickname').value,
+                currentNation: document.getElementById('currentNation').value,
+                timeZone: document.getElementById('timeZone').value,
+                hoursInNavalAction: document.getElementById('hoursInNavalAction').value,
+                currentRank: document.getElementById('currentRank').value,
+                previousCommands: document.getElementById('previousCommands').value,
+                preferredRole: document.getElementById('preferredRole').value,
+                isPortBattleCommander: document.getElementById('isPortBattleCommander').checked,
+                commanderExperience: document.getElementById('commanderExperience').value,
+                isCrafter: document.getElementById('isCrafter').checked,
+                weeklyPlayTime: document.getElementById('weeklyPlayTime').value,
+                portBattleAvailability: portBattleAvailability,
+                typicalSchedule: document.getElementById('typicalSchedule').value,
+                declarationAccuracy: document.getElementById('declarationAccuracy').checked,
+                declarationHonor: document.getElementById('declarationHonor').checked,
+                declarationRules: document.getElementById('declarationRules').checked,
+                signature: document.getElementById('signature').value,
+                submittedAt: new Date().toISOString()
+            };
+        }
+
+        async function testRegistrationOnly() {
+            const formData = getFormData();
+            const resultDiv = document.getElementById('applicationResult');
+
+            try {
+                log('Testing registration only...');
+                resultDiv.innerHTML = '<div class="info">🔄 Testing registration...</div>';
+
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: formData.email,
+                        username: formData.captainName,
+                        password: formData.password,
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = '<div class="success">✅ Registration successful!</div>';
+                    log(`Registration successful: ${data.user.email} (ID: ${data.user.id})`);
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Registration failed: ${data.error}</div>`;
+                    log(`Registration failed: ${data.error}`);
+                }
+
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+                log(`Registration error: ${error.message}`);
+            }
+        }
+
+        document.getElementById('applicationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = getFormData();
+            const resultDiv = document.getElementById('applicationResult');
+
+            try {
+                log('Starting complete application process...');
+                resultDiv.innerHTML = '<div class="info">🔄 Processing application...</div>';
+
+                let userId = null;
+
+                // Step 1: Register user
+                log('Step 1: Registering user...');
+                const registrationResponse = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: formData.email,
+                        username: formData.captainName,
+                        password: formData.password,
+                    })
+                });
+
+                if (registrationResponse.ok) {
+                    const registrationData = await registrationResponse.json();
+                    userId = registrationData.user.id;
+                    log(`✅ Registration successful: ${registrationData.user.email} (ID: ${userId})`);
+                } else {
+                    const errorData = await registrationResponse.json();
+                    if (errorData.error.includes('already exists')) {
+                        log('⚠️ User already exists, proceeding with application...');
+                        // For testing purposes, we'll continue with a mock userId
+                        // In real scenario, you'd need to handle this properly
+                    } else {
+                        throw new Error(`Registration failed: ${errorData.error}`);
+                    }
+                }
+
+                // Step 2: Submit application
+                log('Step 2: Submitting application...');
+                const applicationData = { ...formData, userId };
+
+                const applicationResponse = await fetch('/api/applications', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(applicationData)
+                });
+
+                const applicationResult = await applicationResponse.json();
+
+                if (applicationResponse.ok) {
+                    resultDiv.innerHTML = '<div class="success">✅ Complete application submitted successfully!</div>';
+                    log(`✅ Application submitted successfully: ID ${applicationResult.application.id}`);
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Application failed: ${applicationResult.error}</div>`;
+                    log(`❌ Application failed: ${applicationResult.error}`);
+                }
+
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+                log(`Complete application error: ${error.message}`);
+            }
+        });
+
+        // Load event
+        window.addEventListener('load', () => {
+            log('Application system test page loaded');
+            // Generate random email for testing
+            const randomId = Math.floor(Math.random() * 10000);
+            document.getElementById('email').value = `testcaptain${randomId}@example.com`;
+            document.getElementById('captainName').value = `Captain_Test${randomId}`;
+        });
+    </script>
+</body>
+</html>

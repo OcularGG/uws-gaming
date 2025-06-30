@@ -1,7 +1,7 @@
 {
-  "name": "@krakengaming/database",
+  "name": "@uwsgaming/database",
   "version": "1.0.0",
-  "description": "Database package with Prisma for KrakenGaming",
+  "description": "Database package with Prisma for UWS Gaming",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -17,13 +17,13 @@
     "lint:fix": "eslint src/**/*.ts --fix"
   },
   "dependencies": {
-    "@prisma/client": "^5.15.0",
+    "@prisma/client": "^6.10.1",
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.2"
   },
   "devDependencies": {
     "@types/node": "^20.14.2",
-    "prisma": "^5.15.0",
+    "prisma": "^6.10.1",
     "tsup": "^8.1.0",
     "tsx": "^4.15.6",
     "typescript": "^5.4.5"

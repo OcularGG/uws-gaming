@@ -1,13 +1,7 @@
 {
-  "/api/admin/welcome/route": "app/api/admin/welcome/route.js",
-  "/api/admin/features/route": "app/api/admin/features/route.js",
-  "/api/admin/letter/route": "app/api/admin/letter/route.js",
-  "/api/admin/route": "app/api/admin/route.js",
-  "/api/auth/[...auth]/route": "app/api/auth/[...auth]/route.js",
-  "/api/admin/settings/route": "app/api/admin/settings/route.js",
-  "/api/bug-reports/route": "app/api/bug-reports/route.js",
-  "/admin/page": "app/admin/page.js",
-  "/admin/settings/page": "app/admin/settings/page.js",
   "/page": "app/page.js",
-  "/bugs/page": "app/bugs/page.js"
+  "/api/auth/[...auth]/route": "app/api/auth/[...auth]/route.js",
+  "/legal/page": "app/legal/page.js",
+  "/auth/login/page": "app/auth/login/page.js",
+  "/auth/forgot-password/page": "app/auth/forgot-password/page.js"
 }

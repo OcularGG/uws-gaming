@@ -1,100 +1,132 @@
 #!/usr/bin/env pwsh
-# KrakenGaming - Complete Local Development Setup
-# This script sets up the complete local development environment
+# UWS Gaming - Complete Local Development Setup
+# This script sets up the local development environment with Cloud SQL
 
-Write-Host "🏴‍☠️ KrakenGaming - Complete Local Setup" -ForegroundColor Cyan
-Write-Host "=========================================" -ForegroundColor Blue
+Write-Host "UWS Gaming - Local Setup (Cloud SQL)" -ForegroundColor Cyan
+Write-Host "====================================" -ForegroundColor Blue
 
-# Check if Docker is installed
-$dockerInstalled = $false
+# Check if gcloud is installed
+$gcloudInstalled = $false
 try {
-    $dockerVersion = docker --version 2>$null
-    if ($dockerVersion) {
-        Write-Host "✅ Docker is installed: $dockerVersion" -ForegroundColor Green
-        $dockerInstalled = $true
+    # Refresh PATH first
+    $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH","User")
+
+    $gcloudOutput = gcloud version 2>$null
+    if ($gcloudOutput -and $gcloudOutput -match "Google Cloud SDK") {
+        Write-Host "Google Cloud SDK is installed" -ForegroundColor Green
+        $gcloudInstalled = $true
     }
 } catch {
-    Write-Host "❌ Docker is not available" -ForegroundColor Red
+    Write-Host "Google Cloud SDK is not available" -ForegroundColor Red
 }
 
-if (-not $dockerInstalled) {
-    Write-Host "📦 Docker is required for local PostgreSQL database" -ForegroundColor Yellow
-    Write-Host "Please install Docker Desktop:" -ForegroundColor Yellow
-    Write-Host "  1. Run: winget install Docker.DockerDesktop" -ForegroundColor White
-    Write-Host "  2. Restart your computer" -ForegroundColor White
-    Write-Host "  3. Start Docker Desktop" -ForegroundColor White
-    Write-Host "  4. Run this script again" -ForegroundColor White
+if (-not $gcloudInstalled) {
+    Write-Host "Google Cloud SDK is required for Cloud SQL access" -ForegroundColor Yellow
+    Write-Host "Please install Google Cloud SDK:" -ForegroundColor Yellow
+    Write-Host "  1. Run: winget install Google.CloudSDK" -ForegroundColor White
+    Write-Host "  2. Restart your terminal" -ForegroundColor White
+    Write-Host "  3. Run: gcloud auth login" -ForegroundColor White
+    Write-Host "  4. Run: gcloud config set project uws-gaming" -ForegroundColor White
+    Write-Host "  5. Run this script again" -ForegroundColor White
     exit 1
 }
 
-# Check if Docker is running
+# Check if authenticated
 try {
-    docker ps >$null 2>&1
-    Write-Host "✅ Docker is running" -ForegroundColor Green
-} catch {
-    Write-Host "❌ Docker is not running. Please start Docker Desktop and try again." -ForegroundColor Red
-    exit 1
-}
-
-Write-Host "`n🗃️ Setting up PostgreSQL database..." -ForegroundColor Blue
-
-# Start PostgreSQL database
-Write-Host "Starting PostgreSQL container..." -ForegroundColor Yellow
-docker-compose up -d database
-
-# Wait for database to be ready
-Write-Host "Waiting for database to be ready..." -ForegroundColor Yellow
-$maxAttempts = 30
-$attempt = 0
-do {
-    $attempt++
-    Start-Sleep -Seconds 2
-    $dbReady = docker-compose exec -T database pg_isready -U krakengaming -d krakengaming_dev 2>$null
-    if ($dbReady -like "*accepting connections*") {
-        Write-Host "✅ Database is ready!" -ForegroundColor Green
-        break
+    $currentProject = gcloud config get-value project 2>$null
+    if ($currentProject -ne "uws-gaming") {
+        Write-Host "Please set the correct project:" -ForegroundColor Yellow
+        Write-Host "  gcloud config set project uws-gaming" -ForegroundColor White
+        exit 1
     }
-    Write-Host "Waiting... ($attempt/$maxAttempts)" -ForegroundColor Yellow
-} while ($attempt -lt $maxAttempts)
-
-if ($attempt -eq $maxAttempts) {
-    Write-Host "❌ Database failed to start. Please check Docker logs." -ForegroundColor Red
+    Write-Host "Authenticated with project: $currentProject" -ForegroundColor Green
+} catch {
+    Write-Host "Not authenticated. Please run: gcloud auth login" -ForegroundColor Red
     exit 1
 }
 
-Write-Host "`n📦 Installing dependencies..." -ForegroundColor Blue
+Write-Host ""
+Write-Host "Connecting to Cloud SQL database..." -ForegroundColor Blue
+
+# Test database connection
+Write-Host "Testing Cloud SQL connection..." -ForegroundColor Yellow
+try {
+    $dbStatus = gcloud sql instances describe uws-gaming-db --format="value(state)" 2>$null
+    if ($dbStatus -eq "RUNNABLE") {
+        Write-Host "Cloud SQL instance is running!" -ForegroundColor Green
+    } else {
+        Write-Host "Cloud SQL instance is not running. Status: $dbStatus" -ForegroundColor Red
+        exit 1
+    }
+} catch {
+    Write-Host "Failed to connect to Cloud SQL. Please check your authentication." -ForegroundColor Red
+    exit 1
+}
+
+Write-Host ""
+Write-Host "Creating environment files..." -ForegroundColor Blue
+
+# Create frontend .env.local
+if (-not (Test-Path "apps/frontend/.env.local")) {
+    Copy-Item ".env.example" "apps/frontend/.env.local"
+    Write-Host "Created frontend .env.local from template" -ForegroundColor Green
+} else {
+    Write-Host "Frontend .env.local already exists" -ForegroundColor Green
+}
+
+# Create backend .env.local
+if (-not (Test-Path "apps/backend/.env.local")) {
+    Copy-Item ".env.example" "apps/backend/.env.local"
+    Write-Host "Created backend .env.local from template" -ForegroundColor Green
+} else {
+    Write-Host "Backend .env.local already exists" -ForegroundColor Green
+}
+
+Write-Host ""
+Write-Host "Installing dependencies..." -ForegroundColor Blue
 Set-Location "packages/database"
 npm install
 
-Write-Host "`n🔧 Running database migration..." -ForegroundColor Blue
+Write-Host ""
+Write-Host "Running database migration..." -ForegroundColor Blue
 npx prisma generate
-npx prisma db push
+Write-Host "Database schema is already deployed in Cloud SQL" -ForegroundColor Yellow
+Write-Host "If you need to update schema, run: npx prisma db push" -ForegroundColor Cyan
 
-Write-Host "`n🌱 Seeding database with test accounts..." -ForegroundColor Blue
-npm run seed
-
-Write-Host "`n🚀 Setting up frontend..." -ForegroundColor Blue
+Write-Host ""
+Write-Host "Setting up frontend..." -ForegroundColor Blue
 Set-Location "../../apps/frontend"
 npm install
 
-Write-Host "`n✅ Setup Complete!" -ForegroundColor Green
-Write-Host "==================" -ForegroundColor Blue
+Write-Host ""
+Write-Host "Setting up backend..." -ForegroundColor Blue
+Set-Location "../backend"
+npm install
 
-Write-Host "`n🏴‍☠️ Login Credentials for Testing:" -ForegroundColor Magenta
-Write-Host "=====================================" -ForegroundColor Blue
+Write-Host ""
+Write-Host "Setup Complete!" -ForegroundColor Green
+Write-Host "===============" -ForegroundColor Blue
+
+Write-Host ""
+Write-Host "Login Credentials for Testing:" -ForegroundColor Magenta
+Write-Host "=============================" -ForegroundColor Blue
 Write-Host "Admin Login:" -ForegroundColor Yellow
-Write-Host "  Email: admin@krakengaming.org" -ForegroundColor White
+Write-Host "  Email: admin@uwsgaming.org" -ForegroundColor White
 Write-Host "  Password: admin123" -ForegroundColor White
 Write-Host ""
 Write-Host "User Login:" -ForegroundColor Yellow
-Write-Host "  Email: user@krakengaming.org" -ForegroundColor White
+Write-Host "  Email: user@uwsgaming.org" -ForegroundColor White
 Write-Host "  Password: user123" -ForegroundColor White
 
-Write-Host "`n🚀 To start development:" -ForegroundColor Cyan
-Write-Host "  npm run dev" -ForegroundColor White
-Write-Host "  Visit: http://localhost:3000" -ForegroundColor White
+Write-Host ""
+Write-Host "To start development:" -ForegroundColor Cyan
+Write-Host "  Frontend: cd apps/frontend && npm run dev" -ForegroundColor White
+Write-Host "  Backend:  cd apps/backend && npm run dev" -ForegroundColor White
+Write-Host "  Visit: http://localhost:3000 (frontend)" -ForegroundColor White
+Write-Host "  API:   http://localhost:4000 (backend)" -ForegroundColor White
 
-Write-Host "`n📋 Database Management:" -ForegroundColor Cyan
-Write-Host "  View data: npx prisma studio" -ForegroundColor White
-Write-Host "  Reset DB: npx prisma db push --force-reset" -ForegroundColor White
-Write-Host "  Re-seed: npm run seed" -ForegroundColor White
+Write-Host ""
+Write-Host "Database Management:" -ForegroundColor Cyan
+Write-Host "  View data: cd packages/database && npx prisma studio" -ForegroundColor White
+Write-Host "  Update schema: cd packages/database && npx prisma db push" -ForegroundColor White
+Write-Host "  Cloud SQL Console: https://console.cloud.google.com/sql/instances" -ForegroundColor White

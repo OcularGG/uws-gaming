@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service | KrakenGaming',
+  title: 'Terms of Service | UWS',
   description: 'Terms of Service for KrakenGaming platform.',
 };
 
@@ -102,7 +102,7 @@ export default function TermsOfServicePage() {
                 If you have any questions about these Terms of Service, please contact us at:
               </p>
               <p className="text-gray-700">
-                Email: legal@krakengaming.org
+                Email: legal@uwsgaming.org
               </p>
             </section>
           </div>

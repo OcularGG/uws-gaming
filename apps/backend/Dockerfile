@@ -9,29 +9,34 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 COPY apps/backend/package*.json ./apps/backend/
-COPY packages/shared/package*.json ./packages/shared/
+COPY packages/database/package*.json ./packages/database/
 
 # Install all dependencies (including dev for build)
-RUN npm ci && npm cache clean --force
+RUN npm ci
 
 # Build stage
 FROM base AS builder
 WORKDIR /app
 
-# Copy source code
+# Copy package files and install all dependencies including dev
+COPY package*.json ./
+COPY apps/backend/package*.json ./apps/backend/
+COPY packages/database/package*.json ./packages/database/
+RUN npm ci
+
+# Copy source code after installing dependencies
 COPY . .
-COPY --from=deps /app/node_modules ./node_modules
 
 # Build the application
-RUN npm run build -w @krakengaming/backend
+RUN cd apps/backend && npx tsup src/index.ts --format cjs --outDir dist
 
 # Production dependencies stage
 FROM base AS production-deps
 WORKDIR /app
 COPY package*.json ./
 COPY apps/backend/package*.json ./apps/backend/
-COPY packages/shared/package*.json ./packages/shared/
-RUN npm ci --only=production && npm cache clean --force
+COPY packages/database/package*.json ./packages/database/
+RUN npm ci --only=production
 
 # Production stage
 FROM base AS runner
@@ -50,11 +55,10 @@ COPY --from=production-deps --chown=api:nodejs /app/node_modules ./node_modules
 USER api
 EXPOSE 4000
 ENV NODE_ENV=production
-ENV PORT=4000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:4000/api/v1/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+  CMD node -e "require('http').get('http://localhost:${PORT:-4000}/api/v1/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
 # Start the application
 CMD ["node", "dist/index.js"]

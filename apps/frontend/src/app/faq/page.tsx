@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'FAQ - KRAKEN',
+  title: 'FAQ - UWS',
   description: 'Frequently Asked Questions about KRAKEN Gaming',
 };
 

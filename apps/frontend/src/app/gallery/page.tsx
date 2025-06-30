@@ -911,10 +911,10 @@ export default function GalleryPage() {
                   <span>▼ {item.downvotes} downvotes</span>
                   <span>{item.viewCount} views</span>
                   {item.type === 'collection' && item.imageCount && (
-                    <span className="text-brass">📸 {item.imageCount} images</span>
+                    <span className="static-red-gradient">📸 {item.imageCount} images</span>
                   )}
                 </div>
-                <div className="text-brass">
+                <div className="static-red-gradient">
                   <span>Captain {item.uploader} • {formatDate(item.createdAt)}</span>
                 </div>
               </div>
@@ -1064,7 +1064,7 @@ export default function GalleryPage() {
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-bold text-navy-dark mb-8" style={{fontFamily: 'Cinzel, serif'}}>
-            <span className="text-brass">Gallery</span>
+            <span className="static-red-gradient">Gallery</span>
           </h1>
           <p className="text-xl text-navy-dark/80 max-w-3xl mx-auto" style={{fontFamily: 'Crimson Text, serif'}}>
             Chronicles of our greatest naval victories and legendary battles
@@ -1240,7 +1240,7 @@ export default function GalleryPage() {
                       <span>▲ {item.upvotes}</span>
                       <span>{item.viewCount} views</span>
                     </div>
-                    <div className="text-xs text-brass mt-1">
+                    <div className="text-xs static-red-gradient mt-1">
                       {formatDate(item.createdAt)}
                     </div>
                   </div>
@@ -1417,10 +1417,10 @@ export default function GalleryPage() {
         {!session && (
           <div className="text-center mb-8">
             <p className="text-navy-dark/70 mb-4" style={{fontFamily: 'Crimson Text, serif'}}>
-              <span className="text-brass">⚓</span> Want to share your own naval victories?
+              <span className="static-red-gradient">⚓</span> Want to share your own naval victories?
               <Link
                 href="/api/auth/signin"
-                className="text-brass hover:text-brass-bright underline ml-2 font-semibold"
+                className="text-red-600 hover:text-red-700 underline ml-2 font-semibold"
               >
                 Join the Fleet
               </Link>
@@ -1665,7 +1665,7 @@ export default function GalleryPage() {
                               loadComments(item.id);
                             }
                           }}
-                          className="text-sm text-brass hover:text-brass-bright mb-2"
+                          className="text-sm text-red-600 hover:text-red-700 mb-2"
                         >
                           💬 {(itemComments[item.id] || []).length} comments
                         </button>
@@ -1717,7 +1717,7 @@ export default function GalleryPage() {
                     )}
 
                     {/* Metadata */}
-                    <div className="flex items-center justify-between text-sm text-brass border-t-2 border-navy-dark/10 pt-4">
+                    <div className="flex items-center justify-between text-sm static-red-gradient border-t-2 border-navy-dark/10 pt-4">
                       <div>
                         <span className="font-semibold">Captain {item.uploader}</span>
                       </div>

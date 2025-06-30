@@ -64,7 +64,7 @@ The `github-actions@uws-gaming.iam.gserviceaccount.com` service account has been
 After successful deployment:
 - **Frontend**: https://uwsgaming.org
 - **Backend API**: https://api.uwsgaming.org
-- **Cloud Run Services**: 
+- **Cloud Run Services**:
   - uwsgaming-frontend
   - uwsgaming-backend
 

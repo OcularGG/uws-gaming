@@ -76,7 +76,7 @@ jobs:
         run: |
           # Install dependencies for Prisma
           npm ci --legacy-peer-deps
-          
+
           # Run database migrations
           cd packages/database
           echo "DATABASE_URL=$(gcloud secrets versions access latest --secret=uws-gaming-database-url)" > .env
@@ -159,10 +159,10 @@ jobs:
           # Get the Cloud Run service URLs
           FRONTEND_URL=$(gcloud run services describe uwsgaming-frontend --region=$REGION --format="value(status.url)")
           BACKEND_URL=$(gcloud run services describe uwsgaming-backend --region=$REGION --format="value(status.url)")
-          
+
           echo "Frontend URL: $FRONTEND_URL"
           echo "Backend URL: $BACKEND_URL"
-          
+
           # Update DNS records to point to Cloud Run
           # Get the IP address that Cloud Run domain mapping provides
           echo "Custom domains mapped - DNS should propagate automatically"

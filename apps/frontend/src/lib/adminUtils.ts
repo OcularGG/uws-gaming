@@ -1,17 +1,14 @@
 /**
- * Admin utilities for KrakenGaming
+ * Admin utilities for UWS Gaming
  * Centralized admin user management and permissions
  */
 
 // Admin users - in production, this should be stored in environment variables or database
 const ADMIN_USERS = {
-  // Discord-based admins
-  discordIds: [
-    '1207434980855259206' // Original admin Discord ID
-  ],
   // Email-based admins
   emails: [
-    'admin@krakengaming.org'
+    'admin@uwsgaming.org',
+    'litefoot.gg@gmail.com'
   ],
   // Username-based admins (fallback)
   usernames: [
@@ -25,8 +22,8 @@ const ADMIN_USERS = {
 export function isAdmin(user: any): boolean {
   if (!user) return false;
 
-  // Check Discord ID
-  if (user.discordId && ADMIN_USERS.discordIds.includes(user.discordId)) {
+  // Check role from database (primary method)
+  if (user.role === 'admin') {
     return true;
   }
 
@@ -40,13 +37,8 @@ export function isAdmin(user: any): boolean {
     return true;
   }
 
-  // Check explicit admin flag from database
+  // Check explicit admin flag from database (legacy)
   if (user.isAdmin === true) {
-    return true;
-  }
-
-  // Check by user ID for backwards compatibility
-  if (user.id && ADMIN_USERS.discordIds.includes(user.id)) {
     return true;
   }
 
@@ -79,7 +71,6 @@ export function canApproveRoleRequests(user: any): boolean {
  */
 export function getAdminIdentifiers() {
   return {
-    discordIds: ADMIN_USERS.discordIds,
     emails: ADMIN_USERS.emails,
     usernames: ADMIN_USERS.usernames
   };
@@ -89,7 +80,111 @@ export function getAdminIdentifiers() {
  * Check if a user ID (any type) is an admin
  */
 export function isAdminById(userId: string): boolean {
-  return ADMIN_USERS.discordIds.includes(userId) ||
-         ADMIN_USERS.emails.includes(userId.toLowerCase()) ||
+  return ADMIN_USERS.emails.includes(userId.toLowerCase()) ||
          ADMIN_USERS.usernames.includes(userId.toLowerCase());
+}
+
+/**
+ * Check if a user can access audit logs
+ */
+export function canAccessAuditLogs(user: any): boolean {
+  return isAdmin(user);
+}
+
+/**
+ * Check if a user can access GDPR tools
+ */
+export function canAccessGDPRTools(user: any): boolean {
+  return isAdmin(user);
+}
+
+/**
+ * Check if a user can view user activity logs
+ */
+export function canViewUserActivity(user: any): boolean {
+  return isAdmin(user);
+}
+
+/**
+ * Check if a user can manage system settings
+ */
+export function canManageSystemSettings(user: any): boolean {
+  return isAdmin(user);
+}
+
+/**
+ * Check if a user can manage blacklists
+ */
+export function canManageBlacklist(user: any): boolean {
+  return isAdmin(user);
+}
+
+/**
+ * Check if a user can manage gallery reports
+ */
+export function canManageGalleryReports(user: any): boolean {
+  return isAdmin(user);
+}
+
+/**
+ * Check if a user can manage roles and permissions
+ */
+export function canManageRoles(user: any): boolean {
+  return isAdmin(user);
+}
+
+/**
+ * Check if a user can export audit logs
+ */
+export function canExportAuditLogs(user: any): boolean {
+  return isAdmin(user);
+}
+
+/**
+ * Check if a user can process GDPR requests
+ */
+export function canProcessGDPRRequests(user: any): boolean {
+  return isAdmin(user);
+}
+
+/**
+ * Check if a user can delete user data (for GDPR)
+ */
+export function canDeleteUserData(user: any): boolean {
+  return isAdmin(user);
+}
+
+/**
+ * Check if a user can access analytics
+ */
+export function canAccessAnalytics(user: any): boolean {
+  return isAdmin(user);
+}
+
+/**
+ * Check if a user can manage the roster (view all users)
+ */
+export function canManageRoster(user: any): boolean {
+  return isAdmin(user);
+}
+
+/**
+ * Check if a user can track port battle attendance
+ */
+export function canTrackAttendance(user: any): boolean {
+  return isAdmin(user);
+}
+
+/**
+ * Check if a user can create/edit after action reports
+ */
+export function canManageAARs(user: any): boolean {
+  return isAdmin(user);
+}
+
+/**
+ * Check if a user can view port battle statistics
+ */
+export function canViewPortBattleStats(user: any): boolean {
+  return isAdmin(user);
 }

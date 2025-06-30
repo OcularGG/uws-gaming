@@ -1,5 +1,8 @@
+// Development schema for PostgreSQL - local development version
+// This matches production schema for consistent development experience
+
 generator client {
-  provider      = "prisma-client-js"
+  provider = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -8,335 +11,502 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// User management - includes email-based authentication
 model User {
-  id                                                String                 @id @default(cuid())
-  email                                             String                 @unique
-  username                                          String                 @unique
-  discordId                                         String?                @unique
-  redditUsername                                    String?
-  steamUsername                                     String?
-  avatar                                            String?
-  isBlacklisted                                     Boolean                @default(false)
-  blacklistReason                                   String?
-  createdAt                                         DateTime               @default(now())
-  updatedAt                                         DateTime               @updatedAt
-  album_members                                     album_members[]
-  albums                                            albums[]
-  application_comments                              application_comments[]
-  applications                                      Application[]
-  friend_requests_friend_requests_receiverIdTousers friend_requests[]      @relation("friend_requests_receiverIdTousers")
-  friend_requests_friend_requests_senderIdTousers   friend_requests[]      @relation("friend_requests_senderIdTousers")
-  friends_friends_friendIdTousers                   friends[]              @relation("friends_friendIdTousers")
-  friends_friends_userIdTousers                     friends[]              @relation("friends_userIdTousers")
-  gallery_comments                                  gallery_comments[]
-  gallery_items                                     GalleryItem[]
-  gallery_reactions                                 gallery_reactions[]
-  sessions                                          Session[]
-  activities                                        UserActivity[]
-  userRoles                                         UserRole[]
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String   // Hashed password
+  discordId String?  @unique // Keep for migration purposes, make optional
+  role      String   @default("user") // user, admin, moderator
+  emailVerified Boolean @default(false)
+  emailVerificationToken String?
+  passwordResetToken String?
+  passwordResetExpires DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  sessions   Session[]
+  applications Application[]
+  applicationVouches ApplicationVouch[]
+  applicationCooldown ApplicationCooldown?
+  bugReports BugReport[]
+  activityLogs       ActivityLog[]
+  adminActions       AuditLog[] @relation("AdminActions")
+  targetActions      AuditLog[] @relation("TargetActions")
+  userRoles          UserRole[]
+  roleAssignments    UserRole[] @relation("RoleAssignments")
+  blacklistEntries   Blacklist[] @relation("BlacklistEntries")
+  gdprRequests       GDPRRequest[] @relation("GDPRRequests")
+  processedGDPRRequests GDPRRequest[] @relation("ProcessedGDPRRequests")
+  reportedContent    GalleryReport[] @relation("ReportedContent")
+  reviewedReports    GalleryReport[] @relation("ReviewedReports")
+  createdPortBattles PortBattle[] @relation("CreatedPortBattles")
+  portBattleParticipants PortBattleParticipant[] @relation("PortBattleParticipants")
+  addedPortBattleParticipants PortBattleParticipant[] @relation("AddedPortBattleParticipants")
+  portBattleAttendance PortBattleAttendance[] @relation("PortBattleAttendance")
+  recordedAttendance PortBattleAttendance[] @relation("RecordedAttendance")
+  authoredAARs       PortBattleAAR[] @relation("AuthoredAARs")
+  reviewedAARs       PortBattleAAR[] @relation("ReviewedAARs")
+  updatedSettings    SystemSetting[] @relation("UpdatedSettings")
 
   @@map("users")
 }
 
-model Role {
-  id          String     @id @default(cuid())
-  name        String     @unique
-  description String?
-  permissions Json       @default("[]")
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  userRoles   UserRole[]
-
-  @@map("roles")
-}
-
-model UserRole {
-  id     String @id @default(cuid())
-  userId String
-  roleId String
-  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, roleId])
-  @@map("user_roles")
-}
-
-model UserActivity {
-  id        String           @id @default(cuid())
-  userId    String
-  type      UserActivityType
-  data      Json             @default("{}")
-  ipAddress String?
-  userAgent String?
-  createdAt DateTime         @default(now())
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("user_activities")
-}
-
+// Session management for authentication
 model Session {
   id        String   @id @default(cuid())
   userId    String
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
 }
 
+// Applications - updated to use email-based auth
 model Application {
-  id                   String                 @id @default(cuid())
-  userId               String?
-  status               ApplicationStatus      @default(DRAFT)
-  formData             Json                   @default("{}")
-  lastSaved            DateTime               @default(now())
-  submittedAt          DateTime?
-  reviewedAt           DateTime?
-  reviewedBy           String?
-  notes                String?
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @updatedAt
-  application_comments application_comments[]
-  users                User?                  @relation(fields: [userId], references: [id])
+  id        String   @id @default(cuid())
+  userId    String
+  status    String   @default("PENDING") // ApplicationStatus as string
+
+  // User info (no longer Discord-specific)
+  applicantName   String   // captainName from form
+  email          String
+
+  // Application form data
+  captainName              String
+  preferredNickname        String?
+  currentNation            String
+  timeZone                 String
+  hoursInNavalAction       Int
+  steamConnected           Boolean
+  currentRank              String
+  previousCommands         String?
+  preferredRole            String
+  isPortBattleCommander    Boolean
+  commanderExperience      String?
+  isCrafter                Boolean
+  weeklyPlayTime           Int
+  portBattleAvailability   String  // JSON string of array
+  typicalSchedule          String
+  declarationAccuracy      Boolean
+  declarationHonor         Boolean
+  declarationRules         Boolean
+  signature                String
+
+  // Remove Discord-specific fields
+  // discordChannelId and applicationEmbed removed
+
+  // Timestamps
+  submittedAt DateTime @default(now())
+  reviewedAt  DateTime?
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vouches ApplicationVouch[]
 
   @@map("applications")
 }
 
+// Application vouches
+model ApplicationVouch {
+  id            String   @id @default(cuid())
+  applicationId String
+  reviewerId    String
+  isPositive    Boolean
+  comment       String?
+  createdAt     DateTime @default(now())
+
+  // Relationships
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  reviewer    User        @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@unique([applicationId, reviewerId])
+  @@map("application_vouches")
+}
+
+// Application cooldowns - updated to use user IDs
+model ApplicationCooldown {
+  id             String    @id @default(cuid())
+  userId         String    @unique // Changed from discordId to userId
+  canReapplyAt   DateTime
+  reason         String
+  overriddenBy   String?
+  overriddenAt   DateTime?
+  createdAt      DateTime  @default(now())
+
+  // Relationship
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("application_cooldowns")
+}
+
+// Bug reports - simplified for SQLite
+model BugReport {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  severity    String   @default("MEDIUM") // BugSeverity as string
+  status      String   @default("OPEN")   // BugStatus as string
+  reporterId  String
+  assigneeId  String?
+
+  // Additional info (simplified)
+  stepsToReproduce String?
+  expectedBehavior String?
+  actualBehavior   String?
+  environment      String?
+  attachments      String? // File paths as JSON string
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  reporter User  @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@map("bug_reports")
+}
+
+// Gallery items - simplified for SQLite
 model GalleryItem {
-  id                  String              @id @default(cuid())
-  userId              String
-  title               String
-  description         String?
-  imageUrl            String
-  thumbnailUrl        String?
-  isPublic            Boolean             @default(false)
-  requiresAuth        Boolean             @default(false)
-  status              GalleryItemStatus   @default(PENDING)
-  views               Int                 @default(0)
-  isDuplicate         Boolean             @default(false)
-  originalItemId      String?
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-  album_items         album_items[]
-  gallery_comments    gallery_comments[]
-  gallery_items       GalleryItem?        @relation("gallery_itemsTogallery_items", fields: [originalItemId], references: [id])
-  other_gallery_items GalleryItem[]       @relation("gallery_itemsTogallery_items")
-  users               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  gallery_reactions   gallery_reactions[]
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  filePath    String
+  fileName    String
+  fileSize    Int?
+  mimeType    String?
+  dimensions  String?  // JSON as string instead of Json type
+  tags        String?  // Comma-separated instead of String[]
+  upvotes     Int      @default(0)
+  downvotes   Int      @default(0)
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Add reports relationship
+  reports GalleryReport[]
 
   @@map("gallery_items")
 }
 
-model album_items {
-  id            String      @id
-  albumId       String
-  galleryItemId String
-  order         Int         @default(0)
-  addedAt       DateTime    @default(now())
-  albums        albums      @relation(fields: [albumId], references: [id], onDelete: Cascade)
-  gallery_items GalleryItem @relation(fields: [galleryItemId], references: [id], onDelete: Cascade)
-
-  @@unique([albumId, galleryItemId])
-}
-
-model album_members {
-  id      String @id
-  albumId String
-  userId  String
-  albums  albums @relation(fields: [albumId], references: [id], onDelete: Cascade)
-  users   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([albumId, userId])
-}
-
-model albums {
-  id            String          @id
-  name          String
-  description   String?
-  isPublic      Boolean         @default(false)
-  creatorId     String
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime
-  album_items   album_items[]
-  album_members album_members[]
-  users         User            @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-}
-
-model application_comments {
-  id            String      @id
-  applicationId String
-  userId        String
-  content       String
-  isInternal    Boolean     @default(false)
-  createdAt     DateTime    @default(now())
-  applications  Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  users         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model backup_logs {
-  id           String       @id
-  type         BackupType
-  status       BackupStatus
-  fileName     String?
-  fileSize     BigInt?
-  checksum     String?
-  startedAt    DateTime     @default(now())
-  completedAt  DateTime?
-  errorMessage String?
-}
-
-model discord_guilds {
-  id          String   @id
-  name        String
-  iconUrl     String?
-  ownerId     String
-  memberCount Int      @default(0)
-  isActive    Boolean  @default(true)
-  settings    Json     @default("{}")
+// Activity logging for user actions and admin audit trail
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String
+  category    String   // auth, user, admin, system, security, gdpr
+  resource    String?  // What was acted upon (post, user, etc.)
+  resourceId  String?  // ID of the resource
+  details     Json?    // Additional details about the action
+  ipAddress   String?
+  userAgent   String?
+  sessionId   String?
+  severity    String   @default("info") // info, warning, error, critical
+  success     Boolean  @default(true)
+  metadata    Json?    // Additional metadata
   createdAt   DateTime @default(now())
-  updatedAt   DateTime
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([category])
+  @@index([action])
+  @@index([createdAt])
+  @@map("activity_logs")
 }
 
-model friend_requests {
-  id                                      String              @id
-  senderId                                String
-  receiverId                              String
-  status                                  FriendRequestStatus @default(PENDING)
-  createdAt                               DateTime            @default(now())
-  updatedAt                               DateTime
-  users_friend_requests_receiverIdTousers User                @relation("friend_requests_receiverIdTousers", fields: [receiverId], references: [id], onDelete: Cascade)
-  users_friend_requests_senderIdTousers   User                @relation("friend_requests_senderIdTousers", fields: [senderId], references: [id], onDelete: Cascade)
+// Admin audit logs for tracking admin actions
+model AuditLog {
+  id             String   @id @default(cuid())
+  adminUserId    String   // Who performed the action
+  targetUserId   String?  // Who was affected (if applicable)
+  action         String   // What action was performed
+  resource       String?  // What type of resource
+  resourceId     String?  // ID of the resource
+  previousValue  Json?    // Previous state/value
+  newValue       Json?    // New state/value
+  reason         String?  // Reason for the action
+  ipAddress      String?
+  userAgent      String?
+  sessionId      String?
+  success        Boolean  @default(true)
+  metadata       Json?
+  createdAt      DateTime @default(now())
 
-  @@unique([senderId, receiverId])
+  // Relationships
+  adminUser  User @relation("AdminActions", fields: [adminUserId], references: [id], onDelete: Cascade)
+  targetUser User? @relation("TargetActions", fields: [targetUserId], references: [id], onDelete: SetNull)
+
+  @@index([adminUserId])
+  @@index([targetUserId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
 }
 
-model friends {
-  id                            String   @id
-  userId                        String
-  friendId                      String
-  createdAt                     DateTime @default(now())
-  users_friends_friendIdTousers User     @relation("friends_friendIdTousers", fields: [friendId], references: [id], onDelete: Cascade)
-  users_friends_userIdTousers   User     @relation("friends_userIdTousers", fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, friendId])
-}
-
-model gallery_comments {
-  id            String      @id
-  galleryItemId String
-  userId        String
-  content       String
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime
-  gallery_items GalleryItem @relation(fields: [galleryItemId], references: [id], onDelete: Cascade)
-  users         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model gallery_reactions {
-  id            String      @id
-  galleryItemId String
-  userId        String
-  emoji         String
-  createdAt     DateTime    @default(now())
-  gallery_items GalleryItem @relation(fields: [galleryItemId], references: [id], onDelete: Cascade)
-  users         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([galleryItemId, userId, emoji])
-}
-
-model rate_limits {
-  id         String   @id
-  identifier String
-  endpoint   String
-  count      Int      @default(1)
-  resetTime  DateTime
-  createdAt  DateTime @default(now())
-
-  @@unique([identifier, endpoint])
-}
-
-model system_config {
-  id          String   @id
-  key         String   @unique
-  value       String
+// User roles and permissions system
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  displayName String
   description String?
-  isPublic    Boolean  @default(false)
+  isDefault   Boolean  @default(false)
+  isSystem    Boolean  @default(false) // Cannot be deleted
+  permissions Json     // Array of permission strings
   createdAt   DateTime @default(now())
-  updatedAt   DateTime
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  userRoles UserRole[]
+
+  @@map("roles")
 }
 
-model system_logs {
-  id        String   @id
-  level     LogLevel
-  category  String
-  message   String
-  data      Json     @default("{}")
-  userId    String?
-  ipAddress String?
-  userAgent String?
-  createdAt DateTime @default(now())
+// User role assignments
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String
+  roleId    String
+  assignedBy String  // Admin who assigned this role
+  assignedAt DateTime @default(now())
+  expiresAt  DateTime? // Optional expiration
+
+  // Relationships
+  user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  assignedByUser User @relation("RoleAssignments", fields: [assignedBy], references: [id])
+
+  @@unique([userId, roleId])
+  @@map("user_roles")
 }
 
-enum ApplicationStatus {
-  DRAFT
-  SUBMITTED
-  UNDER_REVIEW
-  APPROVED
-  REJECTED
-  WITHDRAWN
+// Blacklist system for users, IPs, and emails
+model Blacklist {
+  id          String   @id @default(cuid())
+  type        String   // user, ip, email, domain
+  value       String   // The actual value to blacklist
+  reason      String
+  addedBy     String   // Admin who added this
+  isActive    Boolean  @default(true)
+  expiresAt   DateTime? // Optional expiration
+  metadata    Json?    // Additional context
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  addedByUser User @relation("BlacklistEntries", fields: [addedBy], references: [id])
+
+  @@index([type, value])
+  @@index([isActive])
+  @@map("blacklist")
 }
 
-enum BackupStatus {
-  RUNNING
-  COMPLETED
-  FAILED
+// GDPR data requests
+model GDPRRequest {
+  id          String   @id @default(cuid())
+  userId      String   // User making the request
+  type        String   // export, deletion, rectification
+  status      String   @default("pending") // pending, processing, completed, failed, rejected
+  requestData Json?    // Details about what data is requested
+  processedBy String?  // Admin who processed the request
+  processedAt DateTime?
+  completedAt DateTime?
+  downloadUrl String?  // For data export requests
+  notes       String?  // Admin notes
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  user        User @relation("GDPRRequests", fields: [userId], references: [id], onDelete: Cascade)
+  processor   User? @relation("ProcessedGDPRRequests", fields: [processedBy], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@map("gdpr_requests")
 }
 
-enum BackupType {
-  MANUAL
-  SCHEDULED
-  EMERGENCY
+// Gallery content reports
+model GalleryReport {
+  id          String   @id @default(cuid())
+  galleryId   String   // Reference to gallery item
+  reportedBy  String   // User who reported
+  reason      String   // Reason for report
+  description String?  // Additional details
+  status      String   @default("pending") // pending, reviewing, resolved, dismissed
+  reviewedBy  String?  // Admin who reviewed
+  reviewedAt  DateTime?
+  resolution  String?  // What action was taken
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  gallery    GalleryItem @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+  reporter   User @relation("ReportedContent", fields: [reportedBy], references: [id], onDelete: Cascade)
+  reviewer   User? @relation("ReviewedReports", fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([reportedBy])
+  @@map("gallery_reports")
 }
 
-enum FriendRequestStatus {
-  PENDING
-  ACCEPTED
-  DECLINED
+// Port Battle management
+model PortBattle {
+  id              String   @id @default(cuid())
+  name            String   // Battle name/title
+  description     String?  // Battle description
+  port            String   // Port name
+  server          String   // Game server
+  scheduledTime   DateTime // When the battle is scheduled
+  status          String   @default("scheduled") // scheduled, active, completed, cancelled
+  maxParticipants Int?     @default(50)
+  requirements    String?  // Battle requirements
+  rewards         String?  // Battle rewards
+  createdBy       String   // Admin who created
+
+  // Battle results (filled after completion)
+  result          String?  // victory, defeat, draw
+  enemyFleetSize  Int?     // Enemy fleet size encountered
+  battleDuration  Int?     // Duration in minutes
+
+  // Metadata
+  metadata        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relationships
+  createdByUser   User @relation("CreatedPortBattles", fields: [createdBy], references: [id])
+  participants    PortBattleParticipant[]
+  attendanceRecords PortBattleAttendance[]
+  afterActionReport PortBattleAAR?
+
+  @@index([scheduledTime])
+  @@index([status])
+  @@index([server])
+  @@map("port_battles")
 }
 
-enum GalleryItemStatus {
-  PENDING
-  APPROVED
-  REJECTED
+// Port battle participants (sign-ups)
+model PortBattleParticipant {
+  id           String   @id @default(cuid())
+  portBattleId String
+  userId       String
+  shipType     String?  // Ship type they plan to bring
+  notes        String?  // Any notes from the participant
+  status       String   @default("signed_up") // signed_up, confirmed, cancelled
+  addedBy      String   // Who added them (could be self or admin)
+  joinedAt     DateTime @default(now())
+
+  // Relationships
+  portBattle   PortBattle @relation(fields: [portBattleId], references: [id], onDelete: Cascade)
+  user         User @relation("PortBattleParticipants", fields: [userId], references: [id], onDelete: Cascade)
+  addedByUser  User @relation("AddedPortBattleParticipants", fields: [addedBy], references: [id])
+
+  @@unique([portBattleId, userId])
+  @@index([portBattleId])
+  @@index([userId])
+  @@map("port_battle_participants")
 }
 
-enum LogLevel {
-  DEBUG
-  INFO
-  WARN
-  ERROR
-  CRITICAL
+// Attendance tracking for port battles
+model PortBattleAttendance {
+  id           String   @id @default(cuid())
+  portBattleId String
+  userId       String
+  status       String   // present, absent, late, left_early
+  joinTime     DateTime? // When they joined the battle
+  leaveTime    DateTime? // When they left (if applicable)
+  shipUsed     String?   // Actual ship used in battle
+  performance  String?   // performance notes (optional)
+  notes        String?   // Admin notes about attendance
+  recordedBy   String    // Admin who recorded attendance
+  recordedAt   DateTime  @default(now())
+
+  // Relationships
+  portBattle   PortBattle @relation(fields: [portBattleId], references: [id], onDelete: Cascade)
+  user         User @relation("PortBattleAttendance", fields: [userId], references: [id], onDelete: Cascade)
+  recordedByUser User @relation("RecordedAttendance", fields: [recordedBy], references: [id])
+
+  @@unique([portBattleId, userId])
+  @@index([portBattleId])
+  @@index([userId])
+  @@map("port_battle_attendance")
 }
 
-enum UserActivityType {
-  LOGIN
-  LOGOUT
-  PASSWORD_CHANGE
-  EMAIL_CHANGE
-  PROFILE_UPDATE
-  DISCORD_LINK
-  DISCORD_UNLINK
-  APPLICATION_START
-  APPLICATION_SAVE
-  APPLICATION_SUBMIT
-  APPLICATION_VIEW
-  GALLERY_UPLOAD
-  GALLERY_VIEW
-  GALLERY_LIKE
-  GALLERY_COMMENT
-  ADMIN_ACTION
-  FRIEND_REQUEST_SENT
-  FRIEND_REQUEST_ACCEPTED
-  FRIEND_REQUEST_DECLINED
+// After Action Reports for completed port battles
+model PortBattleAAR {
+  id              String   @id @default(cuid())
+  portBattleId    String   @unique
+
+  // Battle Summary
+  outcome         String   // victory, defeat, draw
+  enemyFleetSize  Int?
+  ourFleetSize    Int
+  battleDuration  Int?     // Duration in minutes
+  casualties      Json?    // Casualty report
+
+  // Narrative Report
+  battleSummary   String   // Main battle narrative
+  tacticsUsed     String?  // Tactics and strategy employed
+  enemyTactics    String?  // Enemy tactics observed
+  keyMoments      String?  // Key moments in the battle
+
+  // Performance Analysis
+  strengths       String?  // What went well
+  weaknesses      String?  // Areas for improvement
+  lessons         String?  // Lessons learned
+  recommendations String?  // Recommendations for future
+
+  // Participant Performance (optional)
+  mvp             String?  // Most valuable player
+  participantNotes Json?   // Individual performance notes
+
+  // Admin Info
+  authoredBy      String   // Who wrote the report
+  reviewedBy      String?  // Who reviewed/approved it
+  publishedAt     DateTime?
+  isPublished     Boolean  @default(false)
+
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relationships
+  portBattle      PortBattle @relation(fields: [portBattleId], references: [id], onDelete: Cascade)
+  author          User @relation("AuthoredAARs", fields: [authoredBy], references: [id])
+  reviewer        User? @relation("ReviewedAARs", fields: [reviewedBy], references: [id])
+
+  @@index([portBattleId])
+  @@index([isPublished])
+  @@map("port_battle_aars")
+}
+
+// System settings for admin configuration
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       Json     // Store various data types
+  description String?
+  category    String   @default("general") // general, security, features, etc.
+  isPublic    Boolean  @default(false) // Can non-admins read this setting?
+  updatedBy   String   // Admin who last updated
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  updatedByUser User @relation("UpdatedSettings", fields: [updatedBy], references: [id])
+
+  @@index([category])
+  @@map("system_settings")
 }

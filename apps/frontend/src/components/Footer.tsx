@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="py-12 border-t-4 footer-border-gradient" style={{backgroundColor: '#4d6fa0'}}>
+    <footer className="py-12 border-t-4 footer-border-gradient" style={{backgroundColor: '#000000'}}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
@@ -11,7 +11,7 @@ export default function Footer() {
               United We Stand
             </h3>
             <p className="text-gray-100 mb-4" style={{fontFamily: 'Crimson Text, serif'}}>
-              His Majesty's Naval Service - Elite squadron commanding the Caribbean waters in Naval Action.
+              In the name of his Majesty King George, this ship now belongs to UWS.
             </p>
             <div className="flex space-x-4">
               <a
@@ -65,23 +65,11 @@ export default function Footer() {
                   FAQ
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/bugs"
-                  className="text-gray-100 hover:text-white transition-colors"
-                  style={{fontFamily: 'Crimson Text, serif'}}
-                >
-                  Report Bugs
-                </Link>
-              </li>
             </ul>
           </div>
 
           {/* Legal */}
           <div>
-            <h4 className="font-semibold mb-4 text-white" style={{fontFamily: 'Cinzel, serif'}}>
-              Legal
-            </h4>
             <ul className="space-y-2">
               <li>
                 <Link
@@ -89,7 +77,7 @@ export default function Footer() {
                   className="text-gray-100 hover:text-white transition-colors"
                   style={{fontFamily: 'Crimson Text, serif'}}
                 >
-                  Privacy Policy
+                  Legal
                 </Link>
               </li>
             </ul>

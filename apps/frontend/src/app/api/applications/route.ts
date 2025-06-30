@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-
-// @ts-ignore - Prisma types need regeneration after schema changes
-const prisma = new PrismaClient()
 
 // Application schema for validation
 const applicationSchema = z.object({
@@ -81,10 +78,8 @@ export async function POST(request: Request) {
     const existingApplication = await prisma.application.findFirst({
       where: {
         OR: [
-          // @ts-ignore - Schema mismatch
           { userId: userId },
-          // @ts-ignore - Schema mismatch
-          { applicantEmail: validatedData.email }
+          { email: validatedData.email }
         ]
       }
     })
@@ -133,13 +128,13 @@ export async function POST(request: Request) {
         commanderExperience: validatedData.commanderExperience || null,
         isCrafter: validatedData.isCrafter,
         weeklyPlayTime: parseInt(validatedData.weeklyPlayTime),
-        portBattleAvailability: validatedData.portBattleAvailability, // Array instead of JSON string
+        portBattleAvailability: JSON.stringify(validatedData.portBattleAvailability), // Convert array to JSON string
         typicalSchedule: validatedData.typicalSchedule,
         declarationAccuracy: validatedData.declarationAccuracy,
         declarationHonor: validatedData.declarationHonor,
         declarationRules: validatedData.declarationRules,
         signature: validatedData.signature,
-        status: 'pending' // lowercase as per new schema
+        status: 'PENDING' // Use uppercase to match schema comment
       }
     })
 

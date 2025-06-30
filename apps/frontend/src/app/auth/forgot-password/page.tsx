@@ -2,34 +2,12 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useTypewriter } from '@/hooks/useTypewriter'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
-  const ships = [
-    'Duke of Kent',
-    'L\'Ocean',
-    'Santa Ana',
-    'Santisima Trinidad',
-    'Victory',
-    'Christian',
-    'Le Bucentaure',
-    'San Pedro',
-    'St. Pavel',
-    'Admiral de Ruyter',
-    'Implacable',
-    'Redoubtable',
-    'Constitution',
-    'Wapen von Hamburg',
-    'Indefatigable'
-  ];
-
-  useTypewriter('forgot-password-typewriter-ship', ships, 1000);
-  useTypewriter('forgot-password-typewriter-ship-mobile', ships, 1000);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -68,7 +46,7 @@ export default function ForgotPasswordPage() {
             <div className="mb-8">
               <Link
                 href="/"
-                className="inline-flex items-center text-sail-white lg:text-navy-dark/70 hover:text-sail-white/80 lg:hover:text-navy-dark text-sm font-medium transition-colors"
+                className="inline-flex items-center text-black lg:text-black hover:text-gray-700 lg:hover:text-gray-700 text-sm font-medium transition-colors"
                 style={{fontFamily: 'Cinzel, serif'}}
               >
                 ← Return to Port
@@ -85,7 +63,7 @@ export default function ForgotPasswordPage() {
               </p>
               <Link
                 href="/auth/login"
-                className="inline-block bg-brass hover:bg-brass-bright text-white px-6 py-3 rounded-md font-semibold transition-all border-2 border-brass hover:border-brass-bright"
+                className="inline-block bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-md font-semibold transition-all border-2 border-red-600 hover:border-red-700"
                 style={{fontFamily: 'Cinzel, serif'}}
               >
                 Return to Login
@@ -111,7 +89,7 @@ export default function ForgotPasswordPage() {
             <div className="text-center px-4 max-w-2xl">
               {/* Pirate Flag Logo */}
               <div className="mb-8 flex justify-center">
-                <div className="w-32 h-32 md:w-48 md:h-48 drop-shadow-2xl logo-floating">
+                <div className="w-48 h-48 md:w-64 md:h-64 drop-shadow-2xl logo-floating">
                   <img
                     src="https://i.imgur.com/3efff8f4.png"
                     alt="Pirate Flag Logo"
@@ -138,27 +116,11 @@ export default function ForgotPasswordPage() {
                         `;
                       }
                     }}
-                  />
-                </div>
-              </div>
-
-              <h1 className="hero-title-brutal text-4xl md:text-6xl mb-6" style={{fontFamily: 'Cinzel, serif'}}>
-                <span className="text-green-800">UWS</span>
-              </h1>
-
-              <div className="hero-subtitle text-lg md:text-2xl mb-8 max-w-lg mx-auto"
-                 style={{
-                   color: 'var(--sail-white)',
-                   textShadow: '2px 2px 4px rgba(0,0,0,0.7), 0 0 10px rgba(22, 101, 52, 0.3)',
-                   fontFamily: 'Crimson Text, serif'
-                 }}>
-                <p>
-                  Reset your course with the <span id="forgot-password-typewriter-ship" className="text-green-800 font-bold"></span>
-                </p>
-              </div>
+                  />              </div>
             </div>
           </div>
         </div>
+      </div>
       </div>
     )
   }
@@ -172,7 +134,7 @@ export default function ForgotPasswordPage() {
           <div className="mb-8">
             <Link
               href="/"
-              className="inline-flex items-center text-sail-white lg:text-navy-dark/70 hover:text-sail-white/80 lg:hover:text-navy-dark text-sm font-medium transition-colors"
+              className="inline-flex items-center text-black lg:text-black hover:text-gray-700 lg:hover:text-gray-700 text-sm font-medium transition-colors"
               style={{fontFamily: 'Cinzel, serif'}}
             >
               ← Return to Port
@@ -180,24 +142,13 @@ export default function ForgotPasswordPage() {
           </div>
 
           <div className="lg:hidden text-center mb-8">
-            <h1 className="hero-title-gradient text-4xl font-bold mb-2">
-              UWS
-            </h1>
-            <div className="text-lg" style={{
-              color: 'var(--sail-white)',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.7), 0 0 10px rgba(22, 101, 52, 0.3)',
-              fontFamily: 'Crimson Text, serif'
-            }}>
-              <p>
-                Set sail with us in your <span id="forgot-password-typewriter-ship-mobile" className="typewriter-gradient font-bold"></span>
-              </p>
-            </div>
+            {/* Mobile logo placeholder if needed */}
           </div>
 
           <div className="neo-brutal-box bg-sail-white p-8 lg:shadow-none lg:border-none">
             {/* Header */}
             <div className="text-center mb-8">
-              <h2 className="hero-title-gradient text-3xl font-bold mb-2">
+              <h2 className="static-red-gradient text-3xl font-bold mb-2">
                 Reset Password
               </h2>
               <p className="text-navy-dark/70" style={{fontFamily: 'Crimson Text, serif'}}>
@@ -223,7 +174,7 @@ export default function ForgotPasswordPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full px-4 py-3 border-2 border-navy-dark rounded-md focus:outline-none focus:ring-2 focus:ring-brass focus:border-transparent transition-all"
-                  placeholder="captain@krakengaming.org"
+                  placeholder="captain@uwsgaming.org"
                 />
               </div>
 
@@ -233,7 +184,7 @@ export default function ForgotPasswordPage() {
                 className={`w-full py-4 px-4 rounded-md font-semibold transition-all border-2 ${
                   loading
                     ? 'bg-gray-400 text-gray-600 border-gray-400 cursor-not-allowed'
-                    : 'bg-brass hover:bg-brass-bright text-white border-brass hover:border-brass-bright'
+                    : 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-red-600 hover:border-red-700'
                 }`}
                 style={{fontFamily: 'Cinzel, serif'}}
               >
@@ -244,14 +195,14 @@ export default function ForgotPasswordPage() {
             <div className="mt-8 text-center space-y-4">
               <Link
                 href="/auth/login"
-                className="block text-brass hover:text-brass-bright text-sm font-medium"
+                className="block text-red-600 hover:text-red-700 text-sm font-medium"
                 style={{fontFamily: 'Crimson Text, serif'}}
               >
                 Back to Login
               </Link>
               <div className="text-sm text-navy-dark/70" style={{fontFamily: 'Crimson Text, serif'}}>
                 Need to join the fleet?{' '}
-                <Link href="/apply" className="text-brass hover:text-brass-bright font-semibold">
+                <Link href="/apply" className="text-red-600 hover:text-red-700 font-semibold">
                   Apply for a Letter of Marque
                 </Link>
               </div>
@@ -265,7 +216,7 @@ export default function ForgotPasswordPage() {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: 'url("https://greydogtales.com/blog/wp-content/uploads/2016/03/ghost_ship_approaching_by_matchack-deviantart.jpg")'
+            backgroundImage: 'url("https://preview.redd.it/7znsvaed7wo51.jpg?auto=webp&s=9bf67432f156d99e0b1b73e654e07fab1f85dab3")'
           }}
         />
 
@@ -277,7 +228,7 @@ export default function ForgotPasswordPage() {
           <div className="text-center px-4 max-w-2xl">
             {/* Pirate Flag Logo */}
             <div className="mb-8 flex justify-center">
-              <div className="w-32 h-32 md:w-48 md:h-48 drop-shadow-2xl logo-floating">
+              <div className="w-48 h-48 md:w-64 md:h-64 drop-shadow-2xl logo-floating">
                 <img
                   src="/uws-logo.png"
                   alt="UWS Logo"
@@ -306,21 +257,6 @@ export default function ForgotPasswordPage() {
                   }}
                 />
               </div>
-            </div>
-
-            <h1 className="hero-title-gradient text-4xl md:text-6xl mb-6">
-              UWS
-            </h1>
-
-            <div className="hero-subtitle text-lg md:text-2xl mb-8 max-w-lg mx-auto"
-               style={{
-                 color: 'var(--sail-white)',
-                 textShadow: '2px 2px 4px rgba(0,0,0,0.7), 0 0 10px rgba(22, 101, 52, 0.3)',
-                 fontFamily: 'Crimson Text, serif'
-               }}>
-              <p>
-                Set sail with us in your <span id="forgot-password-typewriter-ship" className="typewriter-gradient font-bold"></span>
-              </p>
             </div>
           </div>
         </div>

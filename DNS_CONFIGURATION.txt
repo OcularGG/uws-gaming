@@ -1,0 +1,51 @@
+# DNS Configuration for uwsgaming.org
+# Add these records to your domain registrar's DNS settings
+
+## STEP 1: Google Site Verification (REQUIRED FIRST)
+Type: TXT
+Name: @ (root domain)
+Value: google-site-verification=Evl5tN-82zFOBS_qXMPEbRuCQYU1QC6JEBTHTFNYwns
+
+## STEP 2: Main Domain (uwsgaming.org -> Frontend)
+Type: A
+Name: @
+Values:
+  216.239.32.21
+  216.239.34.21
+  216.239.36.21
+  216.239.38.21
+
+## STEP 3: WWW Subdomain
+Type: CNAME
+Name: www
+Value: ghs.googlehosted.com
+
+## STEP 4: API Subdomain (api.uwsgaming.org -> Backend)
+Type: CNAME
+Name: api
+Value: ghs.googlehosted.com
+
+## STEP 5: Preview Subdomain (optional for staging)
+Type: CNAME
+Name: preview
+Value: ghs.googlehosted.com
+
+## VERIFICATION INSTRUCTIONS:
+1. Add the Google Site Verification TXT record FIRST
+2. Wait for DNS propagation (5-15 minutes)
+3. Verify domain ownership in Google Search Console
+4. Add the remaining records
+5. Set up domain mapping in Cloud Run Console
+
+## CURRENT SERVICE URLS:
+Frontend: https://krakengaming-frontend-582199768810.us-central1.run.app
+Backend:  https://krakengaming-backend-582199768810.us-central1.run.app
+
+## FINAL URLS AFTER SETUP:
+Frontend: https://uwsgaming.org
+API:      https://api.uwsgaming.org
+Preview:  https://preview.uwsgaming.org
+
+## ADMIN CREDENTIALS:
+Email: admin@uwsgaming.org
+Password: KG_Admin_2025_de3e3b4e87c10f6e775b6bdcad274ced

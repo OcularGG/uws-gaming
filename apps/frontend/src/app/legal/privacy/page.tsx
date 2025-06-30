@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | KrakenGaming',
+  title: 'Privacy Policy | UWS',
   description: 'Privacy Policy for KrakenGaming platform.',
 };
 
@@ -125,7 +125,7 @@ export default function PrivacyPolicyPage() {
                 If you have any questions about this Privacy Policy, please contact us at:
               </p>
               <p className="text-gray-700">
-                Email: privacy@krakengaming.org
+                Email: privacy@uwsgaming.org
               </p>
             </section>
           </div>

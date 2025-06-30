@@ -20,7 +20,7 @@ jobs:
         env:
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
-          POSTGRES_DB: krakengaming_test
+          POSTGRES_DB: uwsgaming_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -55,30 +55,30 @@ jobs:
     - name: Setup test environment
       run: |
         cp .env.example .env.test
-        echo "DATABASE_URL=postgresql://test:test@localhost:5432/krakengaming_test" >> .env.test
+        echo "DATABASE_URL=postgresql://test:test@localhost:5432/uwsgaming_test" >> .env.test
         echo "REDIS_URL=redis://localhost:6379" >> .env.test
         echo "NODE_ENV=test" >> .env.test
 
     - name: Setup database
       run: |
-        export DATABASE_URL=postgresql://test:test@localhost:5432/krakengaming_test
-        npm run generate -w @krakengaming/database
-        npm run migrate -w @krakengaming/database
+        export DATABASE_URL=postgresql://test:test@localhost:5432/uwsgaming_test
+        npm run generate -w @uwsgaming/database
+        npm run migrate -w @uwsgaming/database
 
     - name: Start backend server
       run: |
-        npm run build -w @krakengaming/backend
-        npm start -w @krakengaming/backend &
+        npm run build -w @uwsgaming/backend
+        npm start -w @uwsgaming/backend &
         sleep 10
       env:
-        DATABASE_URL: postgresql://test:test@localhost:5432/krakengaming_test
+        DATABASE_URL: postgresql://test:test@localhost:5432/uwsgaming_test
         NODE_ENV: test
         API_PORT: 4000
 
     - name: Start frontend server
       run: |
-        npm run build -w @krakengaming/frontend
-        npm start -w @krakengaming/frontend &
+        npm run build -w @uwsgaming/frontend
+        npm start -w @uwsgaming/frontend &
         sleep 15
       env:
         NEXT_PUBLIC_API_URL: http://localhost:4000
@@ -92,12 +92,12 @@ jobs:
     - name: Run integration tests
       run: |
         # API Integration Tests
-        npm run test:integration -w @krakengaming/backend
+        npm run test:integration -w @uwsgaming/backend
 
         # Frontend E2E Tests
-        npm run test:e2e -w @krakengaming/frontend
+        npm run test:e2e -w @uwsgaming/frontend
       env:
-        DATABASE_URL: postgresql://test:test@localhost:5432/krakengaming_test
+        DATABASE_URL: postgresql://test:test@localhost:5432/uwsgaming_test
         PLAYWRIGHT_BASE_URL: http://localhost:3000
         API_BASE_URL: http://localhost:4000
 

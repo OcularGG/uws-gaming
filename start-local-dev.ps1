@@ -1,44 +1,72 @@
 #!/usr/bin/env pwsh
-# KrakenGaming - Local Development Setup
-# This script sets up the local development environment
+# UWS Gaming - Start Local Development with Cloud SQL
+# This script starts both frontend and backend development servers
 
-Write-Host "🏴‍☠️ KrakenGaming Local Development Setup" -ForegroundColor Cyan
-Write-Host "=======================================" -ForegroundColor Blue
+Write-Host "🚢 UWS Gaming Development Server Startup" -ForegroundColor Cyan
+Write-Host "=========================================" -ForegroundColor Blue
 
-# Navigate to frontend directory
-Set-Location "apps/frontend"
+# Check if setup has been run
+if (-not (Test-Path "apps/frontend/.env.local") -or -not (Test-Path "apps/backend/.env.local")) {
+    Write-Host "❌ Environment files not found. Please run setup first:" -ForegroundColor Red
+    Write-Host "   .\setup-local-dev.ps1" -ForegroundColor Yellow
+    exit 1
+}
 
-# Copy development environment file
-if (-not (Test-Path ".env.local")) {
-    Write-Host "📝 Creating .env.local file..." -ForegroundColor Yellow
-    Copy-Item ".env.development" ".env.local"
-    Write-Host "✅ Created .env.local from template" -ForegroundColor Green
-    Write-Host "💡 You can edit .env.local to customize your local settings" -ForegroundColor Cyan
+# Check Cloud SQL connection
+Write-Host "`n🗃️ Verifying Cloud SQL connection..." -ForegroundColor Blue
+try {
+    $dbStatus = gcloud sql instances describe uws-gaming-db --format="value(state)" 2>$null
+    if ($dbStatus -eq "RUNNABLE") {
+        Write-Host "✅ Cloud SQL instance is running!" -ForegroundColor Green
+    } else {
+        Write-Host "❌ Cloud SQL instance is not running. Status: $dbStatus" -ForegroundColor Red
+        exit 1
+    }
+} catch {
+    Write-Host "❌ Failed to connect to Cloud SQL. Please check: gcloud auth login" -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "`n📝 Setting up environment files..." -ForegroundColor Yellow
+
+# Create frontend .env.local if it doesn't exist
+if (-not (Test-Path "apps/frontend/.env.local")) {
+    Copy-Item ".env.example" "apps/frontend/.env.local"
+    Write-Host "✅ Created frontend .env.local from template" -ForegroundColor Green
 } else {
-    Write-Host "✅ .env.local already exists" -ForegroundColor Green
+    Write-Host "✅ Frontend .env.local already exists" -ForegroundColor Green
 }
 
-# Install dependencies if needed
-if (-not (Test-Path "node_modules")) {
-    Write-Host "📦 Installing dependencies..." -ForegroundColor Yellow
-    npm install
+# Create backend .env.local if it doesn't exist
+if (-not (Test-Path "apps/backend/.env.local")) {
+    Copy-Item ".env.example" "apps/backend/.env.local"
+    Write-Host "✅ Created backend .env.local from template" -ForegroundColor Green
+} else {
+    Write-Host "✅ Backend .env.local already exists" -ForegroundColor Green
 }
 
-Write-Host "`n🚀 Starting Development Server..." -ForegroundColor Green
-Write-Host "🌐 Frontend will be available at: http://localhost:3000" -ForegroundColor Cyan
-Write-Host "🗃️ PostgreSQL Database: localhost:5432/krakengaming_dev" -ForegroundColor Cyan
+Write-Host "`n🚀 Starting Development Servers..." -ForegroundColor Green
+Write-Host "🌐 Frontend: http://localhost:3000" -ForegroundColor Cyan
+Write-Host "⚡ Backend:  http://localhost:4000" -ForegroundColor Cyan
+Write-Host "🗃️ Database: Cloud SQL (uwsgaming_prod)" -ForegroundColor Cyan
 
 Write-Host "`n🎯 Development Features:" -ForegroundColor Magenta
 Write-Host "✅ Email-based Authentication - Use real email/password" -ForegroundColor Green
-Write-Host "✅ Admin Account: admin@krakengaming.org / admin123" -ForegroundColor Green
-Write-Host "✅ User Account: user@krakengaming.org / user123" -ForegroundColor Green
-Write-Host "✅ Real Discord OAuth (if configured)" -ForegroundColor Green
+Write-Host "✅ Admin Account: admin@uwsgaming.org / admin123" -ForegroundColor Green
+Write-Host "✅ User Account: user@uwsgaming.org / user123" -ForegroundColor Green
 
-Write-Host "`n📋 Quick Test Steps:" -ForegroundColor Blue
-Write-Host "1. Start PostgreSQL: docker-compose up -d database" -ForegroundColor White
-Write-Host "2. Run database migration: npm run db:migrate" -ForegroundColor White
-Write-Host "3. Seed test accounts: npm run db:seed" -ForegroundColor White
-Write-Host "4. Visit http://localhost:3000/auth/login to sign in" -ForegroundColor White
+Write-Host "`n📋 Available Commands:" -ForegroundColor Blue
+Write-Host "Frontend: cd apps/frontend && npm run dev" -ForegroundColor White
+Write-Host "Backend:  cd apps/backend && npm run dev" -ForegroundColor White
+Write-Host "Database: cd packages/database && npx prisma studio" -ForegroundColor White
 
-Write-Host "`nStarting frontend..." -ForegroundColor Yellow
+# Start both servers using PowerShell jobs
+Write-Host "`nStarting backend..." -ForegroundColor Yellow
+Start-Job -Name "UWSBackend" -ScriptBlock {
+    Set-Location "apps/backend"
+    npm run dev
+}
+
+Write-Host "Starting frontend..." -ForegroundColor Yellow
+Set-Location "apps/frontend"
 npm run dev

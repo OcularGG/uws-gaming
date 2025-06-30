@@ -37,11 +37,11 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_APP_NAME=$NEXT_PUBLIC_APP_NAME
 ENV NEXT_PUBLIC_APP_VERSION=$NEXT_PUBLIC_APP_VERSION
 
-# Generate Prisma client
-RUN npx prisma generate --schema=./apps/frontend/prisma/schema.prisma
+# Generate Prisma client from the packages/database location
+RUN npx prisma generate --schema=./packages/database/prisma/schema.prisma
 
 # Build the application
-RUN npm run build -w @krakengaming/frontend
+RUN npm run build --workspace=@uwsgaming/frontend
 
 # Production image, copy all the files and run next
 FROM base AS runner

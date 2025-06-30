@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Under Maintenance | KrakenGaming',
+  title: 'Under Maintenance | UWS',
   description: 'KrakenGaming is currently under maintenance. We will be back shortly.',
 };
 
@@ -88,13 +88,13 @@ export default function MaintenancePage() {
           </p>
           <div className="space-x-4">
             <a
-              href="mailto:support@krakengaming.org"
+              href="mailto:support@uwsgaming.org"
               className="inline-flex items-center justify-center px-6 py-3 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
             >
               Contact Support
             </a>
             <a
-              href="https://status.krakengaming.org"
+              href="https://status.uwsgaming.org"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center px-6 py-3 text-sm font-medium text-white border border-white hover:bg-white hover:text-gray-900 rounded-lg transition-colors"
